@@ -1,0 +1,37 @@
+[package]
+name = "libafl_renode"
+version = "0.0.0"
+authors = [""]
+edition = "2021"
+
+[features]
+default = ["std"]
+tui = []
+std = []
+
+[profile.dev]
+panic = "abort"
+
+[profile.release]
+panic = "abort"
+lto = true
+codegen-units = 1
+opt-level = 3
+debug = true
+
+[build-dependencies]
+csbindgen = "1.8.0" 
+# cc = { version = "1.0", features = ["parallel"] }
+# which = "4.4"
+
+[dependencies]
+libafl = { path = "../../libafl/" }
+libafl_bolts = { path = "../../libafl_bolts/" }
+# libafl_targets = { path = "../../libafl_targets/", features = ["pointer_maps", "sancov_cmplog", "libfuzzer"] }
+libafl_targets = { path = "../../libafl_targets" }
+clap = { version = "4.0", features = ["default"] }
+
+
+[lib]
+name = "libafl_renode"
+crate-type = ["cdylib"]
