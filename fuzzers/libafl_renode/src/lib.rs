@@ -46,35 +46,35 @@ static mut PREV_LOC: u64 = 0;
 #[no_mangle] // coverage map
 pub static mut COV_MAP: [u8; MAP_SIZE] = [0; MAP_SIZE];
 
-// // Function to get the pointer to COV_MAP 
-// #[no_mangle] 
-// pub extern "C" fn get_cov_map_ptr() -> *mut u8 { 
+// Function to get the pointer to COV_MAP 
+#[no_mangle] 
+pub extern "C" fn get_cov_map_ptr() -> *mut u8 { 
 
-//     unsafe{
-//         COV_MAP.as_mut_ptr() 
-//     }
+    unsafe{
+        COV_MAP.as_mut_ptr()
+    }
 
-// } 
+} 
 
 // Function to update COV_MAP
-#[no_mangle]
-pub extern  "C" fn update_cov_map(pc: u64){
-    unsafe{
-        let hash = (pc ^ PREV_LOC) & (MAP_SIZE as u64 - 1);
-        COV_MAP[hash as usize] += 1; 
-        PREV_LOC = pc >> 1; 
-        let cov_val = COV_MAP[hash as usize];
-        let mut logfile = OpenOptions::new()
-            .create(true)
-            .append(true)
-            .open("/home/asmita/fuzzing_bare-metal/SEFF_project_dirs/SEFF-project/LibAFL/fuzzers/libafl_renode/log_libafl.txt")
-            .expect("Failed to open or create the log file");
+// #[no_mangle]
+// pub extern  "C" fn update_cov_map(pc: u64){
+//     unsafe{
+//         let hash = (pc ^ PREV_LOC) & (MAP_SIZE as u64 - 1);
+//         COV_MAP[hash as usize] += 1; 
+//         PREV_LOC = pc >> 1; 
+//         let cov_val = COV_MAP[hash as usize];
+//         let mut logfile = OpenOptions::new()
+//             .create(true)
+//             .append(true)
+//             .open("/home/asmita/fuzzing_bare-metal/SEFF_project_dirs/SEFF-project/LibAFL/fuzzers/libafl_renode/log_libafl.txt")
+//             .expect("Failed to open or create the log file");
          
-        // Write the message to the file
-        writeln!(logfile, "update cov map: hash : {hash}, prev_loc : {PREV_LOC},cov : {cov_val}").expect("Failed to write to the log file");
-    }
+//         // Write the message to the file
+//         writeln!(logfile, "update cov map: hash : {hash}, prev_loc : {PREV_LOC},cov : {cov_val}").expect("Failed to write to the log file");
+//     }
 
-    }
+//     }
  
 
 
