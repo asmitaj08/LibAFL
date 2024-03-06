@@ -16,8 +16,8 @@ namespace CsBindgen
 
 
 
-        [DllImport(__DllName, EntryPoint = "get_cov_map_ptr", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-        public static extern byte* get_cov_map_ptr();
+        [DllImport(__DllName, EntryPoint = "update_cov_map", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        public static extern void update_cov_map(ulong pc);
 
         [DllImport(__DllName, EntryPoint = "external_current_millis2", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
         public static extern ulong external_current_millis2();
