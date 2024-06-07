@@ -31,6 +31,7 @@ libafl_bolts = { path = "../../libafl_bolts/" }
 libafl_targets = { path = "../../libafl_targets" }
 clap = { version = "4.0", features = ["default"] }
 env_logger = {version = "0.11.2"}
+log = "0.4.20"
 
 
 [lib]

@@ -87,7 +87,7 @@ pub unsafe extern "C" fn external_current_millis2() -> u64 {
 
 #[no_mangle] // Also add edge_map pointer of something as one of the args of this func that can be populated by renode for coverage
 pub extern "C" fn main_fuzzing_func(input_dir: *const c_char,
-    harness_fn: extern "C" fn(*const u8, usize) -> c_int,
+    harness_fn: extern "C" fn(*const u8),
 ) {
     env_logger::init();
     println!("Hello, entered main_fuzzing_func in libafl_renode");
@@ -105,20 +105,21 @@ pub extern "C" fn main_fuzzing_func(input_dir: *const c_char,
         // // Write the message to the file
         // unsafe{writeln!(logfile, "In libafl harness, cov map : {:?}", COV_MAP).expect("Failed to write to the log file")};
         
-        // let target = input.target_bytes();
-        // let buf = target.as_slice();
-        let mut buf = input.bytes().to_vec();
+        let target = input.target_bytes();
+        let buf = target.as_slice();
+        // let mut buf = input.bytes().to_vec();
         //let buf1 : &mut [u8]=buf.as_mut_slice();
-        // Ensure that each byte is a valid byte (0x00 to 0xFF)
-        for byte in buf.iter_mut() {
-                if *byte > 0xFF {
-                    *byte = 0x44;
-                }
-        }
-            
-        // println!("Calling harness callback from within libAFL");
-        harness_fn(buf.as_ptr(), buf.len());
-        ExitKind::Ok
+        harness_fn(buf.as_ptr());
+        ExitKind::Ok  
+        
+        // let ret = harness_fn(buf.as_ptr(), buf.len());
+        // let ret = harness_fn(buf.as_ptr());
+        // //println!("#######Harness func return val {}", ret);
+        // match ret {
+        //     0 => ExitKind::Ok,
+        //     // 2 => ExitKind::Timeout,
+        //     _=> ExitKind::Crash,
+        // }
     };
     println!("Harness setup done");
     // println!("Done setting up dirs");
@@ -132,7 +133,8 @@ pub extern "C" fn main_fuzzing_func(input_dir: *const c_char,
 
     // let edges_observer = unsafe{StdMapObserver::new("shared_mem", shmem_buf)};
 
-    let mut feedback = MaxMapFeedback::tracking(&edges_observer, true, false);
+    // let mut feedback = MaxMapFeedback::tracking(&edges_observer, true, false);
+    let mut feedback = MaxMapFeedback::new(&edges_observer);
 
     let mut objective = CrashFeedback::new();
    
@@ -152,8 +154,19 @@ pub extern "C" fn main_fuzzing_func(input_dir: *const c_char,
         &mut feedback,
         // Same for objective feedbacks
         &mut objective,
-    )
-    .unwrap();
+    ).unwrap();
+    // ){
+    //     Ok(state) => state,
+    //     Err(err) => {
+    //     // If the construction fails, display the error and stop the program
+    //     eprintln!("############Error occurred while creating StdState: {:?}", err);
+    //     // Optionally, you can choose to panic here to stop the program immediately
+    //     // panic!("Error occurred while creating StdState: {:?}", err);
+    //     return; // Or use another way to exit the function or block
+    //     }
+    // };
+
+    // .unwrap();
     println!("[*] State creation done");
 
     let mon = SimpleMonitor::new(|s| println!("{s}"));
@@ -162,7 +175,7 @@ pub extern "C" fn main_fuzzing_func(input_dir: *const c_char,
     let scheduler = QueueScheduler::new();
      // A fuzzer with feedbacks and a corpus scheduler
      let mut fuzzer = StdFuzzer::new(scheduler, feedback, objective);
-
+     println!("[*] fuzzer, scheduler setup done");
     // Create the executor for an in-process function with one observer for edge coverage and one for the execution time
     let mut executor = InProcessExecutor::new(
             &mut harness,
@@ -171,12 +184,31 @@ pub extern "C" fn main_fuzzing_func(input_dir: *const c_char,
             &mut state,
             &mut mgr,
     ).expect("Failed to create the Executor");
-
+    println!("[*] executor setup done");
      // Generator of printable bytearrays of max size 32
     // let mut generator = RandBytesGenerator::new(8);
 
-    
+    println!("Calling to load initial inputs");
+     // Generator of printable bytearrays of max size 32
+    //  let mut generator = RandBytesGenerator::new(1);
+
+    //  // Generate 8 initial inputs
+    //  state
+    //      .generate_initial_inputs(&mut fuzzer, &mut executor, &mut generator, &mut mgr, 2)
+    //      .expect("Failed to generate the initial corpus");
+
     state.load_initial_inputs(&mut fuzzer, &mut executor, &mut mgr, &[PathBuf::from("/home/asmita/fuzzing_bare-metal/SEFF_project_dirs/SEFF-project/LibAFL/fuzzers/libafl_renode/input_dir/")]).unwrap();
+    // match state.load_initial_inputs(&mut fuzzer, &mut executor, &mut mgr, &[PathBuf::from("/home/asmita/fuzzing_bare-metal/SEFF_project_dirs/SEFF-project/LibAFL/fuzzers/libafl_renode/input_dir/")]){
+    //     Ok(()) => {
+    //         // If the function call succeeds, continue with the rest of the program
+    //     },
+    //     Err(err) => {
+    //         // If the function call fails, display the error and stop the program
+    //         eprintln!("Error occurred: {:?}", err);
+    //         // Optionally, you can choose to panic here to stop the program immediately
+    //         // panic!("Error occurred: {:?}", err);
+    //     }
+    // }
     println!("Loaded initial inputs");
     
     println!("[*] STARTING FUZZER");
