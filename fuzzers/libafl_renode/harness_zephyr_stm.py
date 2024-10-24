@@ -56,7 +56,7 @@ def hook_addr_main(cpu, addr):
     print(f"Main : SP: {hex(sp_main)}, PC: {hex(addr)}, LR: {hex(lr_main)}")
 
 def hook_addr_goal(cpu,addr):
-    global reach_goal_flag
+    global reach_goal_flag 
     reach_goal_flag = 1
 
 def hook_addr_target(cpu,addr):

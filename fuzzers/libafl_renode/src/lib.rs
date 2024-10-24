@@ -136,7 +136,7 @@ pub extern "C" fn main_fuzzing_func(input_dir: *const c_char,
     // let mut feedback = MaxMapFeedback::tracking(&edges_observer, true, false);
     let mut feedback = MaxMapFeedback::new(&edges_observer);
 
-    let mut objective = CrashFeedback::new();
+    let mut objective = CrashFeedback::new();   // make it timeout objective??
    
     println!("[*] creating state");
     // If not restarting, create a State from scratch
