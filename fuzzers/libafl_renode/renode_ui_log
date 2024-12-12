@@ -1,0 +1,34 @@
+19:31:42.4677 [INFO] cpu: Guessing VectorTableOffset value to be 0x0.
+19:31:42.4706 [INFO] cpu: Setting initial values: PC = 0x2BD, SP = 0x20040000.
+19:31:42.4713 [INFO] machine-0: Machine started.
+19:31:42.5032 [WARNING] sysbus: [cpu: 0x3870] (tag: 'FICR') ReadDoubleWord from non existing peripheral at 0x10000130, returning 0x00000000.
+19:31:42.5053 [WARNING] sysbus: [cpu: 0x3894] (tag: 'FICR') ReadDoubleWord from non existing peripheral at 0x10000130, returning 0x00000000.
+19:31:42.5054 [WARNING] sysbus: [cpu: 0x38A2] (tag: 'PSELRESET') ReadDoubleWord from non existing peripheral at 0x10001200, returning 0x00000000.
+19:31:42.5060 [WARNING] sysbus: [cpu: 0x38B0] ReadDoubleWord from non existing peripheral at 0x10001204.
+19:31:42.5199 [WARNING] uart0: Unhandled write to offset 0x50C. Unhandled bits: [0, 3-31] when writing value 0x6. Tags: PIN (0x19), PORT (0x1), RESERVED (0x1FFFFFF), CONNECT (0x1).
+19:31:42.5357 [WARNING] twi0: Unhandled write to offset 0x508, value 0x11.
+19:31:42.5357 [WARNING] twi0: Unhandled write to offset 0x50C, value 0x13.
+19:31:42.5357 [WARNING] twi0: Unhandled write to offset 0x524, value 0x4000000.
+19:31:42.5412 [WARNING] twi0: Unhandled write to offset 0x200. Unhandled bits: [0] when writing value 0x1. Tags: BB_SUSPEND (0x1).
+19:31:42.5418 [WARNING] twi0: Unhandled write to offset 0x200. Unhandled bits: [0] when writing value 0x1. Tags: BB_SUSPEND (0x1).
+19:31:42.5423 [WARNING] twi0: Unhandled write to offset 0x200. Unhandled bits: [0] when writing value 0x1. Tags: BB_SUSPEND (0x1).
+19:31:42.5429 [WARNING] twi0: Unhandled write to offset 0x200. Unhandled bits: [0] when writing value 0x1. Tags: BB_SUSPEND (0x1).
+19:31:42.5445 [WARNING] twi0: Unhandled write to offset 0x200. Unhandled bits: [0] when writing value 0x1. Tags: BB_SUSPEND (0x1).
+19:31:42.5450 [WARNING] twi0: Unhandled write to offset 0x200. Unhandled bits: [0] when writing value 0x1. Tags: BB_SUSPEND (0x1).
+19:31:42.5456 [WARNING] twi0: Unhandled write to offset 0x200. Unhandled bits: [0] when writing value 0x1. Tags: BB_SUSPEND (0x1).
+19:31:42.5462 [WARNING] twi0: Unhandled write to offset 0x200. Unhandled bits: [0] when writing value 0x1. Tags: BB_SUSPEND (0x1).
+19:31:42.5467 [WARNING] twi0: Unhandled write to offset 0x200. Unhandled bits: [0] when writing value 0x1. Tags: BB_SUSPEND (0x1).
+19:31:42.5472 [WARNING] twi0: Unhandled write to offset 0x200. Unhandled bits: [0] when writing value 0x1. Tags: BB_SUSPEND (0x1).
+19:31:42.5477 [WARNING] twi0: Unhandled write to offset 0x200. Unhandled bits: [0] when writing value 0x1. Tags: BB_SUSPEND (0x1).
+19:31:42.5487 [WARNING] twi0: Unhandled write to offset 0x200. Unhandled bits: [0] when writing value 0x1. Tags: BB_SUSPEND (0x1).
+19:31:42.5494 [WARNING] twi0: Unhandled write to offset 0x200. Unhandled bits: [0] when writing value 0x1. Tags: BB_SUSPEND (0x1).
+19:31:42.5512 [WARNING] twi0: Unhandled write to offset 0x200. Unhandled bits: [0] when writing value 0x1. Tags: BB_SUSPEND (0x1).
+19:31:42.5519 [WARNING] twi0: Unhandled write to offset 0x200. Unhandled bits: [0] when writing value 0x1. Tags: BB_SUSPEND (0x1).
+19:31:42.5531 [WARNING] twi0: Unhandled write to offset 0x200. Unhandled bits: [0] when writing value 0x1. Tags: BB_SUSPEND (0x1).
+19:31:42.5539 [WARNING] twi0: Unhandled write to offset 0x200. Unhandled bits: [0] when writing value 0x1. Tags: BB_SUSPEND (0x1).
+19:31:42.5552 [WARNING] twi0: Unhandled write to offset 0x200. Unhandled bits: [0] when writing value 0x1. Tags: BB_SUSPEND (0x1).
+19:31:42.5563 [WARNING] twi0: Unhandled write to offset 0x200. Unhandled bits: [0] when writing value 0x1. Tags: BB_SUSPEND (0x1).
+19:31:42.5587 [WARNING] twi0: Unhandled write to offset 0x200. Unhandled bits: [0] when writing value 0x1. Tags: BB_SUSPEND (0x1).
+19:31:42.5594 [WARNING] twi0: Unhandled write to offset 0x200. Unhandled bits: [0] when writing value 0x1. Tags: BB_SUSPEND (0x1).
+19:31:46.3290 [INFO] machine-0: Machine paused.
+19:31:46.3541 [INFO] machine-0: Disposed.

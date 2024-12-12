@@ -1,0 +1,34 @@
+:name: NRF52840
+:description: This script runs Zephyr Shell demo on NRF52840.
+
+using sysbus
+
+
+mach create
+: sensor: Sensors.BMP180_modified@ twi0 0x77
+: machine LoadPlatformDescription @platforms/cpus/nrf52840.repl
+machine LoadPlatformDescriptionFromString """using "@platforms/cpus/nrf52840.repl" bmp180: Sensors.BMP180_modified@ twi0 0x77"""
+
+
+python "print '******* Hiiii'"
+:python cpu SetHookAtBlockBegin "print '***Execution of a code block has started'"
+
+:$bin?=@https://dl.antmicro.com/projects/renode/renode-nrf52840-zephyr_shell_module.elf-gf8d05cf-s_1310072-c00fbffd6b65c6238877c4fe52e8228c2a38bf1f
+
+$bin?=@/home/asmita/fuzzing_bare-metal/SEFF_project_dirs/SEFF-project/LibAFL/fuzzers/libafl_renode/nrf_bmp180_drv1_no_delay.out
+showAnalyzer uart0
+
+macro reset
+"""
+    python "print '******* Hello'"
+    sysbus LoadELF $bin
+    python "print '*** Loaded ELF'"
+    :cpu SetHookAtBlockBegin "print '***Execution of a code block has started'"
+    : cpu SetHookAtBlockBegin "print ('PC val : '+ str(self.PC))"
+    : cpu SetHookAtBlockBegin " "
+  
+
+
+
+"""
+runMacro $reset

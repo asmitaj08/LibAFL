@@ -33,8 +33,9 @@ e = Emulation()
 m = Monitor()
 nrf52840 = e.add_mach("nrf52840")
 nrf52840.load_repl("platforms/cpus/nrf52840.repl")
-nrf52840.load_elf("https://dl.antmicro.com/projects/renode/renode-nrf52840-zephyr_shell_module.elf-gf8d05cf-s_1310072-c00fbffd6b65c6238877c4fe52e8228c2a38bf1f")
+# nrf52840.load_elf("https://dl.antmicro.com/projects/renode/renode-nrf52840-zephyr_shell_module.elf-gf8d05cf-s_1310072-c00fbffd6b65c6238877c4fe52e8228c2a38bf1f")
 # nrf52840.load_elf("/media/asmita/224870c0-ff7f-4009-9ea0-79854d3c355a/nrfSDK/DeviceDownload/nRF5_SDK_17.1.0_ddde560/examples/peripheral/uart/pca10056/blank/armgcc/_build/nrf52840_xxaa.out")
+nrf52840.load_elf("zephyr-shell-nrf.elf")
 TranslationCPUHooksExtensions.SetHookAtBlockBegin(nrf52840.sysbus.cpu.internal, nrf52840.internal, " ")
 Analyzer(nrf52840.sysbus.uart0).Show()
 e.StartAll()
@@ -53,18 +54,21 @@ def callback(data):
     # m.execute(f"sysbus.uart0 WriteChar {data}")
     # m.execute("Clear")
     # print("Inside harness callback")
-    print(f"data: {type(data)} {data} size: {len(data)}")
+    # print(f"data: {type(data)} {data} size: {len(data)}")
     m.execute(f"Load @{state_file}")
     # print("***CCCC1****")
     nrf52840 = e.get_mach("nrf52840")
+    if len(data)==0 :
+            data=[0x20]
     # print("***CCCC2****")
     Analyzer(nrf52840.sysbus.uart0) # works but slow
     # print("***CCCC3****")
     e.StartAll()
     # print("***CCCC4****")
-    # m.execute(f"sysbus.uart0 WriteChar 0x44")
-    for i in range(len(data)):
-        m.execute(f"sysbus.uart0 WriteByte {data[i]}")
+   
+    m.execute(f"sysbus.uart0 WriteChar {data[0]}")
+    # for i in range(len(data)):
+    #     m.execute(f"sysbus.uart0 WriteByte {data[i]}")
     # print("***CCCC5****")
     # m.execute("sysbus.cpu PC")
     # print(val1)
@@ -72,7 +76,7 @@ def callback(data):
     # print(val1)
     # if m.execute("sysbus.cpu PC") == ('0x5156\r\r\n', '') :
     #     return 5
-    m.execute("Clear")
+    # m.execute("Clear")
     # return 0
     # with open("/home/asmita/fuzzing_bare-metal/SEFF_project_dirs/SEFF-project/LibAFL/fuzzers/libafl_renode/log.txt", 'a') as logfile:
     #     print(f"3rd print in callback", file=logfile, flush=True)

@@ -12,13 +12,16 @@ from Antmicro.Renode.PlatformDescription.UserInterface import PlatformDescriptio
 from Antmicro.Renode.Core import EmulationManager # src/Infrastructure/src/Emulator/Main/Core/EmulationManager.cs
 from Antmicro.Renode.Utilities import ConfigurationManager
 from Antmicro.Renode.Utilities import ReadFilePath
+import cProfile
+import sys
+import signal
 
 sp_main=0
 lr_main=0
 pc_main = 0
 mach_name = "stm"
 e = Emulation()
-m = Monitor()
+m = Monitor() # gives error if i comment it out, LoadPlatformDescription uses the machine provided by Monitor
 mach = e.add_mach(mach_name)
 
 # state_file= "statefile_bmp180_nrf.dat"
@@ -72,7 +75,7 @@ hook_action_exit = Action4[ICpuSupportingGdb, System.UInt64](hook_addr_exit)
 
 TranslationCPUHooksExtensions.SetHookAtBlockBegin(mach.sysbus.cpu.internal, mach.internal, " ")
 
-Analyzer(mach.sysbus.uart0).Show()
+# Analyzer(mach.sysbus.uart0).Show()
 e.StartAll()
 
 while reach_target_flag == 0:
@@ -91,8 +94,11 @@ print("Done initial setup")
 
 # MAX_SIZE = 1024
 data_h = [0x44,0x44]
+
+# @profile
 def callback(data) :
-    global exit_flag,e,delay_flag
+    try :
+        global exit_flag,e,delay_flag
     # # Convert the raw pointer to a Python byte array (limit to MAX_SIZE to avoid large buffers)
     # data_in_bytes = ctypes.string_at(data, MAX_SIZE)
     #  # Find the length based on actual data (adjust to your use case if a termination condition exists)
@@ -102,38 +108,56 @@ def callback(data) :
 
     # print("^^^^^^^^ Loading the saved file")
     # start_time = time.time()
-    EmulationManager.Instance.Load(load_path_format)
+        EmulationManager.Instance.Load(load_path_format)
     # end_time = time.time()
     # load_execution_time = end_time - start_time
     # print(f"Execution time for the line: {load_execution_time:.10f} seconds")
     # print("^^^^^ file loaded")
-    mach = e.get_mach(mach_name)
-    if len(data)==0 :
-        data=[0x20]
+        mach = e.get_mach(mach_name)
+        if len(data)==0 :
+            data=[0x20]
     # data_in_bytes = bytes(data, 'utf-8')  # Convert string to bytes
     # print(f"^^^^^ Data : {data}")CALLBACK = ctypes.CFUNCTYPE(None, ctypes.POINTER(ctypes.c_char), ctypes.c_size_t)
-    mach.sysbus.cpu.AddHook(exit_addr,hook_action_exit)
+        mach.sysbus.cpu.AddHook(exit_addr,hook_action_exit)
     # print(f"***Mach here : {mach_new}")
     # print(f"******PC : {mach_new.sysbus.cpu.PC}")
     # Analyzer(mach_new.sysbus.usart2).Show()
-    Analyzer(mach.sysbus.uart0)
+        # Analyzer(mach.sysbus.uart0)
     # print(f"start pc : {(mach_new.sysbus.cpu.PC)}")
     # print("^^^^^Resuming next run")
-    mach.sysbus.twi0.bmp180.ReadFromFuzzer(data)
-    e.StartAll()
-    while exit_flag == 0 :
-        print(f"current pc : {(mach.sysbus.cpu.PC)}")
+        mach.sysbus.twi0.bmp180.ReadFromFuzzer(data)
+        e.StartAll()
+        while exit_flag == 0 :
+            print(f"current pc : {(mach.sysbus.cpu.PC)}")
         # pass
     
-    if exit_flag == 1:
-        exit_flag = 0
+        if exit_flag == 1:
+            exit_flag = 0
+
+    except Exception as e:
+        print(f"Exception in callback: {e}")
+        return 0  # Return a default value or handle the error
         # print(f"end pc : {(mach_new.sysbus.cpu.PC)}")
     # time.sleep(1)
     # e.clear()
 
-callback_ptr = callback_function(callback)
-print("calling liabafl main_fuzzing_func")
-libafl_renode_lib.main_fuzzing_func(ctypes.c_char_p(input_dir.encode('utf-8')),callback_ptr)
+# profiler = cProfile.Profile()
+# profiler.enable()  # Start profiling
 
+# Define a function to handle graceful exit
+def signal_handler(sig, frame):
+    print("\nExiting gracefully...")
+    sys.exit(0)
+
+# Register the signal handler for keyboard interrupt
+signal.signal(signal.SIGINT, signal_handler)
+
+try:
+    callback_ptr = callback_function(callback)
+    print("calling liabafl main_fuzzing_func")
+    libafl_renode_lib.main_fuzzing_func(ctypes.c_char_p(input_dir.encode('utf-8')),callback_ptr)
+except Exception as e:
+    print(f"\nException occurred: {e}")
+    sys.exit(1)
 
 
