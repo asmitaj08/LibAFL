@@ -1,24 +1,29 @@
 //! The colorization stage from `colorization()` in afl++
 use alloc::{
+    borrow::{Cow, ToOwned},
     collections::binary_heap::BinaryHeap,
-    string::{String, ToString},
     vec::Vec,
 };
 use core::{cmp::Ordering, fmt::Debug, marker::PhantomData, ops::Range};
 
-use libafl_bolts::{rands::Rand, tuples::MatchName};
+use libafl_bolts::{
+    rands::Rand,
+    tuples::{Handle, Handled},
+    Named,
+};
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    corpus::{Corpus, HasCurrentCorpusIdx},
+    corpus::{Corpus, HasCurrentCorpusId},
     events::EventFirer,
     executors::{Executor, HasObservers},
-    inputs::HasBytesVec,
+    inputs::{HasMutatorBytes, UsesInput},
     mutators::mutations::buffer_copy,
+    nonzero,
     observers::{MapObserver, ObserversTuple},
-    stages::Stage,
-    state::{HasCorpus, HasMetadata, HasRand, UsesState},
-    Error,
+    stages::{RetryCountRestartHelper, Stage},
+    state::{HasCorpus, HasCurrentTestcase, HasRand, UsesState},
+    Error, HasMetadata, HasNamedMetadata,
 };
 
 // Bigger range is better
@@ -53,45 +58,66 @@ impl Ord for Earlier {
     }
 }
 
+/// Default name for `ColorizationStage`; derived from ALF++
+pub const COLORIZATION_STAGE_NAME: &str = "colorization";
 /// The mutational stage using power schedules
 #[derive(Clone, Debug)]
-pub struct ColorizationStage<EM, O, E, Z> {
-    map_observer_name: String,
+pub struct ColorizationStage<C, E, EM, O, S, Z> {
+    map_observer_handle: Handle<C>,
+    name: Cow<'static, str>,
     #[allow(clippy::type_complexity)]
-    phantom: PhantomData<(E, EM, O, Z)>,
+    phantom: PhantomData<(E, EM, O, E, S, Z)>,
 }
 
-impl<EM, O, E, Z> UsesState for ColorizationStage<EM, O, E, Z>
+impl<C, E, EM, O, S, Z> Named for ColorizationStage<C, E, EM, O, S, Z>
 where
     E: UsesState,
 {
-    type State = E::State;
+    fn name(&self) -> &Cow<'static, str> {
+        &self.name
+    }
 }
 
-impl<E, EM, O, Z> Stage<E, EM, Z> for ColorizationStage<EM, O, E, Z>
+impl<C, E, EM, O, S, Z> Stage<E, EM, S, Z> for ColorizationStage<C, E, EM, O, S, Z>
 where
-    EM: UsesState<State = E::State> + EventFirer,
-    E: HasObservers + Executor<EM, Z>,
-    E::State: HasCorpus + HasMetadata + HasRand,
-    E::Input: HasBytesVec,
+    EM: EventFirer<State = S>,
+    E: HasObservers + Executor<EM, Z, State = S>,
+    S: HasCorpus
+        + HasMetadata
+        + HasRand
+        + HasNamedMetadata
+        + HasCurrentCorpusId
+        + UsesInput<Input = <S::Corpus as Corpus>::Input>,
+    E::Observers: ObserversTuple<<S::Corpus as Corpus>::Input, S>,
+    <S::Corpus as Corpus>::Input: HasMutatorBytes + Clone,
     O: MapObserver,
-    Z: UsesState<State = E::State>,
+    C: AsRef<O> + Named,
+    Z: UsesState<State = S>,
 {
-    type Progress = (); // TODO this stage needs resume
-
     #[inline]
     #[allow(clippy::let_and_return)]
     fn perform(
         &mut self,
         fuzzer: &mut Z,
         executor: &mut E, // don't need the *main* executor for tracing
-        state: &mut E::State,
+        state: &mut S,
         manager: &mut EM,
     ) -> Result<(), Error> {
         // Run with the mutated input
-        Self::colorize(fuzzer, executor, state, manager, &self.map_observer_name)?;
+        Self::colorize(fuzzer, executor, state, manager, &self.map_observer_handle)?;
 
         Ok(())
+    }
+
+    fn should_restart(&mut self, state: &mut S) -> Result<bool, Error> {
+        // This is a deterministic stage
+        // Once it failed, then don't retry,
+        // It will just fail again
+        RetryCountRestartHelper::no_retry(state, &self.name)
+    }
+
+    fn clear_progress(&mut self, state: &mut S) -> Result<(), Error> {
+        RetryCountRestartHelper::clear_progress(state, &self.name)
     }
 }
 
@@ -134,44 +160,42 @@ impl TaintMetadata {
 
 libafl_bolts::impl_serdeany!(TaintMetadata);
 
-impl<EM, O, E, Z> ColorizationStage<EM, O, E, Z>
+impl<C, E, EM, O, S, Z> ColorizationStage<C, E, EM, O, S, Z>
 where
-    EM: UsesState<State = E::State> + EventFirer,
+    EM: EventFirer<State = S>,
     O: MapObserver,
-    E: HasObservers + Executor<EM, Z>,
-    E::State: HasCorpus + HasMetadata + HasRand,
-    E::Input: HasBytesVec,
-    Z: UsesState<State = E::State>,
+    C: AsRef<O> + Named,
+    E: HasObservers + Executor<EM, Z, State = S>,
+    E::Observers: ObserversTuple<<S::Corpus as Corpus>::Input, S>,
+    S: HasCorpus
+        + HasMetadata
+        + HasRand
+        + HasCurrentCorpusId
+        + HasCurrentTestcase
+        + UsesInput<Input = <S::Corpus as Corpus>::Input>,
+    <S::Corpus as Corpus>::Input: HasMutatorBytes + Clone,
+    Z: UsesState<State = S>,
 {
     #[inline]
     #[allow(clippy::let_and_return)]
     fn colorize(
         fuzzer: &mut Z,
         executor: &mut E,
-        state: &mut E::State,
+        state: &mut S,
         manager: &mut EM,
-        name: &str,
-    ) -> Result<E::Input, Error> {
-        let Some(corpus_idx) = state.current_corpus_idx()? else {
-            return Err(Error::illegal_state(
-                "state is not currently processing a corpus index",
-            ));
-        };
-
-        let mut input = state.corpus().cloned_input_for_id(corpus_idx)?;
+        observer_handle: &Handle<C>,
+    ) -> Result<<S::Corpus as Corpus>::Input, Error> {
+        let mut input = state.current_input_cloned()?;
         // The backup of the input
         let backup = input.clone();
         // This is the buffer we'll randomly mutate during type_replace
         let mut changed = input.clone();
 
-        // input will be consumed so clone it
-        let consumed_input = input.clone();
-
         // First, run orig_input once and get the original hash
 
         // Idea: No need to do this every time
         let orig_hash =
-            Self::get_raw_map_hash_run(fuzzer, executor, state, manager, consumed_input, name)?;
+            Self::get_raw_map_hash_run(fuzzer, executor, state, manager, &input, observer_handle)?;
         let changed_bytes = changed.bytes_mut();
         let input_len = changed_bytes.len();
 
@@ -209,14 +233,13 @@ where
                     );
                 }
 
-                let consumed_input = input.clone();
                 let changed_hash = Self::get_raw_map_hash_run(
                     fuzzer,
                     executor,
                     state,
                     manager,
-                    consumed_input,
-                    name,
+                    &input,
+                    observer_handle,
                 )?;
 
                 if orig_hash == changed_hash {
@@ -287,9 +310,11 @@ where
 
     #[must_use]
     /// Creates a new [`ColorizationStage`]
-    pub fn new(map_observer_name: &O) -> Self {
+    pub fn new(map_observer: &C) -> Self {
+        let obs_name = map_observer.name().clone().into_owned();
         Self {
-            map_observer_name: map_observer_name.name().to_string(),
+            map_observer_handle: map_observer.handle(),
+            name: Cow::Owned(COLORIZATION_STAGE_NAME.to_owned() + ":" + obs_name.as_str()),
             phantom: PhantomData,
         }
     }
@@ -298,25 +323,23 @@ where
     fn get_raw_map_hash_run(
         fuzzer: &mut Z,
         executor: &mut E,
-        state: &mut E::State,
+        state: &mut S,
         manager: &mut EM,
-        input: E::Input,
-        name: &str,
+        input: &<S::Corpus as Corpus>::Input,
+        observer_handle: &Handle<C>,
     ) -> Result<usize, Error> {
-        executor.observers_mut().pre_exec_all(state, &input)?;
+        executor.observers_mut().pre_exec_all(state, input)?;
 
-        let exit_kind = executor.run_target(fuzzer, state, manager, &input)?;
+        let exit_kind = executor.run_target(fuzzer, state, manager, input)?;
 
-        let observer = executor
-            .observers()
-            .match_name::<O>(name)
-            .ok_or_else(|| Error::key_not_found("MapObserver not found".to_string()))?;
+        let observers = executor.observers();
+        let observer = observers[observer_handle].as_ref();
 
-        let hash = observer.hash() as usize;
+        let hash = observer.hash_simple() as usize;
 
         executor
             .observers_mut()
-            .post_exec_all(state, &input, &exit_kind)?;
+            .post_exec_all(state, input, &exit_kind)?;
 
         // let observers = executor.observers();
         // fuzzer.process_execution(state, manager, input, observers, &exit_kind, true)?;
@@ -326,17 +349,17 @@ where
 
     /// Replace bytes with random values but following certain rules
     #[allow(clippy::needless_range_loop)]
-    fn type_replace(bytes: &mut [u8], state: &mut E::State) {
+    fn type_replace(bytes: &mut [u8], state: &mut S) {
         let len = bytes.len();
         for idx in 0..len {
             let c = match bytes[idx] {
                 0x41..=0x46 => {
                     // 'A' + 1 + rand('F' - 'A')
-                    0x41 + 1 + state.rand_mut().below(5) as u8
+                    0x41 + 1 + state.rand_mut().below(nonzero!(5)) as u8
                 }
                 0x61..=0x66 => {
                     // 'a' + 1 + rand('f' - 'a')
-                    0x61 + 1 + state.rand_mut().below(5) as u8
+                    0x61 + 1 + state.rand_mut().below(nonzero!(5)) as u8
                 }
                 0x30 => {
                     // '0' -> '1'
@@ -348,35 +371,35 @@ where
                 }
                 0x32..=0x39 => {
                     // '2' + 1 + rand('9' - '2')
-                    0x32 + 1 + state.rand_mut().below(7) as u8
+                    0x32 + 1 + state.rand_mut().below(nonzero!(7)) as u8
                 }
                 0x47..=0x5a => {
                     // 'G' + 1 + rand('Z' - 'G')
-                    0x47 + 1 + state.rand_mut().below(19) as u8
+                    0x47 + 1 + state.rand_mut().below(nonzero!(19)) as u8
                 }
                 0x67..=0x7a => {
                     // 'g' + 1 + rand('z' - 'g')
-                    0x67 + 1 + state.rand_mut().below(19) as u8
+                    0x67 + 1 + state.rand_mut().below(nonzero!(19)) as u8
                 }
                 0x21..=0x2a => {
                     // '!' + 1 + rand('*' - '!');
-                    0x21 + 1 + state.rand_mut().below(9) as u8
+                    0x21 + 1 + state.rand_mut().below(nonzero!(9)) as u8
                 }
                 0x2c..=0x2e => {
                     // ',' + 1 + rand('.' - ',')
-                    0x2c + 1 + state.rand_mut().below(2) as u8
+                    0x2c + 1 + state.rand_mut().below(nonzero!(2)) as u8
                 }
                 0x3a..=0x40 => {
                     // ':' + 1 + rand('@' - ':')
-                    0x3a + 1 + state.rand_mut().below(6) as u8
+                    0x3a + 1 + state.rand_mut().below(nonzero!(6)) as u8
                 }
                 0x5b..=0x60 => {
                     // '[' + 1 + rand('`' - '[')
-                    0x5b + 1 + state.rand_mut().below(5) as u8
+                    0x5b + 1 + state.rand_mut().below(nonzero!(5)) as u8
                 }
                 0x7b..=0x7e => {
                     // '{' + 1 + rand('~' - '{')
-                    0x7b + 1 + state.rand_mut().below(3) as u8
+                    0x7b + 1 + state.rand_mut().below(nonzero!(3)) as u8
                 }
                 0x2b => {
                     // '+' -> '/'

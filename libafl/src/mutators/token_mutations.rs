@@ -1,12 +1,13 @@
 //! Tokens are what AFL calls extras or dictionaries.
 //! They may be inserted as part of mutations during fuzzing.
-use alloc::vec::Vec;
+use alloc::{borrow::Cow, vec::Vec};
 #[cfg(any(target_os = "linux", target_vendor = "apple"))]
 use core::slice::from_raw_parts;
 use core::{
     fmt::Debug,
     mem::size_of,
-    ops::{Add, AddAssign},
+    num::NonZero,
+    ops::{Add, AddAssign, Deref},
     slice::Iter,
 };
 #[cfg(feature = "std")]
@@ -17,20 +18,21 @@ use std::{
 };
 
 use hashbrown::HashSet;
-use libafl_bolts::{rands::Rand, AsSlice};
+use libafl_bolts::{rands::Rand, AsSlice, HasLen};
 use serde::{Deserialize, Serialize};
 
 #[cfg(feature = "std")]
 use crate::mutators::str_decode;
 use crate::{
-    inputs::{HasBytesVec, UsesInput},
+    corpus::{CorpusId, HasCurrentCorpusId},
+    inputs::HasMutatorBytes,
     mutators::{
         buffer_self_copy, mutations::buffer_copy, MultiMutator, MutationResult, Mutator, Named,
     },
     observers::cmp::{AFLppCmpValuesMetadata, CmpValues, CmpValuesMetadata},
     stages::TaintMetadata,
-    state::{HasCorpus, HasMaxSize, HasMetadata, HasRand},
-    Error,
+    state::{HasCorpus, HasMaxSize, HasRand},
+    Error, HasMetadata,
 };
 
 /// A state metadata holding a list of tokens
@@ -82,7 +84,7 @@ impl Tokens {
         let mut head = 0;
         loop {
             if head >= size {
-                // Sanity Check
+                // Make double sure this is not completely off
                 assert!(head == size);
                 break;
             }
@@ -271,9 +273,9 @@ where
     }
 }
 
-impl AsSlice for Tokens {
-    type Entry = Vec<u8>;
-    fn as_slice(&self) -> &[Vec<u8>] {
+impl Deref for Tokens {
+    type Target = [Vec<u8>];
+    fn deref(&self) -> &[Vec<u8>] {
         self.tokens()
     }
 }
@@ -304,29 +306,29 @@ pub struct TokenInsert;
 impl<I, S> Mutator<I, S> for TokenInsert
 where
     S: HasMetadata + HasRand + HasMaxSize,
-    I: HasBytesVec,
+    I: HasMutatorBytes,
 {
-    fn mutate(
-        &mut self,
-        state: &mut S,
-        input: &mut I,
-        _stage_idx: i32,
-    ) -> Result<MutationResult, Error> {
+    fn mutate(&mut self, state: &mut S, input: &mut I) -> Result<MutationResult, Error> {
         let max_size = state.max_size();
         let tokens_len = {
-            let meta = state.metadata_map().get::<Tokens>();
-            if meta.is_none() {
+            let Some(meta) = state.metadata_map().get::<Tokens>() else {
+                return Ok(MutationResult::Skipped);
+            };
+            if let Some(tokens_len) = NonZero::new(meta.tokens().len()) {
+                tokens_len
+            } else {
                 return Ok(MutationResult::Skipped);
             }
-            if meta.unwrap().tokens().is_empty() {
-                return Ok(MutationResult::Skipped);
-            }
-            meta.unwrap().tokens().len()
         };
-        let token_idx = state.rand_mut().below(tokens_len as u64) as usize;
+        let token_idx = state.rand_mut().below(tokens_len);
 
         let size = input.bytes().len();
-        let off = state.rand_mut().below((size + 1) as u64) as usize;
+        // # Safety
+        // after saturating add it's always above 0
+
+        let off = state
+            .rand_mut()
+            .below(unsafe { NonZero::new(size.saturating_add(1)).unwrap_unchecked() });
 
         let meta = state.metadata_map().get::<Tokens>().unwrap();
         let token = &meta.tokens()[token_idx];
@@ -340,7 +342,7 @@ where
             }
         }
 
-        input.bytes_mut().resize(size + len, 0);
+        input.resize(size + len, 0);
         unsafe {
             buffer_self_copy(input.bytes_mut(), off, off + len, size - off);
             buffer_copy(input.bytes_mut(), token, 0, off, len);
@@ -351,8 +353,9 @@ where
 }
 
 impl Named for TokenInsert {
-    fn name(&self) -> &str {
-        "TokenInsert"
+    fn name(&self) -> &Cow<'static, str> {
+        static NAME: Cow<'static, str> = Cow::Borrowed("TokenInsert");
+        &NAME
     }
 }
 
@@ -371,33 +374,28 @@ pub struct TokenReplace;
 
 impl<I, S> Mutator<I, S> for TokenReplace
 where
-    S: UsesInput + HasMetadata + HasRand + HasMaxSize,
-    I: HasBytesVec,
+    S: HasMetadata + HasRand + HasMaxSize,
+    I: HasMutatorBytes,
 {
-    fn mutate(
-        &mut self,
-        state: &mut S,
-        input: &mut I,
-        _stage_idx: i32,
-    ) -> Result<MutationResult, Error> {
+    fn mutate(&mut self, state: &mut S, input: &mut I) -> Result<MutationResult, Error> {
         let size = input.bytes().len();
-        if size == 0 {
+        let off = if let Some(nz) = NonZero::new(size) {
+            state.rand_mut().below(nz)
+        } else {
             return Ok(MutationResult::Skipped);
-        }
+        };
 
         let tokens_len = {
-            let meta = state.metadata_map().get::<Tokens>();
-            if meta.is_none() {
+            let Some(meta) = state.metadata_map().get::<Tokens>() else {
+                return Ok(MutationResult::Skipped);
+            };
+            if let Some(tokens_len) = NonZero::new(meta.tokens().len()) {
+                tokens_len
+            } else {
                 return Ok(MutationResult::Skipped);
             }
-            if meta.unwrap().tokens().is_empty() {
-                return Ok(MutationResult::Skipped);
-            }
-            meta.unwrap().tokens().len()
         };
-        let token_idx = state.rand_mut().below(tokens_len as u64) as usize;
-
-        let off = state.rand_mut().below(size as u64) as usize;
+        let token_idx = state.rand_mut().below(tokens_len);
 
         let meta = state.metadata_map().get::<Tokens>().unwrap();
         let token = &meta.tokens()[token_idx];
@@ -415,8 +413,9 @@ where
 }
 
 impl Named for TokenReplace {
-    fn name(&self) -> &str {
-        "TokenReplace"
+    fn name(&self) -> &Cow<'static, str> {
+        static NAME: Cow<'static, str> = Cow::Borrowed("TokenReplace");
+        &NAME
     }
 }
 
@@ -435,35 +434,31 @@ pub struct I2SRandReplace;
 
 impl<I, S> Mutator<I, S> for I2SRandReplace
 where
-    S: UsesInput + HasMetadata + HasRand + HasMaxSize,
-    I: HasBytesVec,
+    S: HasMetadata + HasRand + HasMaxSize,
+    I: HasMutatorBytes,
 {
     #[allow(clippy::too_many_lines)]
-    fn mutate(
-        &mut self,
-        state: &mut S,
-        input: &mut I,
-        _stage_idx: i32,
-    ) -> Result<MutationResult, Error> {
+    fn mutate(&mut self, state: &mut S, input: &mut I) -> Result<MutationResult, Error> {
         let size = input.bytes().len();
-        if size == 0 {
+        let Some(size) = NonZero::new(size) else {
             return Ok(MutationResult::Skipped);
-        }
+        };
 
         let cmps_len = {
-            let meta = state.metadata_map().get::<CmpValuesMetadata>();
+            let Some(meta) = state.metadata_map().get::<CmpValuesMetadata>() else {
+                return Ok(MutationResult::Skipped);
+            };
             log::trace!("meta: {:x?}", meta);
-            if meta.is_none() {
-                return Ok(MutationResult::Skipped);
-            }
-            if meta.unwrap().list.is_empty() {
-                return Ok(MutationResult::Skipped);
-            }
-            meta.unwrap().list.len()
+            meta.list.len()
         };
-        let idx = state.rand_mut().below(cmps_len as u64) as usize;
 
-        let off = state.rand_mut().below(size as u64) as usize;
+        let Some(cmps_len) = NonZero::new(cmps_len) else {
+            return Ok(MutationResult::Skipped);
+        };
+
+        let idx = state.rand_mut().below(cmps_len);
+
+        let off = state.rand_mut().below(size);
         let len = input.bytes().len();
         let bytes = input.bytes_mut();
 
@@ -472,41 +467,41 @@ where
 
         let mut result = MutationResult::Skipped;
         match cmp_values {
-            CmpValues::U8(v) => {
+            CmpValues::U8((v1, v2, v1_is_const)) => {
                 for byte in bytes.iter_mut().take(len).skip(off) {
-                    if *byte == v.0 {
-                        *byte = v.1;
+                    if !v1_is_const && *byte == *v1 {
+                        *byte = *v2;
                         result = MutationResult::Mutated;
                         break;
-                    } else if *byte == v.1 {
-                        *byte = v.0;
+                    } else if *byte == *v2 {
+                        *byte = *v1;
                         result = MutationResult::Mutated;
                         break;
                     }
                 }
             }
-            CmpValues::U16(v) => {
+            CmpValues::U16((v1, v2, v1_is_const)) => {
                 if len >= size_of::<u16>() {
-                    for i in off..len - (size_of::<u16>() - 1) {
+                    for i in off..=len - size_of::<u16>() {
                         let val =
                             u16::from_ne_bytes(bytes[i..i + size_of::<u16>()].try_into().unwrap());
-                        if val == v.0 {
-                            let new_bytes = v.1.to_ne_bytes();
+                        if !v1_is_const && val == *v1 {
+                            let new_bytes = v2.to_ne_bytes();
                             bytes[i..i + size_of::<u16>()].copy_from_slice(&new_bytes);
                             result = MutationResult::Mutated;
                             break;
-                        } else if val.swap_bytes() == v.0 {
-                            let new_bytes = v.1.swap_bytes().to_ne_bytes();
+                        } else if !v1_is_const && val.swap_bytes() == *v1 {
+                            let new_bytes = v2.swap_bytes().to_ne_bytes();
                             bytes[i..i + size_of::<u16>()].copy_from_slice(&new_bytes);
                             result = MutationResult::Mutated;
                             break;
-                        } else if val == v.1 {
-                            let new_bytes = v.0.to_ne_bytes();
+                        } else if val == *v2 {
+                            let new_bytes = v1.to_ne_bytes();
                             bytes[i..i + size_of::<u16>()].copy_from_slice(&new_bytes);
                             result = MutationResult::Mutated;
                             break;
-                        } else if val.swap_bytes() == v.1 {
-                            let new_bytes = v.0.swap_bytes().to_ne_bytes();
+                        } else if val.swap_bytes() == *v2 {
+                            let new_bytes = v1.swap_bytes().to_ne_bytes();
                             bytes[i..i + size_of::<u16>()].copy_from_slice(&new_bytes);
                             result = MutationResult::Mutated;
                             break;
@@ -514,28 +509,28 @@ where
                     }
                 }
             }
-            CmpValues::U32(v) => {
+            CmpValues::U32((v1, v2, v1_is_const)) => {
                 if len >= size_of::<u32>() {
-                    for i in off..len - (size_of::<u32>() - 1) {
+                    for i in off..=len - size_of::<u32>() {
                         let val =
                             u32::from_ne_bytes(bytes[i..i + size_of::<u32>()].try_into().unwrap());
-                        if val == v.0 {
-                            let new_bytes = v.1.to_ne_bytes();
+                        if !v1_is_const && val == *v1 {
+                            let new_bytes = v2.to_ne_bytes();
                             bytes[i..i + size_of::<u32>()].copy_from_slice(&new_bytes);
                             result = MutationResult::Mutated;
                             break;
-                        } else if val.swap_bytes() == v.0 {
-                            let new_bytes = v.1.swap_bytes().to_ne_bytes();
+                        } else if !v1_is_const && val.swap_bytes() == *v1 {
+                            let new_bytes = v2.swap_bytes().to_ne_bytes();
                             bytes[i..i + size_of::<u32>()].copy_from_slice(&new_bytes);
                             result = MutationResult::Mutated;
                             break;
-                        } else if val == v.1 {
-                            let new_bytes = v.0.to_ne_bytes();
+                        } else if val == *v2 {
+                            let new_bytes = v1.to_ne_bytes();
                             bytes[i..i + size_of::<u32>()].copy_from_slice(&new_bytes);
                             result = MutationResult::Mutated;
                             break;
-                        } else if val.swap_bytes() == v.1 {
-                            let new_bytes = v.0.swap_bytes().to_ne_bytes();
+                        } else if val.swap_bytes() == *v2 {
+                            let new_bytes = v1.swap_bytes().to_ne_bytes();
                             bytes[i..i + size_of::<u32>()].copy_from_slice(&new_bytes);
                             result = MutationResult::Mutated;
                             break;
@@ -543,28 +538,28 @@ where
                     }
                 }
             }
-            CmpValues::U64(v) => {
+            CmpValues::U64((v1, v2, v1_is_const)) => {
                 if len >= size_of::<u64>() {
-                    for i in off..len - (size_of::<u64>() - 1) {
+                    for i in off..=len - size_of::<u64>() {
                         let val =
                             u64::from_ne_bytes(bytes[i..i + size_of::<u64>()].try_into().unwrap());
-                        if val == v.0 {
-                            let new_bytes = v.1.to_ne_bytes();
+                        if !v1_is_const && val == *v1 {
+                            let new_bytes = v2.to_ne_bytes();
                             bytes[i..i + size_of::<u64>()].copy_from_slice(&new_bytes);
                             result = MutationResult::Mutated;
                             break;
-                        } else if val.swap_bytes() == v.0 {
-                            let new_bytes = v.1.swap_bytes().to_ne_bytes();
+                        } else if !v1_is_const && val.swap_bytes() == *v1 {
+                            let new_bytes = v2.swap_bytes().to_ne_bytes();
                             bytes[i..i + size_of::<u64>()].copy_from_slice(&new_bytes);
                             result = MutationResult::Mutated;
                             break;
-                        } else if val == v.1 {
-                            let new_bytes = v.0.to_ne_bytes();
+                        } else if val == *v2 {
+                            let new_bytes = v1.to_ne_bytes();
                             bytes[i..i + size_of::<u64>()].copy_from_slice(&new_bytes);
                             result = MutationResult::Mutated;
                             break;
-                        } else if val.swap_bytes() == v.1 {
-                            let new_bytes = v.0.swap_bytes().to_ne_bytes();
+                        } else if val.swap_bytes() == *v2 {
+                            let new_bytes = v1.swap_bytes().to_ne_bytes();
                             bytes[i..i + size_of::<u64>()].copy_from_slice(&new_bytes);
                             result = MutationResult::Mutated;
                             break;
@@ -576,9 +571,9 @@ where
                 'outer: for i in off..len {
                     let mut size = core::cmp::min(v.0.len(), len - i);
                     while size != 0 {
-                        if v.0[0..size] == input.bytes()[i..i + size] {
+                        if v.0.as_slice()[0..size] == input.bytes()[i..i + size] {
                             unsafe {
-                                buffer_copy(input.bytes_mut(), &v.1, 0, i, size);
+                                buffer_copy(input.bytes_mut(), v.1.as_slice(), 0, i, size);
                             }
                             result = MutationResult::Mutated;
                             break 'outer;
@@ -587,9 +582,9 @@ where
                     }
                     size = core::cmp::min(v.1.len(), len - i);
                     while size != 0 {
-                        if v.1[0..size] == input.bytes()[i..i + size] {
+                        if v.1.as_slice()[0..size] == input.bytes()[i..i + size] {
                             unsafe {
-                                buffer_copy(input.bytes_mut(), &v.0, 0, i, size);
+                                buffer_copy(input.bytes_mut(), v.0.as_slice(), 0, i, size);
                             }
                             result = MutationResult::Mutated;
                             break 'outer;
@@ -605,8 +600,9 @@ where
 }
 
 impl Named for I2SRandReplace {
-    fn name(&self) -> &str {
-        "I2SRandReplace"
+    fn name(&self) -> &Cow<'static, str> {
+        static NAME: Cow<'static, str> = Cow::Borrowed("I2SRandReplace");
+        &NAME
     }
 }
 
@@ -618,6 +614,213 @@ impl I2SRandReplace {
     }
 }
 
+// A `I2SRandReplaceBinonly` [`Mutator`] replaces a random matching input-2-state comparison operand with the other.
+/// It needs a valid [`CmpValuesMetadata`] in the state.
+/// This version has been designed for binary-only fuzzing, for which cmp sized can be larger than necessary.
+#[derive(Debug, Default)]
+pub struct I2SRandReplaceBinonly;
+
+fn random_slice_size<const SZ: usize, S>(state: &mut S) -> usize
+where
+    S: HasRand,
+{
+    let sz_log = SZ.ilog2() as usize;
+    // # Safety
+    // We add 1 so this can never be 0.
+    // On 32 bit systems this could overflow in theory but this is highly unlikely.
+    let sz_log_inclusive = unsafe { NonZero::new(sz_log + 1).unwrap_unchecked() };
+    let res = state.rand_mut().below(sz_log_inclusive);
+    2_usize.pow(res as u32)
+}
+
+impl<I, S> Mutator<I, S> for I2SRandReplaceBinonly
+where
+    S: HasMetadata + HasRand + HasMaxSize,
+    I: HasMutatorBytes,
+{
+    #[allow(clippy::too_many_lines)]
+    fn mutate(&mut self, state: &mut S, input: &mut I) -> Result<MutationResult, Error> {
+        let Some(size) = NonZero::new(input.bytes().len()) else {
+            return Ok(MutationResult::Skipped);
+        };
+        let Some(meta) = state.metadata_map().get::<CmpValuesMetadata>() else {
+            return Ok(MutationResult::Skipped);
+        };
+        log::trace!("meta: {:x?}", meta);
+
+        let Some(cmps_len) = NonZero::new(meta.list.len()) else {
+            return Ok(MutationResult::Skipped);
+        };
+        let idx = state.rand_mut().below(cmps_len);
+
+        let off = state.rand_mut().below(size);
+        let len = input.bytes().len();
+        let bytes = input.bytes_mut();
+
+        let meta = state.metadata_map().get::<CmpValuesMetadata>().unwrap();
+        let cmp_values = &meta.list[idx];
+
+        // TODO: do not use from_ne_bytes, it's for host not for target!! we should use a from_target_ne_bytes....
+
+        let mut result = MutationResult::Skipped;
+        match cmp_values.clone() {
+            CmpValues::U8(v) => {
+                for byte in bytes.iter_mut().take(len).skip(off) {
+                    if *byte == v.0 {
+                        *byte = v.1;
+                        result = MutationResult::Mutated;
+                        break;
+                    } else if *byte == v.1 {
+                        *byte = v.0;
+                        result = MutationResult::Mutated;
+                        break;
+                    }
+                }
+            }
+            CmpValues::U16(v) => {
+                let cmp_size = random_slice_size::<{ size_of::<u16>() }, S>(state);
+
+                if len >= cmp_size {
+                    for i in off..len - (cmp_size - 1) {
+                        let mut val_bytes = [0; size_of::<u16>()];
+                        val_bytes[..cmp_size].copy_from_slice(&bytes[i..i + cmp_size]);
+                        let val = u16::from_ne_bytes(val_bytes);
+
+                        if val == v.0 {
+                            let new_bytes = &v.1.to_ne_bytes()[..cmp_size];
+                            bytes[i..i + cmp_size].copy_from_slice(new_bytes);
+                            result = MutationResult::Mutated;
+                            break;
+                        } else if val == v.1 {
+                            let new_bytes = &v.0.to_ne_bytes()[..cmp_size];
+                            bytes[i..i + cmp_size].copy_from_slice(new_bytes);
+                            result = MutationResult::Mutated;
+                            break;
+                        } else if val.swap_bytes() == v.0 {
+                            let new_bytes = v.1.swap_bytes().to_ne_bytes();
+                            bytes[i..i + cmp_size].copy_from_slice(&new_bytes[..cmp_size]);
+                            result = MutationResult::Mutated;
+                            break;
+                        } else if val.swap_bytes() == v.1 {
+                            let new_bytes = v.0.swap_bytes().to_ne_bytes();
+                            bytes[i..i + cmp_size].copy_from_slice(&new_bytes[..cmp_size]);
+                            result = MutationResult::Mutated;
+                            break;
+                        }
+                    }
+                }
+            }
+            CmpValues::U32(v) => {
+                let cmp_size = random_slice_size::<{ size_of::<u32>() }, S>(state);
+                if len >= cmp_size {
+                    for i in off..len - (cmp_size - 1) {
+                        let mut val_bytes = [0; size_of::<u32>()];
+                        val_bytes[..cmp_size].copy_from_slice(&bytes[i..i + cmp_size]);
+                        let val = u32::from_ne_bytes(val_bytes);
+
+                        if val == v.0 {
+                            let new_bytes = &v.1.to_ne_bytes()[..cmp_size];
+                            bytes[i..i + cmp_size].copy_from_slice(new_bytes);
+                            result = MutationResult::Mutated;
+                            break;
+                        } else if val == v.1 {
+                            let new_bytes = &v.0.to_ne_bytes()[..cmp_size];
+                            bytes[i..i + cmp_size].copy_from_slice(new_bytes);
+                            result = MutationResult::Mutated;
+                            break;
+                        } else if val.swap_bytes() == v.0 {
+                            let new_bytes = v.1.swap_bytes().to_ne_bytes();
+                            bytes[i..i + cmp_size].copy_from_slice(&new_bytes[..cmp_size]);
+                            result = MutationResult::Mutated;
+                            break;
+                        } else if val.swap_bytes() == v.1 {
+                            let new_bytes = v.0.swap_bytes().to_ne_bytes();
+                            bytes[i..i + cmp_size].copy_from_slice(&new_bytes[..cmp_size]);
+                            result = MutationResult::Mutated;
+                            break;
+                        }
+                    }
+                }
+            }
+            CmpValues::U64(v) => {
+                let cmp_size = random_slice_size::<{ size_of::<u64>() }, S>(state);
+
+                if len >= cmp_size {
+                    for i in off..(len - (cmp_size - 1)) {
+                        let mut val_bytes = [0; size_of::<u64>()];
+                        val_bytes[..cmp_size].copy_from_slice(&bytes[i..i + cmp_size]);
+                        let val = u64::from_ne_bytes(val_bytes);
+
+                        if val == v.0 {
+                            let new_bytes = &v.1.to_ne_bytes()[..cmp_size];
+                            bytes[i..i + cmp_size].copy_from_slice(new_bytes);
+                            result = MutationResult::Mutated;
+                            break;
+                        } else if val == v.1 {
+                            let new_bytes = &v.0.to_ne_bytes()[..cmp_size];
+                            bytes[i..i + cmp_size].copy_from_slice(new_bytes);
+                            result = MutationResult::Mutated;
+                            break;
+                        } else if val.swap_bytes() == v.0 {
+                            let new_bytes = v.1.swap_bytes().to_ne_bytes();
+                            bytes[i..i + cmp_size].copy_from_slice(&new_bytes[..cmp_size]);
+                            result = MutationResult::Mutated;
+                            break;
+                        } else if val.swap_bytes() == v.1 {
+                            let new_bytes = v.0.swap_bytes().to_ne_bytes();
+                            bytes[i..i + cmp_size].copy_from_slice(&new_bytes[..cmp_size]);
+                            result = MutationResult::Mutated;
+                            break;
+                        }
+                    }
+                }
+            }
+            CmpValues::Bytes(v) => {
+                'outer: for i in off..len {
+                    let mut size = core::cmp::min(v.0.len(), len - i);
+                    while size != 0 {
+                        if v.0.as_slice()[0..size] == input.bytes()[i..i + size] {
+                            unsafe {
+                                buffer_copy(input.bytes_mut(), v.1.as_slice(), 0, i, size);
+                            }
+                            result = MutationResult::Mutated;
+                            break 'outer;
+                        }
+                        size -= 1;
+                    }
+                    size = core::cmp::min(v.1.len(), len - i);
+                    while size != 0 {
+                        if v.1.as_slice()[0..size] == input.bytes()[i..i + size] {
+                            unsafe {
+                                buffer_copy(input.bytes_mut(), v.0.as_slice(), 0, i, size);
+                            }
+                            result = MutationResult::Mutated;
+                            break 'outer;
+                        }
+                        size -= 1;
+                    }
+                }
+            }
+        }
+
+        Ok(result)
+    }
+}
+
+impl Named for I2SRandReplaceBinonly {
+    fn name(&self) -> &Cow<'static, str> {
+        static NAME: Cow<'static, str> = Cow::Borrowed("I2SRandReplace");
+        &NAME
+    }
+}
+
+impl I2SRandReplaceBinonly {
+    /// Creates a new `I2SRandReplace` struct.
+    #[must_use]
+    pub fn new() -> Self {
+        Self
+    }
+}
 const CMP_ATTTRIBUTE_IS_EQUAL: u8 = 1;
 const CMP_ATTRIBUTE_IS_GREATER: u8 = 2;
 const CMP_ATTRIBUTE_IS_LESSER: u8 = 4;
@@ -632,6 +835,9 @@ pub struct AFLppRedQueen {
     enable_transform: bool,
     enable_arith: bool,
     text_type: TextType,
+    /// We use this variable to check if we scheduled a new `corpus_id`
+    /// - and, hence, need to recalculate `text_type`
+    last_corpus_id: Option<CorpusId>,
 }
 
 impl AFLppRedQueen {
@@ -661,7 +867,7 @@ impl AFLppRedQueen {
         input_len: usize,
         hshape: usize,
         vec: &mut Vec<Vec<u8>>,
-    ) -> bool {
+    ) -> Result<bool, Error> {
         // TODO: ascii2num (we need check q->is_ascii (in calibration stage(?)))
 
         // try Transform
@@ -679,7 +885,7 @@ impl AFLppRedQueen {
                 _ => 8,
             };
             // prevent overflow
-            bytes = core::cmp::min(bytes, input_len - buf_idx);
+            bytes = core::cmp::min(bytes, input_len.wrapping_sub(buf_idx));
 
             let (b_val, o_b_val, mask): (u64, u64, u64) = match bytes {
                 0 => {
@@ -716,11 +922,11 @@ impl AFLppRedQueen {
             };
 
             // Try arith
-            let diff = pattern as i64 - b_val as i64;
-            let new_diff = another_pattern as i64 - o_b_val as i64;
+            let diff = (pattern as i64).wrapping_sub(b_val as i64);
+            let new_diff = (another_pattern as i64).wrapping_sub(o_b_val as i64);
 
             if diff == new_diff && diff != 0 {
-                let new_repl: u64 = (repl as i64 - diff) as u64;
+                let new_repl: u64 = (repl as i64).wrapping_sub(diff) as u64;
 
                 let ret = self.cmp_extend_encoding(
                     pattern,
@@ -735,9 +941,9 @@ impl AFLppRedQueen {
                     input_len,
                     hshape,
                     vec,
-                );
+                )?;
                 if ret {
-                    return true;
+                    return Ok(true);
                 }
             }
 
@@ -762,10 +968,10 @@ impl AFLppRedQueen {
                     input_len,
                     hshape,
                     vec,
-                );
+                )?;
 
                 if ret {
-                    return true;
+                    return Ok(true);
                 }
             }
 
@@ -790,10 +996,10 @@ impl AFLppRedQueen {
                     input_len,
                     hshape,
                     vec,
-                );
+                )?;
 
                 if ret {
-                    return true;
+                    return Ok(true);
                 }
             }
 
@@ -818,15 +1024,15 @@ impl AFLppRedQueen {
                     input_len,
                     hshape,
                     vec,
-                );
+                )?;
 
                 if ret {
-                    return true;
+                    return Ok(true);
                 }
             }
         }
 
-        let its_len = core::cmp::min(input_len - buf_idx, taint_len);
+        let its_len = core::cmp::min(input_len.wrapping_sub(buf_idx), taint_len);
 
         // Try pattern matching
         // println!("Pattern match");
@@ -840,29 +1046,29 @@ impl AFLppRedQueen {
                     let mut cloned = buf.to_vec();
                     cloned[buf_idx] = repl as u8;
                     vec.push(cloned);
-                    return true;
+                    return Ok(true);
                 }
             }
             2 | 3 => {
                 if its_len >= 2 {
-                    let buf_16 = u16::from_be_bytes(buf[buf_idx..buf_idx + 2].try_into().unwrap());
+                    let buf_16 = u16::from_be_bytes(buf[buf_idx..buf_idx + 2].try_into()?);
                     let another_buf_16 =
-                        u16::from_be_bytes(another_buf[buf_idx..buf_idx + 2].try_into().unwrap());
+                        u16::from_be_bytes(another_buf[buf_idx..buf_idx + 2].try_into()?);
 
                     if buf_16 == pattern as u16 && another_buf_16 == another_pattern as u16 {
                         let mut cloned = buf.to_vec();
                         cloned[buf_idx + 1] = (repl & 0xff) as u8;
                         cloned[buf_idx] = (repl >> 8 & 0xff) as u8;
                         vec.push(cloned);
-                        return true;
+                        return Ok(true);
                     }
                 }
             }
             4..=7 => {
                 if its_len >= 4 {
-                    let buf_32 = u32::from_be_bytes(buf[buf_idx..buf_idx + 4].try_into().unwrap());
+                    let buf_32 = u32::from_be_bytes(buf[buf_idx..buf_idx + 4].try_into()?);
                     let another_buf_32 =
-                        u32::from_be_bytes(another_buf[buf_idx..buf_idx + 4].try_into().unwrap());
+                        u32::from_be_bytes(another_buf[buf_idx..buf_idx + 4].try_into()?);
                     // println!("buf: {buf_32} {another_buf_32} {pattern} {another_pattern}");
                     if buf_32 == pattern as u32 && another_buf_32 == another_pattern as u32 {
                         let mut cloned = buf.to_vec();
@@ -872,15 +1078,15 @@ impl AFLppRedQueen {
                         cloned[buf_idx] = (repl >> 24 & 0xff) as u8;
                         vec.push(cloned);
 
-                        return true;
+                        return Ok(true);
                     }
                 }
             }
             _ => {
                 if its_len >= 8 {
-                    let buf_64 = u64::from_be_bytes(buf[buf_idx..buf_idx + 8].try_into().unwrap());
+                    let buf_64 = u64::from_be_bytes(buf[buf_idx..buf_idx + 8].try_into()?);
                     let another_buf_64 =
-                        u64::from_be_bytes(another_buf[buf_idx..buf_idx + 8].try_into().unwrap());
+                        u64::from_be_bytes(another_buf[buf_idx..buf_idx + 8].try_into()?);
 
                     if buf_64 == pattern && another_buf_64 == another_pattern {
                         let mut cloned = buf.to_vec();
@@ -895,7 +1101,7 @@ impl AFLppRedQueen {
                         cloned[buf_idx] = (repl >> 48 & 0xff) as u8;
 
                         vec.push(cloned);
-                        return true;
+                        return Ok(true);
                     }
                 }
             }
@@ -904,7 +1110,7 @@ impl AFLppRedQueen {
         // Try arith
         if self.enable_arith || attr != CMP_ATTRIBUTE_IS_TRANSFORM {
             if (attr & (CMP_ATTRIBUTE_IS_GREATER | CMP_ATTRIBUTE_IS_LESSER)) == 0 || hshape < 4 {
-                return false;
+                return Ok(false);
             }
 
             // Transform >= to < and <= to >
@@ -934,7 +1140,7 @@ impl AFLppRedQueen {
                         g += 1.0;
                         repl_new = g as u64;
                     } else {
-                        return false;
+                        return Ok(false);
                     }
 
                     let ret = self.cmp_extend_encoding(
@@ -950,9 +1156,9 @@ impl AFLppRedQueen {
                         input_len,
                         hshape,
                         vec,
-                    );
+                    )?;
                     if ret {
-                        return true;
+                        return Ok(true);
                     }
                 } else {
                     if hshape == 4 && its_len >= 4 {
@@ -964,7 +1170,7 @@ impl AFLppRedQueen {
                         g -= 1.0;
                         repl_new = g as u64;
                     } else {
-                        return false;
+                        return Ok(false);
                     }
 
                     let ret = self.cmp_extend_encoding(
@@ -980,14 +1186,14 @@ impl AFLppRedQueen {
                         input_len,
                         hshape,
                         vec,
-                    );
+                    )?;
                     if ret {
-                        return true;
+                        return Ok(true);
                     }
                 }
             } else if attr < CMP_ATTRIBUTE_IS_FP {
                 if attr & CMP_ATTRIBUTE_IS_GREATER != 0 {
-                    let repl_new = repl + 1;
+                    let repl_new = repl.wrapping_add(1);
 
                     let ret = self.cmp_extend_encoding(
                         pattern,
@@ -1002,13 +1208,13 @@ impl AFLppRedQueen {
                         input_len,
                         hshape,
                         vec,
-                    );
+                    )?;
 
                     if ret {
-                        return true;
+                        return Ok(true);
                     }
                 } else {
-                    let repl_new = repl - 1;
+                    let repl_new = repl.wrapping_sub(1);
 
                     let ret = self.cmp_extend_encoding(
                         pattern,
@@ -1023,18 +1229,18 @@ impl AFLppRedQueen {
                         input_len,
                         hshape,
                         vec,
-                    );
+                    )?;
 
                     if ret {
-                        return true;
+                        return Ok(true);
                     }
                 }
             } else {
-                return false;
+                return Ok(false);
             }
         }
 
-        false
+        Ok(false)
     }
 
     /// rtn part from AFL++
@@ -1057,7 +1263,7 @@ impl AFLppRedQueen {
         let ol0 = o_pattern.len();
         let lmax = core::cmp::max(l0, ol0);
         let its_len = core::cmp::min(
-            core::cmp::min(input_len - buf_idx, taint_len),
+            core::cmp::min(input_len.wrapping_sub(buf_idx), taint_len),
             core::cmp::min(lmax, hshape),
         );
 
@@ -1098,8 +1304,8 @@ impl AFLppRedQueen {
 
 impl<I, S> MultiMutator<I, S> for AFLppRedQueen
 where
-    S: UsesInput + HasMetadata + HasRand + HasMaxSize + HasCorpus,
-    I: HasBytesVec + From<Vec<u8>>,
+    S: HasMetadata + HasRand + HasMaxSize + HasCorpus + HasCurrentCorpusId,
+    I: HasMutatorBytes + From<Vec<u8>>,
 {
     #[allow(clippy::needless_range_loop)]
     #[allow(clippy::too_many_lines)]
@@ -1107,7 +1313,6 @@ where
         &mut self,
         state: &mut S,
         input: &I,
-        stage_idx: i32,
         max_count: Option<usize>,
     ) -> Result<Vec<I>, Error> {
         // TODO
@@ -1118,17 +1323,18 @@ where
         }
 
         let (cmp_len, cmp_meta, taint_meta) = {
-            let cmp_meta = state.metadata_map().get::<AFLppCmpValuesMetadata>();
-            let taint_meta = state.metadata_map().get::<TaintMetadata>();
-            if cmp_meta.is_none() || taint_meta.is_none() {
+            let (Some(cmp_meta), Some(taint_meta)) = (
+                state.metadata_map().get::<AFLppCmpValuesMetadata>(),
+                state.metadata_map().get::<TaintMetadata>(),
+            ) else {
                 return Ok(vec![]);
-            }
+            };
 
-            let cmp_len = cmp_meta.unwrap().headers().len();
+            let cmp_len = cmp_meta.headers().len();
             if cmp_len == 0 {
                 return Ok(vec![]);
             }
-            (cmp_len, cmp_meta.unwrap(), taint_meta.unwrap())
+            (cmp_len, cmp_meta, taint_meta)
         };
 
         // These idxes must saved in this mutator itself!
@@ -1146,8 +1352,10 @@ where
         // println!("orig: {:#?} new: {:#?}", orig_cmpvals, new_cmpvals);
 
         // Compute when mutating it for the 1st time.
-        if stage_idx == 0 {
+        let current_corpus_id = state.current_corpus_id()?.ok_or_else(|| Error::key_not_found("No corpus-id is currently being fuzzed, but called AFLppRedQueen::multi_mutated()."))?;
+        if self.last_corpus_id.is_none() || self.last_corpus_id.unwrap() != current_corpus_id {
             self.text_type = check_if_text(orig_bytes, orig_bytes.len());
+            self.last_corpus_id = Some(current_corpus_id);
         }
         // println!("approximate size: {cmp_len} x {input_len}");
         for cmp_idx in 0..cmp_len {
@@ -1202,7 +1410,7 @@ where
                         None => input_len - cmp_buf_idx,
                     };
 
-                    let hshape = (header.shape() + 1) as usize;
+                    let hshape = (header.shape().value() + 1) as usize;
 
                     match (&orig_val[cmp_h_idx], &new_val[cmp_h_idx]) {
                         (CmpValues::U8(_orig), CmpValues::U8(_new)) => {
@@ -1298,7 +1506,7 @@ where
                         }
                         (CmpValues::U16(orig), CmpValues::U16(new)) => {
                             let (orig_v0, orig_v1, new_v0, new_v1) = (orig.0, orig.1, new.0, new.1);
-                            let attribute: u8 = header.attribute() as u8;
+                            let attribute: u8 = header.attribute().value();
 
                             if new_v0 != orig_v0 && orig_v0 != orig_v1 {
                                 // Compare v0 against v1
@@ -1315,7 +1523,7 @@ where
                                     input_len,
                                     hshape,
                                     &mut ret,
-                                );
+                                )?;
 
                                 // Swapped
                                 // Compare v0 against v1
@@ -1332,7 +1540,7 @@ where
                                     input_len,
                                     hshape,
                                     &mut ret,
-                                );
+                                )?;
                             }
 
                             if new_v1 != orig_v1 && orig_v0 != orig_v1 {
@@ -1350,7 +1558,7 @@ where
                                     input_len,
                                     hshape,
                                     &mut ret,
-                                );
+                                )?;
 
                                 // Swapped
                                 self.cmp_extend_encoding(
@@ -1366,7 +1574,7 @@ where
                                     input_len,
                                     hshape,
                                     &mut ret,
-                                );
+                                )?;
                             }
 
                             /*
@@ -1386,7 +1594,7 @@ where
                         }
                         (CmpValues::U32(orig), CmpValues::U32(new)) => {
                             let (orig_v0, orig_v1, new_v0, new_v1) = (orig.0, orig.1, new.0, new.1);
-                            let attribute = header.attribute() as u8;
+                            let attribute = header.attribute().value();
 
                             let mut cmp_found = false;
                             if new_v0 != orig_v0 && orig_v0 != orig_v1 {
@@ -1404,7 +1612,7 @@ where
                                     input_len,
                                     hshape,
                                     &mut ret,
-                                );
+                                )?;
 
                                 // swapped
                                 // Compare v0 against v1
@@ -1421,7 +1629,7 @@ where
                                     input_len,
                                     hshape,
                                     &mut ret,
-                                );
+                                )?;
                             }
 
                             if new_v1 != orig_v1 && orig_v0 != orig_v1 {
@@ -1439,7 +1647,7 @@ where
                                     input_len,
                                     hshape,
                                     &mut ret,
-                                );
+                                )?;
 
                                 // Swapped
                                 // Compare v1 against v0
@@ -1456,7 +1664,7 @@ where
                                     input_len,
                                     hshape,
                                     &mut ret,
-                                );
+                                )?;
                             }
 
                             if !cmp_found {
@@ -1479,7 +1687,7 @@ where
                         }
                         (CmpValues::U64(orig), CmpValues::U64(new)) => {
                             let (orig_v0, orig_v1, new_v0, new_v1) = (orig.0, orig.1, new.0, new.1);
-                            let attribute = header.attribute() as u8;
+                            let attribute = header.attribute().value();
 
                             let mut cmp_found = false;
                             if new_v0 != orig_v0 && orig_v0 != orig_v1 {
@@ -1497,7 +1705,7 @@ where
                                     input_len,
                                     hshape,
                                     &mut ret,
-                                );
+                                )?;
 
                                 // Swapped
                                 // Compare v0 against v1
@@ -1514,7 +1722,7 @@ where
                                     input_len,
                                     hshape,
                                     &mut ret,
-                                );
+                                )?;
                             }
 
                             if new_v1 != orig_v1 && orig_v0 != orig_v1 {
@@ -1532,7 +1740,7 @@ where
                                     input_len,
                                     hshape,
                                     &mut ret,
-                                );
+                                )?;
 
                                 // Swapped
                                 // Compare v1 against v0
@@ -1549,7 +1757,7 @@ where
                                     input_len,
                                     hshape,
                                     &mut ret,
-                                );
+                                )?;
                             }
 
                             if !cmp_found {
@@ -1577,10 +1785,10 @@ where
                             let mut rtn_found = false;
                             // Compare v0 against v1
                             rtn_found |= self.rtn_extend_encoding(
-                                orig_v0,
-                                orig_v1,
-                                new_v0,
-                                new_v1,
+                                orig_v0.as_slice(),
+                                orig_v1.as_slice(),
+                                new_v0.as_slice(),
+                                new_v1.as_slice(),
                                 new_bytes,
                                 orig_bytes,
                                 cmp_buf_idx,
@@ -1592,10 +1800,10 @@ where
 
                             // Compare v1 against v0
                             rtn_found |= self.rtn_extend_encoding(
-                                orig_v1,
-                                orig_v0,
-                                new_v1,
-                                new_v0,
+                                orig_v1.as_slice(),
+                                orig_v0.as_slice(),
+                                new_v1.as_slice(),
+                                new_v0.as_slice(),
                                 new_bytes,
                                 orig_bytes,
                                 cmp_buf_idx,
@@ -1610,10 +1818,10 @@ where
                             let mut v1_len = orig_v1.len();
                             if v0_len > 0
                                 && (is_ascii_or_utf8
-                                    || check_if_text(orig_v0, v0_len).size() == hshape)
+                                    || check_if_text(orig_v0.as_slice(), v0_len).size() == hshape)
                             {
                                 // this is not utf8.
-                                let v = strlen(orig_v0);
+                                let v = strlen(orig_v0.as_slice());
                                 if v > 0 {
                                     v0_len = v;
                                 }
@@ -1621,10 +1829,10 @@ where
 
                             if v1_len > 0
                                 && (is_ascii_or_utf8
-                                    || check_if_text(orig_v1, v1_len).size() == hshape)
+                                    || check_if_text(orig_v1.as_slice(), v1_len).size() == hshape)
                             {
                                 // this is not utf8.
-                                let v = strlen(orig_v1);
+                                let v = strlen(orig_v1.as_slice());
                                 if v > 0 {
                                     v1_len = v;
                                 }
@@ -1632,16 +1840,26 @@ where
 
                             if v0_len > 0
                                 && orig_v0 == new_v0
-                                && (!rtn_found || check_if_text(orig_v0, v0_len).size() == v0_len)
+                                && (!rtn_found
+                                    || check_if_text(orig_v0.as_slice(), v0_len).size() == v0_len)
                             {
-                                Self::try_add_autotokens(&mut gathered_tokens, orig_v0, v0_len);
+                                Self::try_add_autotokens(
+                                    &mut gathered_tokens,
+                                    orig_v0.as_slice(),
+                                    v0_len,
+                                );
                             }
 
                             if v1_len > 0
                                 && orig_v1 == new_v1
-                                && (!rtn_found || check_if_text(orig_v1, v1_len).size() == v1_len)
+                                && (!rtn_found
+                                    || check_if_text(orig_v1.as_slice(), v1_len).size() == v1_len)
                             {
-                                Self::try_add_autotokens(&mut gathered_tokens, orig_v1, v1_len);
+                                Self::try_add_autotokens(
+                                    &mut gathered_tokens,
+                                    orig_v1.as_slice(),
+                                    v1_len,
+                                );
                             }
                         }
                         (_, _) => {
@@ -1685,8 +1903,9 @@ where
 }
 
 impl Named for AFLppRedQueen {
-    fn name(&self) -> &str {
-        "AFLppRedQueen"
+    fn name(&self) -> &Cow<'static, str> {
+        static NAME: Cow<'static, str> = Cow::Borrowed("AFLppRedQueen");
+        &NAME
     }
 }
 
@@ -1698,6 +1917,7 @@ impl AFLppRedQueen {
             enable_transform: false,
             enable_arith: false,
             text_type: TextType::None,
+            last_corpus_id: None,
         }
     }
 
@@ -1708,6 +1928,7 @@ impl AFLppRedQueen {
             enable_transform: transform,
             enable_arith: arith,
             text_type: TextType::None,
+            last_corpus_id: None,
         }
     }
 
@@ -1872,7 +2093,7 @@ mod tests {
     use std::fs;
 
     #[cfg(feature = "std")]
-    use super::Tokens;
+    use super::{AFLppRedQueen, Tokens};
 
     #[cfg(feature = "std")]
     #[test]
@@ -1890,5 +2111,38 @@ token2="B"
         log::info!("Token file entries: {:?}", tokens.tokens());
         assert_eq!(tokens.tokens().len(), 2);
         let _res = fs::remove_file("test.tkns");
+    }
+
+    #[cfg(feature = "std")]
+    #[test]
+    fn test_token_mutations() {
+        let rq = AFLppRedQueen::with_cmplog_options(true, true);
+        let pattern = 0;
+        let repl = 0;
+        let another_pattern = 0;
+        let changed_val = 0;
+        let attr = 0;
+        let another_buf = &[0, 0, 0, 0];
+        let buf = &[0, 0, 0, 0];
+        let buf_idx = 0;
+        let taint_len = 0;
+        let input_len = 0;
+        let hshape = 0;
+        let mut vec = std::vec::Vec::new();
+
+        let _res = rq.cmp_extend_encoding(
+            pattern,
+            repl,
+            another_pattern,
+            changed_val,
+            attr,
+            another_buf,
+            buf,
+            buf_idx,
+            taint_len,
+            input_len,
+            hshape,
+            &mut vec,
+        );
     }
 }

@@ -1,32 +1,18 @@
+//! The [`FRIDA`](https://frida.re) `CmpLog` runtime
+//!
 //! Functionality for [`frida`](https://frida.re)-based binary-only `CmpLog`.
 //! With it, a fuzzer can collect feedback about each compare that happened in the target
 //! This allows the fuzzer to potentially solve the compares, if a compare value is directly
 //! related to the input.
 //! Read the [`RedQueen`](https://www.ndss-symposium.org/ndss-paper/redqueen-fuzzing-with-input-to-state-correspondence/) paper for the general concepts.
 
-#[cfg(all(feature = "cmplog", target_arch = "x86_64"))]
-use std::collections::HashMap;
-
-use dynasmrt::dynasm;
-#[cfg(target_arch = "aarch64")]
-use dynasmrt::{DynasmApi, DynasmLabelApi};
-use libafl::{
-    inputs::{HasTargetBytes, Input},
-    Error,
-};
-use libafl_targets::{self, CMPLOG_MAP_W};
-use rangemap::RangeMap;
-
-use crate::helper::FridaRuntime;
-extern "C" {
-    /// Tracks cmplog instructions
-    pub fn __libafl_targets_cmplog_instructions(k: u64, shape: u8, arg1: u64, arg2: u64);
-}
-
 #[cfg(target_arch = "aarch64")]
 use core::ffi::c_void;
 use std::rc::Rc;
 
+use dynasmrt::dynasm;
+#[cfg(target_arch = "aarch64")]
+use dynasmrt::{DynasmApi, DynasmLabelApi};
 use frida_gum::ModuleMap;
 #[cfg(target_arch = "x86_64")]
 use frida_gum::{instruction_writer::InstructionWriter, stalker::StalkerOutput};
@@ -37,11 +23,17 @@ use frida_gum::{
 };
 use frida_gum_sys::Insn;
 #[cfg(all(feature = "cmplog", target_arch = "x86_64"))]
+use hashbrown::HashMap;
+#[cfg(all(feature = "cmplog", target_arch = "x86_64"))]
 use iced_x86::{
     BlockEncoder, Code, DecoderOptions, Instruction, InstructionBlock, MemoryOperand, MemorySize,
     OpKind, Register,
 };
+use libafl::Error;
+use libafl_targets::{cmps::__libafl_targets_cmplog_instructions, CMPLOG_MAP_W};
+use rangemap::RangeMap;
 
+use crate::helper::FridaRuntime;
 #[cfg(all(feature = "cmplog", target_arch = "aarch64"))]
 use crate::utils::{disas_count, writer_register};
 
@@ -129,17 +121,19 @@ impl FridaRuntime for CmpLogRuntime {
     fn init(
         &mut self,
         _gum: &frida_gum::Gum,
-        _ranges: &RangeMap<usize, (u16, String)>,
+        _ranges: &RangeMap<u64, (u16, String)>,
         _module_map: &Rc<ModuleMap>,
     ) {
         self.generate_instrumentation_blobs();
     }
 
-    fn pre_exec<I: Input + HasTargetBytes>(&mut self, _input: &I) -> Result<(), Error> {
+    fn deinit(&mut self, _gum: &frida_gum::Gum) {}
+
+    fn pre_exec(&mut self, _input_bytes: &[u8]) -> Result<(), Error> {
         Ok(())
     }
 
-    fn post_exec<I: Input + HasTargetBytes>(&mut self, _input: &I) -> Result<(), Error> {
+    fn post_exec(&mut self, _input_bytes: &[u8]) -> Result<(), Error> {
         Ok(())
     }
 }
@@ -179,7 +173,7 @@ impl CmpLogRuntime {
         k &= (CMPLOG_MAP_W as u64) - 1;
 
         unsafe {
-            __libafl_targets_cmplog_instructions(k, 8, op1, op2);
+            __libafl_targets_cmplog_instructions(k as usize, 8, op1, op2);
         }
     }
 
@@ -195,7 +189,7 @@ impl CmpLogRuntime {
         k &= (CMPLOG_MAP_W as u64) - 1;
 
         unsafe {
-            __libafl_targets_cmplog_instructions(k, size, op1, op2);
+            __libafl_targets_cmplog_instructions(k as usize, size, op1, op2);
         }
     }
 
@@ -221,7 +215,7 @@ impl CmpLogRuntime {
                 ; stp x26, x27, [sp, #-0x10]!
                 ; stp x28, x29, [sp, #-0x10]!
                 ; stp x30, xzr, [sp, #-0x10]!
-                ; .dword 0xd53b4218u32 as i32 // mrs x24, nzcv
+                ; .u32 0xd53b4218_u32 // mrs x24, nzcv
                 // jump to rust based population of the lists
                 ; mov x2, x0
                 ; adr x3, >done
@@ -229,7 +223,7 @@ impl CmpLogRuntime {
                 ; ldr x0, >self_addr
                 ; blr x4
                 // restore the reg state before returning to the caller
-                ; .dword 0xd51b4218u32 as i32 // msr nzcv, x24
+                ; .u32 0xd51b4218_u32 // msr nzcv, x24
                 ; ldp x30, xzr, [sp], #0x10
                 ; ldp x28, x29, [sp], #0x10
                 ; ldp x26, x27, [sp], #0x10
@@ -247,9 +241,9 @@ impl CmpLogRuntime {
                 ; ldp x2, x3, [sp], #0x10
                 ; b >done
                 ; self_addr:
-                ; .qword self as *mut _  as *mut c_void as i64
+                ; .u64 core::ptr::from_mut(self) as *mut c_void as u64
                 ; populate_lists:
-                ; .qword  CmpLogRuntime::populate_lists as *mut c_void as i64
+                ; .u64 CmpLogRuntime::populate_lists as *mut c_void as u64
                 ; done:
             );};
         }
@@ -661,11 +655,11 @@ impl CmpLogRuntime {
     )> {
         let bytes = instr.bytes();
         let mut decoder =
-            iced_x86::Decoder::with_ip(64, bytes, instr.address(), iced_x86::DecoderOptions::NONE);
+            iced_x86::Decoder::with_ip(64, bytes, instr.address(), DecoderOptions::NONE);
         if !decoder.can_decode() {
             return None;
         }
-        let mut instruction = iced_x86::Instruction::default();
+        let mut instruction = Instruction::default();
         decoder.decode_out(&mut instruction);
         match instruction.mnemonic() {
             iced_x86::Mnemonic::Cmp | iced_x86::Mnemonic::Sub => {} // continue
@@ -753,7 +747,7 @@ impl CmpLogRuntime {
     }
 
     #[cfg(all(feature = "cmplog", target_arch = "aarch64"))]
-    #[allow(clippy::similar_names)]
+    #[allow(clippy::similar_names, clippy::type_complexity)]
     #[inline]
     /// Check if the current instruction is cmplog relevant one(any opcode which sets the flags)
     #[must_use]
@@ -772,7 +766,7 @@ impl CmpLogRuntime {
             .operands
             .iter()
             .position(|item| *item == Operand::Nothing)
-            .unwrap_or_else(|| 4);
+            .unwrap_or(4);
         // "cmp" | "ands" | "subs" | "adds" | "negs" | "ngcs" | "sbcs" | "bics" | "cbz"
         //    | "cbnz" | "tbz" | "tbnz" | "adcs" - yaxpeax aliases insns (i.e., cmp -> subs)
         // We only care for compare instructions - aka instructions which set the flags
@@ -853,14 +847,14 @@ impl CmpLogRuntime {
                     None,
                 )),
                 Operand::ImmShift(imm, shift) => {
-                    Some((CmplogOperandType::Imm((imm as u64) << shift), None))
+                    Some((CmplogOperandType::Imm(u64::from(imm) << shift), None))
                 } //precalculate the shift
                 Operand::RegShift(shiftstyle, amount, regsize, reg) => {
                     let reg = CmplogOperandType::Regid(writer_register(reg, regsize, true));
                     let shift = (shiftstyle, amount);
                     Some((reg, Some(shift)))
                 }
-                Operand::Immediate(imm) => Some((CmplogOperandType::Imm(imm as u64), None)),
+                Operand::Immediate(imm) => Some((CmplogOperandType::Imm(u64::from(imm)), None)),
                 _ => panic!("Second argument could not be decoded"),
             }
         };
