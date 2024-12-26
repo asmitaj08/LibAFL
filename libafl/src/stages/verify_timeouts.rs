@@ -1,4 +1,4 @@
-#![allow(clippy::too_long_first_doc_paragraph)]
+#![expect(clippy::too_long_first_doc_paragraph)]
 //! Stage that re-runs captured Timeouts with double the timeout to verify
 //! Note: To capture the timeouts, use in conjunction with `CaptureTimeoutFeedback`
 //! Note: Will NOT work with in process executors due to the potential for restarts/crashes when
@@ -86,7 +86,7 @@ where
     E::Observers: ObserversTuple<<S::Corpus as Corpus>::Input, S>,
     E: Executor<EM, Z, State = S> + HasObservers + HasTimeout,
     EM: UsesState<State = S>,
-    Z: Evaluator<E, EM, State = S>,
+    Z: Evaluator<E, EM, <S::Corpus as Corpus>::Input, S>,
     S: HasCorpus + HasMetadata + UsesInput<Input = <S::Corpus as Corpus>::Input>,
     <S::Corpus as Corpus>::Input: Debug + Serialize + DeserializeOwned + Default + 'static + Clone,
 {

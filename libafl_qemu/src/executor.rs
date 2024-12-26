@@ -9,6 +9,8 @@ use std::ptr;
 #[cfg(feature = "systemmode")]
 use std::sync::atomic::{AtomicBool, Ordering};
 
+#[cfg(any(feature = "usermode", feature = "fork"))]
+use libafl::inputs::UsesInput;
 use libafl::{
     corpus::Corpus,
     events::{EventFirer, EventRestarter},
@@ -20,7 +22,6 @@ use libafl::{
     },
     feedbacks::Feedback,
     fuzzer::HasObjective,
-    inputs::UsesInput,
     observers::ObserversTuple,
     state::{HasCorpus, HasExecutions, HasSolutions, State, UsesState},
     Error, ExecutionProcessor, HasScheduler,
@@ -98,7 +99,7 @@ pub unsafe fn inproc_qemu_timeout_handler<E, EM, ET, OF, S, Z>(
     ET: EmulatorModuleTuple<S>,
     OF: Feedback<EM, E::Input, E::Observers, E::State>,
     S: State + Unpin,
-    Z: HasObjective<Objective = OF, State = E::State>,
+    Z: HasObjective<Objective = OF>,
     <<E as UsesState>::State as HasSolutions>::Solutions: Corpus<Input = E::Input>, //delete me
     <<<E as UsesState>::State as HasCorpus>::Corpus as Corpus>::Input: Clone,       //delete me
 {
@@ -166,9 +167,10 @@ where
         EM: EventFirer<State = S> + EventRestarter<State = S>,
         OF: Feedback<EM, S::Input, OT, S>,
         S: Unpin + State + HasExecutions + HasCorpus + HasSolutions,
-        Z: HasObjective<Objective = OF, State = S>
-            + HasScheduler<State = S>
-            + ExecutionProcessor<EM, OT>,
+        S::Corpus: Corpus<Input = S::Input>,
+        Z: HasObjective<Objective = OF>
+            + HasScheduler<<S::Corpus as Corpus>::Input, S>
+            + ExecutionProcessor<EM, <S::Corpus as Corpus>::Input, OT, S>,
         S::Solutions: Corpus<Input = S::Input>, //delete me
         <S::Corpus as Corpus>::Input: Clone,    //delete me
     {
@@ -241,7 +243,6 @@ where
     H: FnMut(&mut Emulator<CM, ED, ET, S, SM>, &mut S, &S::Input) -> ExitKind,
     OT: ObserversTuple<S::Input, S>,
     S: State + HasExecutions + Unpin,
-    Z: UsesState<State = S>,
 {
     fn run_target(
         &mut self,
@@ -315,7 +316,6 @@ where
     OT: ObserversTuple<S::Input, S>,
     S: UsesInput,
     SP: ShMemProvider,
-    Z: UsesState<State = S>,
 {
     inner: QemuInProcessForkExecutor<'a, CM, ED, EM, ET, H, OT, S, SM, SP, Z>,
 }
@@ -333,7 +333,6 @@ where
     S: UsesInput + Debug,
     SM: Debug,
     SP: ShMemProvider,
-    Z: UsesState<State = S>,
 {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         f.debug_struct("QemuForkExecutor")
@@ -354,10 +353,10 @@ where
     OT: ObserversTuple<S::Input, S>,
     S: State + HasSolutions,
     SP: ShMemProvider,
-    Z: HasObjective<State = S>,
+    Z: HasObjective,
     Z::Objective: Feedback<EM, S::Input, OT, S>,
 {
-    #[allow(clippy::too_many_arguments)]
+    #[expect(clippy::too_many_arguments)]
     pub fn new(
         emulator: Emulator<CM, ED, ET, S, SM>,
         harness_fn: &'a mut H,
@@ -416,7 +415,7 @@ where
     OT: ObserversTuple<S::Input, S> + Debug,
     S: State + HasExecutions + Unpin,
     SP: ShMemProvider,
-    Z: HasObjective<Objective = OF, State = S>,
+    Z: HasObjective<Objective = OF>,
 {
     fn run_target(
         &mut self,
@@ -452,7 +451,6 @@ where
     OT: ObserversTuple<S::Input, S>,
     S: State,
     SP: ShMemProvider,
-    Z: UsesState<State = S>,
 {
     type State = S;
 }
@@ -468,7 +466,6 @@ where
     OT: ObserversTuple<S::Input, S>,
     S: State,
     SP: ShMemProvider,
-    Z: UsesState<State = S>,
 {
     type Observers = OT;
     #[inline]

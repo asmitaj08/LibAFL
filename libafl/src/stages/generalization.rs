@@ -51,7 +51,6 @@ pub static GENERALIZATION_STAGE_NAME: &str = "generalization";
 pub struct GeneralizationStage<C, EM, O, OT, S, Z> {
     name: Cow<'static, str>,
     map_observer_handle: Handle<C>,
-    #[allow(clippy::type_complexity)]
     phantom: PhantomData<(EM, O, OT, S, Z)>,
 }
 
@@ -76,10 +75,9 @@ where
         + UsesInput<Input = BytesInput>,
     S::Corpus: Corpus<Input = BytesInput>,
     EM: UsesState<State = S>,
-    Z: UsesState<State = S>,
 {
     #[inline]
-    #[allow(clippy::too_many_lines)]
+    #[expect(clippy::too_many_lines)]
     fn perform(
         &mut self,
         fuzzer: &mut Z,
@@ -352,7 +350,6 @@ where
         + UsesInput<Input = BytesInput>,
     OT: ObserversTuple<BytesInput, S>,
     EM: UsesState<State = S>,
-    Z: UsesState<State = S>,
 {
     /// Create a new [`GeneralizationStage`].
     #[must_use]
@@ -407,7 +404,7 @@ where
         payload.retain(|&x| !(x.is_none() & core::mem::replace(&mut previous, x.is_none())));
     }
 
-    #[allow(clippy::too_many_arguments)]
+    #[expect(clippy::too_many_arguments)]
     fn find_gaps<E>(
         &self,
         fuzzer: &mut Z,
@@ -445,7 +442,7 @@ where
         Ok(())
     }
 
-    #[allow(clippy::too_many_arguments)]
+    #[expect(clippy::too_many_arguments)]
     fn find_gaps_in_closures<E>(
         &self,
         fuzzer: &mut Z,

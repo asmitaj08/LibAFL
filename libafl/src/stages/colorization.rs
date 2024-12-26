@@ -65,7 +65,6 @@ pub const COLORIZATION_STAGE_NAME: &str = "colorization";
 pub struct ColorizationStage<C, E, EM, O, S, Z> {
     map_observer_handle: Handle<C>,
     name: Cow<'static, str>,
-    #[allow(clippy::type_complexity)]
     phantom: PhantomData<(E, EM, O, E, S, Z)>,
 }
 
@@ -92,10 +91,8 @@ where
     <S::Corpus as Corpus>::Input: HasMutatorBytes + Clone,
     O: MapObserver,
     C: AsRef<O> + Named,
-    Z: UsesState<State = S>,
 {
     #[inline]
-    #[allow(clippy::let_and_return)]
     fn perform(
         &mut self,
         fuzzer: &mut Z,
@@ -125,7 +122,7 @@ where
 #[derive(Debug, Serialize, Deserialize)]
 #[cfg_attr(
     any(not(feature = "serdeany_autoreg"), miri),
-    allow(clippy::unsafe_derive_deserialize)
+    expect(clippy::unsafe_derive_deserialize)
 )] // for SerdeAny
 pub struct TaintMetadata {
     input_vec: Vec<u8>,
@@ -174,10 +171,8 @@ where
         + HasCurrentTestcase
         + UsesInput<Input = <S::Corpus as Corpus>::Input>,
     <S::Corpus as Corpus>::Input: HasMutatorBytes + Clone,
-    Z: UsesState<State = S>,
 {
     #[inline]
-    #[allow(clippy::let_and_return)]
     fn colorize(
         fuzzer: &mut Z,
         executor: &mut E,
@@ -348,7 +343,7 @@ where
     }
 
     /// Replace bytes with random values but following certain rules
-    #[allow(clippy::needless_range_loop)]
+    #[expect(clippy::needless_range_loop)]
     fn type_replace(bytes: &mut [u8], state: &mut S) {
         let len = bytes.len();
         for idx in 0..len {

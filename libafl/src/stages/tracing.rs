@@ -27,7 +27,6 @@ use crate::{
 pub struct TracingStage<EM, TE, S, Z> {
     name: Cow<'static, str>,
     tracer_executor: TE,
-    #[allow(clippy::type_complexity)]
     phantom: PhantomData<(EM, TE, S, Z)>,
 }
 
@@ -42,9 +41,8 @@ where
         + MaybeHasClientPerfMonitor
         + UsesInput<Input = <S::Corpus as Corpus>::Input>,
     EM: UsesState<State = S>, //delete me
-    Z: UsesState<State = S>,  //delete me
 {
-    #[allow(rustdoc::broken_intra_doc_links)]
+    #[expect(rustdoc::broken_intra_doc_links)]
     /// Perform tracing on the given `CorpusId`. Useful for if wrapping [`TracingStage`] with your
     /// own stage and you need to manage [`super::NestedStageRetryCountRestartHelper`] differently
     /// see [`super::ConcolicTracingStage`]'s implementation as an example of usage.
@@ -87,7 +85,6 @@ where
         + MaybeHasClientPerfMonitor
         + UsesInput<Input = <S::Corpus as Corpus>::Input>,
     EM: UsesState<State = S>,
-    Z: UsesState<State = S>,
     <S::Corpus as Corpus>::Input: Input,
 {
     #[inline]
@@ -153,7 +150,6 @@ impl<EM, TE, S, Z> TracingStage<EM, TE, S, Z> {
 #[derive(Clone, Debug)]
 pub struct ShadowTracingStage<E, EM, SOT, S, Z> {
     name: Cow<'static, str>,
-    #[allow(clippy::type_complexity)]
     phantom: PhantomData<(E, EM, SOT, S, Z)>,
 }
 
@@ -183,7 +179,6 @@ where
         + MaybeHasClientPerfMonitor
         + UsesInput<Input = <S::Corpus as Corpus>::Input>,
     EM: UsesState<State = S>,
-    Z: UsesState<State = S>,
 {
     #[inline]
     fn perform(
@@ -232,11 +227,10 @@ where
 
 impl<E, EM, SOT, S, Z> ShadowTracingStage<E, EM, SOT, S, Z>
 where
-    E: Executor<EM, Z, State = Z::State> + HasObservers,
-    S: HasExecutions + HasCorpus,
+    E: Executor<EM, Z, State = S> + HasObservers,
+    S: HasExecutions + HasCorpus + UsesInput,
     SOT: ObserversTuple<<S::Corpus as Corpus>::Input, S>,
-    EM: UsesState<State = Z::State>,
-    Z: UsesState,
+    EM: UsesState<State = S>,
 {
     /// Creates a new default stage
     pub fn new(_executor: &mut ShadowExecutor<E, SOT>) -> Self {

@@ -73,7 +73,6 @@ pub struct Instance<'a, M: Monitor> {
 }
 
 impl<M: Monitor> Instance<'_, M> {
-    #[allow(clippy::similar_names)] // elf != self
     fn coverage_filter(&self, qemu: Qemu) -> Result<StdAddressFilter, Error> {
         /* Conversion is required on 32-bit targets, but not on 64-bit ones */
         if let Some(includes) = &self.options.include {
@@ -106,7 +105,7 @@ impl<M: Monitor> Instance<'_, M> {
         }
     }
 
-    #[allow(clippy::too_many_lines)]
+    #[expect(clippy::too_many_lines)]
     pub fn run<ET>(&mut self, modules: ET, state: Option<ClientState>) -> Result<(), Error>
     where
         ET: EmulatorModuleTuple<ClientState> + Debug,
@@ -312,9 +311,8 @@ impl<M: Monitor> Instance<'_, M> {
         stages: &mut ST,
     ) -> Result<(), Error>
     where
-        Z: Fuzzer<E, ClientMgr<M>, ST>
-            + UsesState<State = ClientState>
-            + Evaluator<E, ClientMgr<M>, State = ClientState>,
+        Z: Fuzzer<E, ClientMgr<M>, ClientState, ST>
+            + Evaluator<E, ClientMgr<M>, BytesInput, ClientState>,
         E: UsesState<State = ClientState>,
         ST: StagesTuple<E, ClientMgr<M>, ClientState, Z>,
     {

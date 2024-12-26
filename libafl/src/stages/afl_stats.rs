@@ -239,7 +239,7 @@ impl<C, E, EM, O, S, Z> Stage<E, EM, S, Z> for AflStatsStage<C, E, EM, O, S, Z>
 where
     E: HasObservers,
     EM: EventFirer,
-    Z: HasScheduler<State = S>,
+    Z: HasScheduler<<S::Corpus as Corpus>::Input, S>,
     S: HasImported
         + HasCorpus
         + HasMetadata
@@ -252,9 +252,9 @@ where
     E::Observers: MatchNameRef,
     O: MapObserver,
     C: AsRef<O> + Named,
-    <Z as HasScheduler>::Scheduler: HasQueueCycles,
+    Z::Scheduler: HasQueueCycles,
 {
-    #[allow(clippy::too_many_lines)]
+    #[expect(clippy::too_many_lines)]
     fn perform(
         &mut self,
         fuzzer: &mut Z,
@@ -321,7 +321,6 @@ where
         } else {
             0
         };
-        #[allow(clippy::similar_names)]
         let stats = AFLFuzzerStats {
             start_time: self.start_time,
             last_update: self.last_report_time.as_secs(),
@@ -356,7 +355,7 @@ where
             time_wo_finds: (current_time() - self.last_find).as_secs(),
             corpus_variable: 0,
             stability: self.calculate_stability(unstable_entries_in_map, filled_entries_in_map),
-            #[allow(clippy::cast_precision_loss)]
+            #[expect(clippy::cast_precision_loss)]
             bitmap_cvg: (filled_entries_in_map as f64 / map_size as f64) * 100.0,
             saved_crashes: self.saved_crashes,
             saved_hangs: self.saved_hangs,
@@ -532,8 +531,8 @@ where
         }
     }
 
-    #[allow(clippy::cast_precision_loss)]
-    #[allow(clippy::unused_self)]
+    #[expect(clippy::cast_precision_loss)]
+    #[expect(clippy::unused_self)]
     fn calculate_stability(&self, unstable_entries: usize, filled_entries: u64) -> f64 {
         ((filled_entries as f64 - unstable_entries as f64) / filled_entries as f64) * 100.0
     }

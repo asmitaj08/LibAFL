@@ -53,15 +53,14 @@ pub struct StdTMinMutationalStage<E, EM, F, FF, M, S, Z> {
     runs: usize,
     /// The progress helper for this stage, keeping track of resumes after timeouts/crashes
     restart_helper: ExecutionCountRestartHelper,
-    #[allow(clippy::type_complexity)]
     phantom: PhantomData<(E, EM, F, S, Z)>,
 }
 
 impl<E, EM, F, FF, M, S, Z> Stage<E, EM, S, Z> for StdTMinMutationalStage<E, EM, F, FF, M, S, Z>
 where
-    Z: HasScheduler<State = S>
-        + ExecutionProcessor<EM, E::Observers>
-        + ExecutesInput<E, EM>
+    Z: HasScheduler<<S::Corpus as Corpus>::Input, S>
+        + ExecutionProcessor<EM, <S::Corpus as Corpus>::Input, E::Observers, S>
+        + ExecutesInput<E, EM, <S::Corpus as Corpus>::Input, S>
         + HasFeedback,
     Z::Scheduler: RemovableScheduler<<S::Corpus as Corpus>::Input, S>,
     E: HasObservers + UsesState<State = S>,
@@ -94,7 +93,7 @@ where
         &mut self,
         fuzzer: &mut Z,
         executor: &mut E,
-        state: &mut Z::State,
+        state: &mut S,
         manager: &mut EM,
     ) -> Result<(), Error> {
         self.perform_minification(fuzzer, executor, state, manager)?;
@@ -130,14 +129,14 @@ pub static TMIN_STAGE_NAME: &str = "tmin";
 
 impl<E, EM, F, FF, M, S, Z> StdTMinMutationalStage<E, EM, F, FF, M, S, Z>
 where
-    Z: HasScheduler<State = S>
-        + ExecutionProcessor<EM, E::Observers>
-        + ExecutesInput<E, EM>
+    Z: HasScheduler<<S::Corpus as Corpus>::Input, S>
+        + ExecutionProcessor<EM, <S::Corpus as Corpus>::Input, E::Observers, S>
+        + ExecutesInput<E, EM, <S::Corpus as Corpus>::Input, S>
         + HasFeedback,
     Z::Scheduler: RemovableScheduler<<S::Corpus as Corpus>::Input, S>,
-    E: HasObservers + UsesState<State = Z::State>,
+    E: HasObservers + UsesState<State = S>,
     E::Observers: ObserversTuple<<S::Corpus as Corpus>::Input, S> + Serialize,
-    EM: EventFirer<State = Z::State>,
+    EM: EventFirer<State = S>,
     FF: FeedbackFactory<F, E::Observers>,
     F: Feedback<EM, <S::Corpus as Corpus>::Input, E::Observers, S>,
     S: HasMetadata
@@ -166,7 +165,6 @@ where
     }
 
     /// Runs this (mutational) stage for new objectives
-    #[allow(clippy::cast_possible_wrap)] // more than i32 stages on 32 bit system - highly unlikely...
     fn perform_minification(
         &mut self,
         fuzzer: &mut Z,
