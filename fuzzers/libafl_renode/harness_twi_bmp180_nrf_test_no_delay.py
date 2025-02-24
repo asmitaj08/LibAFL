@@ -1,4 +1,4 @@
-# !/usr/bin/env -S python3 -m bpython -i
+#!/usr/bin/env python3
 
 import sys
 # sys.path.append("/home/asmita/fuzzing_bare-metal/SEFF_project_dirs/SEFF-project/pyrenode3/src/")
@@ -30,19 +30,26 @@ import signal
 import pstats
 import io
 import os
-
+import threading
 
 # sp_main = 0
 # lr_main = 0
 # pc_main = 0
+
+target_event = threading.Event()
+exit_event = threading.Event()
+
 mach_name = "nrf"
+print("*********Emulation()********")
 e = Emulation()
+print("*********Monitor()********")
 m = Monitor()    # gives error if i comment it out, LoadPlatformDescription uses the machine provided by Monitor
+print("*********mach add********")
 mach = e.add_mach(mach_name)
 
 # state_file= "statefile_bmp180_nrf_test_no_delay.dat"
-# trace_file_path = "trace_bmp180_nrf_test_no_delay"
-# log_file_path = "log_bmp180_nrf_test_no_delay.log"
+trace_file_path = "trace_bmp180_nrf_test_no_delay"
+log_file_path = "log_bmp180_nrf_test_no_delay_buggy.log"
 # snapshot_path = "/home/asmita/fuzzing_bare-metal/SEFF_project_dirs/SEFF-project/LibAFL/fuzzers/libafl_renode/snapshot_bmp180_nrf_test_no_delay"
 
 temp_data = 60
@@ -52,21 +59,34 @@ pressure_data = 1200
 exit_flag = 0
 delay_flag = 0
 reach_target_flag = 0
-# exit_addr = 0x296  
-exit_addr = 0x3102
+exit_addr = 0x3102  # this will change depending on target
+fault_addr = 0x2ec
+final_exit_addr = 0x3b78
+# exit_addr = 0x3102
 # restore_pc = 0x0800353a
 # restore_sp = 0x20001040
 # load_str = """using "platforms/cpus/nrf52840.repl" bmp180: Sensors.BMP180@ twi0 0x77"""
 load_str = """using "platforms/cpus/nrf52840.repl" bmp180: Sensors.BMP180_modified@ twi0 0x77"""
+print("*********PlatformDescriptionMachineExtensions********")
 PlatformDescriptionMachineExtensions.LoadPlatformDescriptionFromString(mach.internal,load_str)
+print("*********LoadElf********")
 # mach.load_elf("https://dl.antmicro.com/projects/renode/BMP180_I2C.ino.arduino.mbed.nano33ble.elf-s_3127076-ba5f49cd34cd9549c2aa44f83af8e2011ecd1c22")
 mach.load_elf("/home/asmita/fuzzing_bare-metal/SEFF_project_dirs/SEFF-project/LibAFL/fuzzers/libafl_renode/nrf_bmp180_drv1_no_delay.out")
 
-# pc_main = mach.sysbus.GetSymbolAddress("main")
-pc_main = mach.sysbus.GetSymbolAddress("Reset_Handler")
+# binary with bug
+# mach.load_elf("/home/asmita/fuzzing_bare-metal/SEFF_project_dirs/SEFF-project/LibAFL/fuzzers/libafl_renode/nrf_bmp180_drv1_no_delay_with_bug.out")
+print("*********GetSymbolAddress********")
+pc_main = mach.sysbus.GetSymbolAddress("main")
+# pc_main = mach.sysbus.GetSymbolAddress("Reset_Handler")
+# pc_main = mach.sysbus.GetSymbolAddress("driver_bmp180_start")
+# pc_main = 0x2bc
 
 print(f"Main func addr : {hex(pc_main)}")
 target_func_calling_pc = pc_main
+
+# uart_handler = mach.sysbus.GetSymbolAddress("uart_evt_handler",0)
+uart_handler = 0x3012
+# print(f"uart_handler func addr : {hex(uart_handler)}")
 
 
 def hook_addr_target(cpu,addr):
@@ -78,27 +98,48 @@ def hook_addr_target(cpu,addr):
     # mach.sysbus.cpu.Pause()
     # mach.sysbus.cpu.DisableExecutionTracing()
     print("************In target hook")
-    # mach.Pause()
+    mach.Pause()
+    # mach.sysbus.cpu.Pause()
     # mach.sysbus.cpu.Reset()
     # e.SnapshotTracker.Save(TimeInterval.FromMilliseconds(100),snapshot_path)
-    # mach.sysbus.cpu.Fuzz_PrepareState() # cpu state
-    # mach.sysbus.ram.Fuzz_Mem_Save()   # memory
-    reach_target_flag = 1
+    mach.sysbus.ram.Fuzz_Mem_Save()   # memory
+    mach.sysbus.cpu.Fuzz_PrepareState() # cpu state
+    # print(f"readBytes : {mach.sysbus.ReadBytes(0x20000120, 8)}")
+    # reach_target_flag = 1
     # print(f"----Reg at Pause in hook : {hex(lr_target)}, {hex(sp_target)}, {hex(pc_target)}, {hex(cpacr_target)}")
-    print("Target Hook task done")
+    # print("Target Hook task done")
+    target_event.set()
 
 def hook_addr_exit(cpu,addr):
-    global exit_flag
-    exit_flag = 1
+    # global exit_flag
+   
     print(f"***** Exit addr ******* : {hex(addr)}")
+    # exit_flag = 1
+    # exit_event.set()  # Signal the exit event
+    mach.Pause()
+    exit_event.set()  # Signal the exit event
+    # print("Exit hook task done")
+
+def hook_addr_uart_handler(cpu,addr):
+    # global exit_flag
+    # exit_flag = 1
+    # val = hex(mach.sysbus.cpu.GetRegisterUnsafe(12).RawValue)
+    # print(f"***** R2 : {val}")
+    # print(f"***** SP :{hex(mach.sysbus.cpu.SP)} handler addr : {hex(mach.sysbus.ReadDoubleWord(0x2000074c))}")
+    print(f"***** SP :{hex(mach.sysbus.cpu.SP)}")
 
 Action1 = getattr(System, 'Action`2')
 hook_action_target = Action1[ICpuSupportingGdb, System.UInt64](hook_addr_target)
 mach.sysbus.cpu.AddHook(target_func_calling_pc,hook_action_target)
 
-# Action2 = getattr(System, 'Action`2')
-# hook_action_exit = Action2[ICpuSupportingGdb, System.UInt64](hook_addr_exit)
-# mach.sysbus.cpu.AddHook(exit_addr,hook_action_exit)
+Action2 = getattr(System, 'Action`2')
+hook_action_exit = Action2[ICpuSupportingGdb, System.UInt64](hook_addr_exit)
+mach.sysbus.cpu.AddHook(exit_addr,hook_action_exit)
+# mach.sysbus.cpu.AddHook(fault_addr,hook_action_exit)
+
+# Action3 = getattr(System, 'Action`2')
+# hook_action_uart = Action3[ICpuSupportingGdb, System.UInt64](hook_addr_uart_handler)
+# mach.sysbus.cpu.AddHook(uart_handler,hook_action_uart)
 
 TranslationCPUHooksExtensions.SetHookAtBlockBegin(mach.sysbus.cpu.internal, mach.internal, " ")
 
@@ -113,42 +154,48 @@ TranslationCPUHooksExtensions.SetHookAtBlockBegin(mach.sysbus.cpu.internal, mach
 # m.execute("logFile @" + log_file_path)
 Analyzer(mach.sysbus.uart0).Show()
 print("******Starting the emulator")
+# mach.sysbus.cpu.SetBroadcastDirty(True)
 e.StartAll()
-# m.execute("logFile @" + log_file_path)
-while reach_target_flag == 0: # wait until target is reached
-    # print("Target not reached yet")
-    pass
+# # m.execute("logFile @" + log_file_path)
+# while reach_target_flag == 0: # wait until target is reached
+#     # print("Target not reached yet")
+#     pass
     
-if reach_target_flag == 1:
-    print("Target flag reached...")
-    # try:
+# if reach_target_flag == 1:
+#     print("Target flag reached...")
+#     # try:
         
-        # mach.Pause()
-        # mach.sysbus.cpu.Pause()
-    # mach.sysbus.cpu.DisableExecutionTracing()
-    mach.sysbus.cpu.RemoveHooksAt(target_func_calling_pc)
+#     mach.Pause()
+#         # mach.sysbus.cpu.Pause()
+#     # mach.sysbus.cpu.DisableExecutionTracing()
+#     mach.sysbus.cpu.RemoveHooksAt(target_func_calling_pc)
     
-        # e.SnapshotTracker.Save(TimeInterval.FromMilliseconds(100),snapshot_path)
-        # mach.sysbus.cpu.RemoveHooksAt(exit_addr)
-        # EmulationManager.Instance.Save(state_file)
-        # EmulationManager.Instance.Save()
-        # print(f"Save command executed")
-        # print(f"-------Reg after flag set : SP : {hex(mach.sysbus.cpu.GetRegisterUnsafe(13).RawValue)}, PC : {mach.sysbus.cpu.PC}")
-        # print(f"Save command executed: Save @{state_file}")
-        # mach.sysbus.cpu.DisableExecutionTracing()
-        # m.execute("Clear")
-        # mach.sysbus.cpu.testStatePtr()
-        # mach.sysbus.cpu.testPrepareState()
+#         # e.SnapshotTracker.Save(TimeInterval.FromMilliseconds(100),snapshot_path)
+#         # mach.sysbus.cpu.RemoveHooksAt(exit_addr)
+#         # EmulationManager.Instance.Save(state_file)
+#         # EmulationManager.Instance.Save()
+#         # print(f"Save command executed")
+#         # print(f"-------Reg after flag set : SP : {hex(mach.sysbus.cpu.GetRegisterUnsafe(13).RawValue)}, PC : {mach.sysbus.cpu.PC}")
+#         # print(f"Save command executed: Save @{state_file}")
+#         # mach.sysbus.cpu.DisableExecutionTracing()
+#         # m.execute("Clear")
+#         # mach.sysbus.cpu.testStatePtr()
+#         # mach.sysbus.cpu.testPrepareState()
        
 
-    # except Exception as e:
-    #      print(f"Error executing save command: {e}")
-    # print("reached flag")
+#     # except Exception as e:
+#     #      print(f"Error executing save command: {e}")
+#     # print("reached flag")
 
-# load_path_format = ReadFilePath(state_file)
+# # load_path_format = ReadFilePath(state_file)
+
+target_event.wait()
+target_event.clear()
+mach.Pause()
+mach.sysbus.cpu.RemoveHooksAt(target_func_calling_pc)
 print("Done initial setup")
-data = [0x44]
-count = 1
+data = [0xff]*2
+t_count = 1
 
 # print(e.SnapshotTracker.GetLastSnapshotBeforeOrAtTimeStamp(TimeInterval.FromMilliseconds(100)))
 # print(f"**** Snapshot Info : {e.SnapshotTracker.PrintSnapshotsInfo()}")
@@ -163,12 +210,12 @@ count = 1
 # pr.enable()
 # try :
 i=0
-while count:
+while t_count:
         # global exit_flag
         # exit_flag = 0
         # i+=1
 #     # count += 1
-        print("***************Loading the saved states...")
+        # print("***************Loading the saved states...")
         # print(f"---- Reg before load : SP : {hex(mach.sysbus.cpu.GetRegisterUnsafe(13).RawValue)}, PC : {hex(mach.sysbus.cpu.GetRegisterUnsafe(15).RawValue)}")
         start_time = time.time()
         # EmulationManager.Instance.Load(load_path_format)
@@ -193,22 +240,43 @@ while count:
         # mach.sysbus.cpu.SetRegisterUnsafe(14, RegisterValue.Create(0x0, 32))
         # mach.sysbus.cpu.SetRegisterUnsafe(13, RegisterValue.Create(main_sp_addr, 32))
         # mach.sysbus.cpu.SetRegisterUnsafe(27, RegisterValue.Create(0x0, 32))
-
-        # mach.sysbus.ram.Fuzz_Mem_Load() # mem , these two takes about 0.5 seconds
+        
+        # mach.sysbus.cpu.Pause()
+        # mach.sysbus.cpu.RestoreState()
+        # mach.sysbus.ram.Fuzz_Mem_Load() # mem , these two takes about 0.5 seconds , need this when want to load from particular function instead of reset handler
         # mach.sysbus.cpu.Fuzz_LoadState()
+        mach.Pause()
+        # mach.sysbus.cpu.Fuzz_LoadState()
+        # PlatformDescriptionMachineExtensions.LoadPlatformDescriptionFromString(mach.internal,load_str)
+        # mach.sysbus.ram.Fuzz_DeallocateAllSegments()
+        mach.sysbus.ram.Fuzz_Mem_Load()
+        # mach.load_elf("/home/asmita/fuzzing_bare-metal/SEFF_project_dirs/SEFF-project/LibAFL/fuzzers/libafl_renode/nrf_bmp180_drv1_no_delay.out")
+        # mach.load_elf("/home/asmita/fuzzing_bare-metal/SEFF_project_dirs/SEFF-project/LibAFL/fuzzers/libafl_renode/nrf_bmp180_drv1_no_delay_with_bug.out")
+        mach.sysbus.cpu.Fuzz_LoadState()
+        # mach.sysbus.ram.Fuzz_Mem_Load()
+        # mach.sysbus.cpu.Reset()
+        mach.sysbus.twi0.bmp180.ReadFromFuzzer(data)
         
         # print(f"---- Reg before resume : SP : {hex(mach.sysbus.cpu.GetRegisterUnsafe(13).RawValue)}, PC : {hex(mach.sysbus.cpu.GetRegisterUnsafe(15).RawValue)}")
+        # print(f"---- Reading val at stack before: {hex(mach.sysbus.ReadBytes(0x20000120, 1)[0])}")
+        # mach.sysbus.cpu.CreateExecutionTracing("", f"{trace_file_path}_resumed_{i}", TraceFormat.Disassembly)
+        # i+=1
         # mach.sysbus.cpu.Resume()
+        # if i==4 :
         # mach.sysbus.cpu.CreateExecutionTracing("", f"{trace_file_path}_resumed_{i}", TraceFormat.Disassembly) # make sure trace_file is new file, else it will give error if it already exists
         # mach.Pause()
         # mach.sysbus.cpu.Pause()
-        mach.sysbus.cpu.Reset() # with this total time is about 0.4 seconds, almost same as cpu state load, and mem load
-        # mach.sysbus.cpu.Resume()
+        # mach.sysbus.cpu.Reset() # with this total time is about 0.4 seconds, almost same as cpu state load, and mem load
+        # print(f"---- Reg before resume : SP : {hex(mach.sysbus.cpu.GetRegisterUnsafe(13).RawValue)}, PC : {hex(mach.sysbus.cpu.GetRegisterUnsafe(15).RawValue)}")
+        mach.Resume()
+        # mach.sysbus.cpu.Start()
         # mach.sysbus.cpu.Fuzz_Reset() # **** this also takes almost similar i.e. 0.4 
         # mach.sysbus.cpu.Fuzz_Resume() # these are also slower , this might not worked, I did some changes
-        mach.Resume() #not sure why , but this works faster than mach.sysbus.cpu.Resume() ; but either of these work fine!
-        # print(f"---Reg after resume : SP : {hex(mach.sysbus.cpu.GetRegisterUnsafe(13).RawValue)}, PC : {hex(mach.sysbus.cpu.GetRegisterUnsafe(15).RawValue)}")
+        # mach.Resume() #not sure why , but this works faster than mach.sysbus.cpu.Resume() ; but either of these work fine!
         
+        # print(f"---Reg after resume : SP : {hex(mach.sysbus.cpu.GetRegisterUnsafe(13).RawValue)}, PC : {hex(mach.sysbus.cpu.GetRegisterUnsafe(15).RawValue)}")
+        # print(f"---- Reading val at stack after : {hex(mach.sysbus.ReadWord(0x20000120))}")
+        # print(f"---- Reading val at stack after: {hex(mach.sysbus.ReadBytes(0x20000120, 1)[0])}")
 
 #         print("************file loaded")
 #         mach = e.get_mach(mach_name)
@@ -231,25 +299,44 @@ while count:
 #         print("^^^^^Resuming next run")
 #         mach.sysbus.twi0.bmp180.ReadFromFuzzer(data) #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 #         e.StartAll()
-        # test = 0
-        mach.sysbus.twi0.bmp180.ReadFromFuzzer(data)
-        end_time = time.time()
-        load_execution_time = end_time - start_time
-        print(f"Load file execution time: {load_execution_time:.10f} seconds")
+        test = 0
+        # mach.sysbus.twi0.bmp180.ReadFromFuzzer(data)
+        # end_time = time.time()
+        # load_execution_time = end_time - start_time
+        # print(f"Load file execution time: {load_execution_time:.10f} seconds")
+        # mach.sysbus.cpu.DisableExecutionTracing()
+        # start_time = time.time()
         # while exit_flag == 0 :
-        #     # print(f"Waiting at : pc : {hex(mach.sysbus.cpu.GetRegisterUnsafe(14).RawValue)}, {hex(mach.sysbus.cpu.GetRegisterUnsafe(13).RawValue)},{hex(mach.sysbus.cpu.GetRegisterUnsafe(15).RawValue)}")
+        #     #  time.sleep(0.5)
+        #     # pass
+        #     # print("hello")
+        #     print(f"Waiting at pc : {hex(mach.sysbus.cpu.GetRegisterUnsafe(15).RawValue)}")
         #     # if(flag==2):
         #     #      print("Disabling--trace")
         #     #      mach.sysbus.cpu.DisableExecutionTracing()
         #     #      flag=0
+
         #     # test+=1
-        #     # if(test==10):
-        #     #     #  mach.sysbus.cpu.Pause()
-        #     #      mach.Pause()
-        #     #      print(f"**Test 10****** : pc : {(mach.sysbus.cpu.PC)}, {hex(mach.sysbus.cpu.GetRegisterUnsafe(15).RawValue)}")
-        #     #      break
-        #     print("Waiting!")
-        # pass
+        #     if(test>=5):
+        #         #  mach.sysbus.cpu.Pause()
+        #          mach.Pause()
+        #          exit_flag=0
+        #          print("Waiting test>=10!")
+        #         #  print(f"**Test 10****** : pc : {(mach.sysbus.cpu.PC)}, {hex(mach.sysbus.cpu.GetRegisterUnsafe(15).RawValue)}")
+        #          break
+
+        #     # print("Waiting!")
+        # exit_flag=0
+        # mach.sysbus.cpu.DisableExecutionTracing()
+
+        # Wait until the exit_event is set
+        exit_event.wait()
+
+        # Reset the event for the next iteration
+        exit_event.clear()
+        end_time = time.time()
+        load_execution_time = end_time - start_time
+        print(f"******** Load file execution time: {load_execution_time:.10f} seconds, test: {test}")
 
         # if exit_flag == 1:
         #     exit_flag = 0

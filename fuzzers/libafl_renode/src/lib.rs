@@ -11,37 +11,44 @@ use std::{
     ffi::CString,
 };
 use libafl_bolts::{
-    core_affinity::Cores, current_nanos, rands::StdRand, shmem::{ShMemProvider, StdShMemProvider}, tuples::{tuple_list, Merge}, AsMutSlice, AsSlice,
+    core_affinity::Cores, current_nanos, rands::StdRand, shmem::{ShMemProvider, StdShMemProvider}, tuples::{tuple_list, Merge}, AsSlice,
     // shmem::{ShMem, ShMemProvider, UnixShMemProvider},
 };
 use libafl::{
     corpus::{Corpus, InMemoryCorpus, OnDiskCorpus},
     events::{Launcher, EventConfig, SimpleEventManager},
-    executors::{inprocess::InProcessExecutor, ExitKind},
+    // executors::{inprocess::InProcessExecutor, ExitKind},
+    executors::{ExitKind, InProcessExecutor},
     feedback_or,
     feedbacks::{CrashFeedback, MaxMapFeedback, TimeFeedback, TimeoutFeedback},
     fuzzer::{Fuzzer, StdFuzzer},
     generators::{RandBytesGenerator,RandPrintablesGenerator},
-    inputs::{BytesInput, HasBytesVec, HasTargetBytes},
-    monitors::MultiMonitor, monitors::SimpleMonitor,
-    mutators::{
-        scheduled::{havoc_mutations, tokens_mutations, StdScheduledMutator},
-        // token_mutations::{I2SRandReplace, Tokens},
-    },
-    observers::{HitcountsMapObserver, TimeObserver, StdMapObserver},
+    inputs::{BytesInput, HasTargetBytes},
+    // monitors::MultiMonitor, monitors::SimpleMonitor,
+    monitors::{MultiMonitor,SimpleMonitor},
+    mutators::{havoc_mutations::havoc_mutations, scheduled::StdScheduledMutator},
+
+    // mutators::{
+    //     havoc_mutations::havoc_mutations, scheduled::{tokens_mutations, StdScheduledMutator},
+    //     token_mutations::{I2SRandReplace, Tokens},
+    // },
+    observers::{CanTrack, HitcountsMapObserver, StdMapObserver, TimeObserver},
     schedulers::{IndexesLenTimeMinimizerScheduler, QueueScheduler},
-    stages::{StdMutationalStage, TracingStage},
+    stages::mutational::StdMutationalStage,
     state::{StdState, HasCorpus},
     Error,
 };
-use libafl_targets::{
-    CmpLogObserver, std_edges_map_observer, EDGES_MAP_PTR,
-    MAX_EDGES_NUM,EDGES_MAP_SIZE,
-};
 
-const MAP_SIZE: usize = 8 * 1024;
+pub use libafl_targets::{EDGES_MAP, EDGES_MAP_PTR, EDGES_MAP_ALLOCATED_SIZE, EDGES_MAP_DEFAULT_SIZE,CmpLogObserver};
+
+// use libafl_targets::{
+//     CmpLogObserver, std_edges_map_observer, EDGES_MAP_PTR,
+//     MAX_EDGES_NUM,EDGES_MAP_SIZE,
+// };
+
+const MAP_SIZE: usize =  8 * 1024; //2621440 ; // 8 * 1024; // 0x280000 (i.e. 2621440) for EDGES_MAP_ALLOCATED_SIZE 
 static mut PREV_LOC: u64 = 0; 
-// pub use libafl_targets::{EDGES_MAP_PTR, EDGES_MAP_SIZE};
+// pub use libafl_targets::{EDGES_MAP, EDGES_MAP_PTR, EDGES_MAP_ALLOCATED_SIZE};
 
 #[no_mangle] // coverage map
 pub static mut COV_MAP: [u8; MAP_SIZE] = [0; MAP_SIZE];
@@ -51,7 +58,13 @@ pub static mut COV_MAP: [u8; MAP_SIZE] = [0; MAP_SIZE];
 pub extern "C" fn get_cov_map_ptr() -> *mut u8 { 
 
     unsafe{
-        COV_MAP.as_mut_ptr()
+        // EDGES_MAP_PTR
+        // COV_MAP.as_mut_ptr()
+        let ptr = COV_MAP.as_mut_ptr();
+        println!("*****Coverage Map Pointer Address: {:?}", ptr);
+        // println!("******Coverage Map Pointer Address (pointer format): {:p}", ptr);
+        ptr
+
     }
 
 } 
@@ -87,7 +100,7 @@ pub unsafe extern "C" fn external_current_millis2() -> u64 {
 
 #[no_mangle] // Also add edge_map pointer of something as one of the args of this func that can be populated by renode for coverage
 pub extern "C" fn main_fuzzing_func(input_dir: *const c_char,
-    harness_fn: extern "C" fn(*const u8),
+    harness_fn: extern "C" fn(*const u8, usize)->i32,
 ) {
     env_logger::init();
     println!("Hello, entered main_fuzzing_func in libafl_renode");
@@ -107,14 +120,16 @@ pub extern "C" fn main_fuzzing_func(input_dir: *const c_char,
         
         let target = input.target_bytes();
         let buf = target.as_slice();
+        // let buf =  buf.to_vec();
         // let mut buf = input.bytes().to_vec();
         //let buf1 : &mut [u8]=buf.as_mut_slice();
-        harness_fn(buf.as_ptr());
-        ExitKind::Ok  
+        // harness_fn(buf.as_ptr(), buf.len());
+        // ExitKind::Ok  
         
-        // let ret = harness_fn(buf.as_ptr(), buf.len());
+        let ret = harness_fn(buf.as_ptr(), buf.len());
+        ExitKind::Ok 
         // let ret = harness_fn(buf.as_ptr());
-        // //println!("#######Harness func return val {}", ret);
+        //println!("#######Harness func return val {}", ret);
         // match ret {
         //     0 => ExitKind::Ok,
         //     // 2 => ExitKind::Timeout,
@@ -124,6 +139,7 @@ pub extern "C" fn main_fuzzing_func(input_dir: *const c_char,
     println!("Harness setup done");
     // println!("Done setting up dirs");
     let edges = unsafe { &mut COV_MAP };
+    // let edges = unsafe { &mut EDGES_MAP };
     let edges_observer = unsafe{StdMapObserver::new("edges", edges)};
     // // The unix shmem provider supported by AFL++ for shared memory
     // let mut shmem_provider = UnixShMemProvider::new().unwrap();

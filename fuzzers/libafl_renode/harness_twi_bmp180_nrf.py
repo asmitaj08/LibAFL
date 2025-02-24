@@ -29,8 +29,14 @@ mach = e.add_mach(mach_name)
 
 libafl_renode_lib = ctypes.CDLL("/home/asmita/fuzzing_bare-metal/SEFF_project_dirs/SEFF-project/LibAFL/fuzzers/libafl_renode/target/release/liblibafl_renode.so")
 input_dir = "/home/asmita/fuzzing_bare-metal/SEFF_project_dirs/SEFF-project/LibAFL/fuzzers/libafl_renode/input_dir_i2c"
-callback_function = ctypes.CFUNCTYPE(None, ctypes.c_char_p)
+# callback_function = ctypes.CFUNCTYPE(None, ctypes.c_char_p)
+# callback_function = ctypes.CFUNCTYPE(ctypes.c_int, ctypes.c_char_p)
 # callback_function = ctypes.CFUNCTYPE(None, ctypes.POINTER(ctypes.c_char))
+callback_function = ctypes.CFUNCTYPE(None, ctypes.POINTER(ctypes.c_uint8), ctypes.c_size_t)
+# callback_function = ctypes.CFUNCTYPE(ctypes.c_int, ctypes.POINTER(ctypes.c_uint8))
+
+libafl_renode_lib.main_fuzzing_func.argtypes = [ctypes.c_char_p, callback_function]
+libafl_renode_lib.main_fuzzing_func.restype = None
 
 # temp_data = 60
 # humidity_data = 88
@@ -40,13 +46,16 @@ exit_flag = 0
 reach_target_flag = 0
 
 # exit_addr = 0x3102
-exit_addr = 0x296 
+exit_addr = 0x296
 # load_str = """using "platforms/cpus/nrf52840.repl" bmp180: Sensors.BMP180@ twi0 0x77"""
 load_str = """using "platforms/cpus/nrf52840.repl" bmp180: Sensors.BMP180_modified@ twi0 0x77"""
 PlatformDescriptionMachineExtensions.LoadPlatformDescriptionFromString(mach.internal,load_str)
 # mach.load_elf("https://dl.antmicro.com/projects/renode/BMP180_I2C.ino.arduino.mbed.nano33ble.elf-s_3127076-ba5f49cd34cd9549c2aa44f83af8e2011ecd1c22")
 # mach.load_elf("nrf_bmp180_drv1.out") 
-mach.load_elf("nrf_bmp180_drv1_no_delay.out")
+# mach.load_elf("nrf_bmp180_drv1_no_delay.out")
+#binary with bug
+mach.load_elf("nrf_bmp180_drv1_no_delay_with_bug.out")
+
 pc_main = mach.sysbus.GetSymbolAddress("Reset_Handler")
 # pc_main = mach.sysbus.GetSymbolAddress("main")
 print(f"Target func addr : {hex(pc_main)}")
@@ -56,6 +65,7 @@ def hook_addr_target(cpu,addr):
     global reach_target_flag
     # mach.Pause() # Machine gets auto paused in Hook
     print("** In Target Hook ....")
+
     mach.sysbus.cpu.Fuzz_PrepareState() # cpu state
     mach.sysbus.ram.Fuzz_Mem_Save()   # memory
     
@@ -98,12 +108,12 @@ if reach_target_flag == 1:
 print("Done initial setup")
 
 # MAX_SIZE = 1024
-data_h = [0x44]
+# data_h = [0x44]
 
 # @profile
-def callback(data) :
+def callback(data, length) :
     try :
-        global exit_flag
+        # global exit_flag
     # # Convert the raw pointer to a Python byte array (limit to MAX_SIZE to avoid large buffers)
     # data_in_bytes = ctypes.string_at(data, MAX_SIZE)
     #  # Find the length based on actual data (adjust to your use case if a termination condition exists)
@@ -118,12 +128,19 @@ def callback(data) :
     # load_execution_time = end_time - start_time
     # print(f"Execution time for the line: {load_execution_time:.10f} seconds")
     # print("^^^^^ file loaded")
-        # mach.sysbus.ram.Fuzz_Mem_Load() # mem # more scope of improvement to reduce time
-        # mach.sysbus.cpu.Fuzz_LoadState() # more scope of improvement to reduce time
-        mach.sysbus.cpu.Reset()
+        mach.sysbus.ram.Fuzz_Mem_Load() # mem # more scope of improvement to reduce time
+        mach.sysbus.cpu.Fuzz_LoadState() # more scope of improvement to reduce time
+        
+        # Convert the raw pointer into a usable Python byte array
+        data_array = ctypes.cast(data, ctypes.POINTER(ctypes.c_ubyte * length)).contents
+        # Convert to a Python list or bytes 
+        byte_data = bytes(data_array)
+        # print(f"*********byte data from fuzzer : {byte_data}")
+
+        # mach.sysbus.cpu.Reset()
         # mach.sysbus.cpu.Fuzz_Reset()  # performs almost simialr as mach.sysbus.cpu.Reset
-        if len(data)==0 :
-            data=[0x20]
+        # if len(data)==0 :
+        #     data=[0x20]
         mach.Resume()
     # data_in_bytes = bytes(data, 'utf-8')  # Convert string to bytes
     # print(f"^^^^^ Data : {data}")CALLBACK = ctypes.CFUNCTYPE(None, ctypes.POINTER(ctypes.c_char), ctypes.c_size_t)
@@ -134,7 +151,7 @@ def callback(data) :
         # Analyzer(mach.sysbus.uart0)
     # print(f"start pc : {(mach_new.sysbus.cpu.PC)}")
     # print("^^^^^Resuming next run")
-        mach.sysbus.twi0.bmp180.ReadFromFuzzer(data)
+        mach.sysbus.twi0.bmp180.ReadFromFuzzer(byte_data)
         # mach.Pause()
         # while exit_flag == 0 :
         #     # print(f"Waiting at current pc : {(mach.sysbus.cpu.PC)}")
@@ -144,10 +161,11 @@ def callback(data) :
         #     exit_flag = 0
         #     # mach.Pause()
         #     mach.sysbus.cpu.Reset()
+        # return 0
 
     except Exception as e:
         print(f"Exception in callback: {e}")
-        return 0  # Return a default value or handle the error
+        return -1  # Return a default value or handle the error
         # print(f"end pc : {(mach_new.sysbus.cpu.PC)}")
     # time.sleep(1)
     # e.clear()
@@ -156,12 +174,14 @@ def callback(data) :
 # profiler.enable()  # Start profiling
 
 # Define a function to handle graceful exit
-def signal_handler(sig, frame):
-    print("\nExiting gracefully...")
-    sys.exit(0)
+# def signal_handler(sig, frame):
+#     print("\nExiting gracefully...")
+#     sys.exit(0)
 
 # Register the signal handler for keyboard interrupt
-signal.signal(signal.SIGINT, signal_handler)
+# signal.signal(signal.SIGINT, signal_handler)
+
+assert input_dir is not None, "Error: Input directory is None"
 
 try:
     callback_ptr = callback_function(callback)
