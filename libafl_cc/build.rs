@@ -1,11 +1,17 @@
-use std::{
-    env,
-    fs::File,
-    io::Write,
-    path::{Path, PathBuf},
-    process::Command,
-    str,
-};
+#[cfg(any(
+    target_vendor = "apple",
+    feature = "ddg-instr",
+    feature = "function-logging",
+    feature = "cmplog-routines",
+    feature = "autotokens",
+    feature = "coverage-accounting",
+    feature = "cmplog-instructions",
+    feature = "ctx",
+    feature = "dump-cfg",
+    feature = "profiling",
+))]
+use std::path::PathBuf;
+use std::{env, fs::File, io::Write, path::Path, process::Command, str};
 
 #[cfg(target_vendor = "apple")]
 use glob::glob;
@@ -20,6 +26,17 @@ const LLVM_VERSION_MAX: u32 = 33;
 const LLVM_VERSION_MIN: u32 = 6;
 
 /// Get the extension for a shared object
+#[cfg(any(
+    feature = "ddg-instr",
+    feature = "function-logging",
+    feature = "cmplog-routines",
+    feature = "autotokens",
+    feature = "coverage-accounting",
+    feature = "cmplog-instructions",
+    feature = "ctx",
+    feature = "dump-cfg",
+    feature = "profiling",
+))]
 fn dll_extension<'a>() -> &'a str {
     if let Ok(vendor) = env::var("CARGO_CFG_TARGET_VENDOR") {
         if vendor == "apple" {
@@ -80,7 +97,7 @@ fn find_llvm_config() -> Result<String, String> {
         Err(err) => {
             println!("cargo:warning={err}");
         }
-    };
+    }
 
     #[cfg(any(target_os = "solaris", target_os = "illumos"))]
     for version in (LLVM_VERSION_MIN..=LLVM_VERSION_MAX).rev() {
@@ -143,6 +160,17 @@ fn find_llvm_version() -> Option<i32> {
     None
 }
 
+#[cfg(any(
+    feature = "ddg-instr",
+    feature = "function-logging",
+    feature = "cmplog-routines",
+    feature = "autotokens",
+    feature = "coverage-accounting",
+    feature = "cmplog-instructions",
+    feature = "ctx",
+    feature = "dump-cfg",
+    feature = "profiling",
+))]
 #[expect(clippy::too_many_arguments)]
 fn build_pass(
     bindir_path: &Path,
@@ -305,19 +333,24 @@ pub const LIBAFL_CC_LLVM_VERSION: Option<usize> = None;
         llvm_ar = Path::new(&llvm_ar_path).join("llvm-ar");
     }
 
+    let mut found = true;
+
     if !clang.exists() {
-        println!("cargo:warning=Failed to find clang frontend.");
-        return;
+        println!("cargo:warning=Failed to find binary: clang.");
+        found = false;
     }
 
     if !clangcpp.exists() {
-        println!("cargo:warning=Failed to find clang++ frontend.");
-        return;
+        println!("cargo:warning=Failed to find binary: clang++.");
+        found = false;
     }
+
     if !llvm_ar.exists() {
-        println!("cargo:warning=Failed to find llvm-ar archiver.");
-        return;
+        println!("cargo:warning=Failed to find binary: llvm-ar.");
+        found = false;
     }
+
+    assert!(found, "\n\tAt least one of the LLVM dependencies could not be found.\n\tThe following search directory was considered: {}\n", bindir_path.display());
 
     let cxxflags = if let Ok(flags) = llvm_cxxflags {
         flags
@@ -431,7 +464,7 @@ pub const LIBAFL_CC_LLVM_VERSION: Option<usize> = None;
         // In case the system is configured oddly, we may have trouble finding the SDK. Manually add the linker flag, just in case.
         sdk_path = find_macos_sdk_libs();
         ldflags.push(&sdk_path);
-    };
+    }
 
     #[cfg(feature = "ddg-instr")]
     build_pass(

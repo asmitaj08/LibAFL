@@ -1,4 +1,4 @@
-//! A [`crate::stages::MutationalStage`] where the mutator iteration can be tuned at runtime
+//! A [`MutationalStage`] where the mutator iteration can be tuned at runtime
 
 use alloc::string::{String, ToString};
 use core::{marker::PhantomData, time::Duration};
@@ -7,19 +7,17 @@ use libafl_bolts::{current_time, impl_serdeany, rands::Rand};
 use serde::{Deserialize, Serialize};
 
 #[cfg(feature = "introspection")]
-use crate::monitors::PerfFeature;
+use crate::monitors::stats::PerfFeature;
 use crate::{
-    corpus::Corpus,
-    inputs::{Input, UsesInput},
     mark_feature_time,
     mutators::{MutationResult, Mutator},
     nonzero,
     stages::{
         mutational::{MutatedTransform, MutatedTransformPost, DEFAULT_MUTATIONAL_MAX_ITERATIONS},
-        ExecutionCountRestartHelper, MutationalStage, Stage,
+        ExecutionCountRestartHelper, MutationalStage, Restartable, Stage,
     },
     start_timer,
-    state::{HasCorpus, HasCurrentTestcase, HasExecutions, HasRand, MaybeHasClientPerfMonitor},
+    state::{HasCurrentTestcase, HasExecutions, HasRand, MaybeHasClientPerfMonitor},
     Error, Evaluator, HasMetadata, HasNamedMetadata,
 };
 
@@ -149,7 +147,7 @@ where
     reset_by_name(state, STD_TUNEABLE_MUTATIONAL_STAGE_NAME)
 }
 
-/// A [`crate::stages::MutationalStage`] where the mutator iteration can be tuned at runtime
+/// A [`MutationalStage`] where the mutator iteration can be tuned at runtime
 #[derive(Clone, Debug)]
 pub struct TuneableMutationalStage<E, EM, I, M, S, Z> {
     /// The mutator we use
@@ -164,10 +162,9 @@ pub struct TuneableMutationalStage<E, EM, I, M, S, Z> {
 impl<E, EM, I, M, S, Z> MutationalStage<S> for TuneableMutationalStage<E, EM, I, M, S, Z>
 where
     M: Mutator<I, S>,
-    Z: Evaluator<E, EM, <S::Corpus as Corpus>::Input, S>,
-    S: HasCorpus + HasRand + HasNamedMetadata + HasMetadata + HasExecutions + HasCurrentTestcase,
-    I: MutatedTransform<<S::Corpus as Corpus>::Input, S> + Clone,
-    <S::Corpus as Corpus>::Input: Input,
+    Z: Evaluator<E, EM, I, S>,
+    S: HasRand + HasNamedMetadata + HasMetadata + HasExecutions + HasCurrentTestcase<I>,
+    I: MutatedTransform<I, S> + Clone,
 {
     type Mutator = M;
     /// The mutator, added to this stage
@@ -196,17 +193,14 @@ where
 impl<E, EM, I, M, S, Z> Stage<E, EM, S, Z> for TuneableMutationalStage<E, EM, I, M, S, Z>
 where
     M: Mutator<I, S>,
-    Z: Evaluator<E, EM, <S::Corpus as Corpus>::Input, S>,
-    S: HasCorpus
-        + HasRand
+    Z: Evaluator<E, EM, I, S>,
+    S: HasRand
         + HasNamedMetadata
         + HasMetadata
         + HasExecutions
-        + HasCurrentTestcase
-        + MaybeHasClientPerfMonitor
-        + UsesInput<Input = <S::Corpus as Corpus>::Input>,
-    I: MutatedTransform<<S::Corpus as Corpus>::Input, S> + Clone,
-    <S::Corpus as Corpus>::Input: Input,
+        + HasCurrentTestcase<I>
+        + MaybeHasClientPerfMonitor,
+    I: MutatedTransform<I, S> + Clone,
 {
     #[inline]
     fn perform(
@@ -216,14 +210,14 @@ where
         state: &mut S,
         manager: &mut EM,
     ) -> Result<(), Error> {
-        let ret = self.perform_mutational(fuzzer, executor, state, manager);
-
-        #[cfg(feature = "introspection")]
-        state.introspection_monitor_mut().finish_stage();
-
-        ret
+        self.perform_mutational(fuzzer, executor, state, manager)
     }
+}
 
+impl<E, EM, I, M, S, Z> Restartable<S> for TuneableMutationalStage<E, EM, I, M, S, Z>
+where
+    S: HasNamedMetadata + HasExecutions,
+{
     fn should_restart(&mut self, state: &mut S) -> Result<bool, Error> {
         self.restart_helper.should_restart(state, &self.name)
     }
@@ -236,17 +230,14 @@ where
 impl<E, EM, I, M, S, Z> TuneableMutationalStage<E, EM, I, M, S, Z>
 where
     M: Mutator<I, S>,
-    Z: Evaluator<E, EM, <S::Corpus as Corpus>::Input, S>,
-    S: HasCorpus
-        + HasRand
+    Z: Evaluator<E, EM, I, S>,
+    S: HasRand
         + HasNamedMetadata
         + HasExecutions
         + HasMetadata
-        + HasCurrentTestcase
-        + MaybeHasClientPerfMonitor
-        + UsesInput<Input = <S::Corpus as Corpus>::Input>,
-    I: MutatedTransform<<S::Corpus as Corpus>::Input, S> + Clone,
-    <S::Corpus as Corpus>::Input: Input,
+        + HasCurrentTestcase<I>
+        + MaybeHasClientPerfMonitor,
+    I: MutatedTransform<I, S> + Clone,
 {
     /// Runs this (mutational) stage for the given `testcase`
     /// Exactly the same functionality as [`MutationalStage::perform_mutational`], but with added timeout support.
@@ -453,9 +444,8 @@ where
             return Ok(());
         }
 
-        // Time is measured directly the `evaluate_input` function
         let (untransformed, post) = input.try_transform_into(state)?;
-        let (_, corpus_id) = fuzzer.evaluate_input(state, executor, manager, untransformed)?;
+        let (_, corpus_id) = fuzzer.evaluate_filtered(state, executor, manager, &untransformed)?;
 
         start_timer!(state);
         self.mutator_mut().post_exec(state, corpus_id)?;
@@ -469,8 +459,8 @@ where
 impl<E, EM, I, M, S, Z> TuneableMutationalStage<E, EM, I, M, S, Z>
 where
     M: Mutator<I, S>,
-    Z: Evaluator<E, EM, <S::Corpus as Corpus>::Input, S>,
-    S: HasCorpus + HasRand + HasNamedMetadata,
+    Z: Evaluator<E, EM, I, S>,
+    S: HasRand + HasNamedMetadata,
 {
     /// Creates a new transforming mutational stage
     #[must_use]

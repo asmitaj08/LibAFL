@@ -1,6 +1,5 @@
 //! The feedbacks reduce observer state after each run to a single `is_interesting`-value.
 //! If a testcase is interesting, it may be added to a Corpus.
-//!
 
 // TODO: make S of Feedback<S> an associated type when specialisation + AT is stable
 
@@ -31,6 +30,9 @@ use crate::{corpus::Testcase, executors::ExitKind, observers::TimeObserver, Erro
 #[cfg(feature = "std")]
 pub mod capture_feedback;
 
+pub mod bool;
+pub use bool::BoolValueFeedback;
+
 #[cfg(feature = "std")]
 pub mod concolic;
 #[cfg(feature = "std")]
@@ -53,6 +55,11 @@ pub use capture_feedback::CaptureTimeoutFeedback;
 
 #[cfg(feature = "introspection")]
 use crate::state::HasClientPerfMonitor;
+
+#[cfg(feature = "value_bloom_feedback")]
+pub mod value_bloom;
+#[cfg(feature = "value_bloom_feedback")]
+pub use value_bloom::ValueBloomFeedback;
 
 /// Feedback which initializes a state.
 ///
@@ -107,7 +114,7 @@ pub trait Feedback<EM, I, OT, S>: StateInitializer<S> + Named {
 
         // Add this stat to the feedback metrics
         state
-            .introspection_monitor_mut()
+            .introspection_stats_mut()
             .update_feedback(self.name(), elapsed);
 
         ret
@@ -752,7 +759,7 @@ macro_rules! feedback_or_fast {
 /// Variadic macro to create a [`NotFeedback`]
 #[macro_export]
 macro_rules! feedback_not {
-    ( $last:expr ) => {
+    ($last:expr) => {
         $crate::feedbacks::NotFeedback::new($last)
     };
 }
@@ -932,7 +939,12 @@ where
         observers: &OT,
         testcase: &mut Testcase<I>,
     ) -> Result<(), Error> {
-        let observer = observers.get(&self.observer_handle).unwrap();
+        let Some(observer) = observers.get(&self.observer_handle) else {
+            return Err(Error::illegal_state(
+                "Observer referenced by TimeFeedback is not found in observers given to the fuzzer",
+            ));
+        };
+
         *testcase.exec_time_mut() = *observer.last_runtime();
         Ok(())
     }

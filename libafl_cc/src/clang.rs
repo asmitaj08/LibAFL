@@ -245,7 +245,7 @@ impl ToolWrapper for ClangWrapper {
                     shared = true;
                 } // TODO dynamic list?
                 _ => (),
-            };
+            }
             new_args.push(args[i].as_ref().to_string());
             i += 1;
         }
@@ -545,7 +545,6 @@ impl CompilerWrapper for ClangWrapper {
 }
 impl Default for ClangWrapper {
     /// Create a new Clang Wrapper
-    #[must_use]
     fn default() -> Self {
         Self::new()
     }

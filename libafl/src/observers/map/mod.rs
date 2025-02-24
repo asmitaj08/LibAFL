@@ -7,7 +7,6 @@ use core::{
     ops::{Deref, DerefMut},
 };
 
-use ahash::RandomState;
 use libafl_bolts::{ownedref::OwnedMutSlice, AsSlice, AsSliceMut, HasLen, Named, Truncate};
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
 
@@ -69,7 +68,6 @@ pub use owned_map::*;
 /// // inform the feedback to track indices (required by IndexesLenTimeMinimizerScheduler), but not novelties
 /// // this *MUST* be done before it is passed to MaxMapFeedback!
 /// let edges_observer = edges_observer.track_indices();
-///
 /// // init the feedback
 /// let mut feedback = MaxMapFeedback::new(&edges_observer);
 /// #
@@ -81,9 +79,6 @@ pub use owned_map::*;
 /// #     &mut feedback,
 /// #     &mut (),
 /// # ).unwrap();
-///
-/// # feedback.init_state(&mut state).unwrap();
-///
 /// let scheduler = IndexesLenTimeMinimizerScheduler::new(&edges_observer, QueueScheduler::new());
 /// # scheduler.cull(&state).unwrap();
 /// ```
@@ -224,7 +219,11 @@ pub mod macros {
     /// #     phantom: PhantomData<(C, O)>,
     /// # }
     /// #
-    /// impl<C, O> MyCustomScheduler<C, O> where O: MapObserver, C: CanTrack + AsRef<O> {
+    /// impl<C, O> MyCustomScheduler<C, O>
+    /// where
+    ///     O: MapObserver,
+    ///     C: CanTrack + AsRef<O>,
+    /// {
     ///     pub fn new(obs: &C) -> Self {
     ///         require_index_tracking!("MyCustomScheduler", C);
     ///         todo!("Construct your type")
@@ -287,7 +286,11 @@ pub mod macros {
     /// #     phantom: PhantomData<(C, O)>,
     /// # }
     /// #
-    /// impl<C, O> MyCustomScheduler<C, O> where O: MapObserver, C: CanTrack + AsRef<O> {
+    /// impl<C, O> MyCustomScheduler<C, O>
+    /// where
+    ///     O: MapObserver,
+    ///     C: CanTrack + AsRef<O>,
+    /// {
     ///     pub fn new(obs: &C) -> Self {
     ///         require_novelties_tracking!("MyCustomScheduler", C);
     ///         todo!("Construct your type")
@@ -350,7 +353,7 @@ pub mod macros {
 ///
 /// TODO: enforce `iter() -> AssociatedTypeIter` when generic associated types stabilize
 pub trait MapObserver:
-    HasLen + Named + Serialize + DeserializeOwned + AsRef<Self> + AsMut<Self> + Hash
+    HasLen + Named + Serialize + DeserializeOwned + AsRef<Self> + AsMut<Self>
 // where
 //     for<'it> &'it Self: IntoIterator<Item = &'it Self::Entry>
 {
@@ -368,9 +371,6 @@ pub trait MapObserver:
 
     /// Count the set bytes in the map
     fn count_bytes(&self) -> u64;
-
-    /// Compute the hash of the map without needing to provide a hasher
-    fn hash_simple(&self) -> u64;
 
     /// Get the initial value for `reset()`
     fn initial(&self) -> Self::Entry;
@@ -524,11 +524,6 @@ where
     #[inline]
     fn usable_count(&self) -> usize {
         self.as_slice().len()
-    }
-
-    #[inline]
-    fn hash_simple(&self) -> u64 {
-        RandomState::with_seeds(0, 0, 0, 0).hash_one(self)
     }
 
     #[inline]

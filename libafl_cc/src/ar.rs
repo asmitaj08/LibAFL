@@ -102,7 +102,7 @@ impl ToolWrapper for ArWrapper {
                     }
                 }
                 _ => (),
-            };
+            }
             new_args.push(args[i].as_ref().to_string());
             i += 1;
         }
@@ -215,7 +215,6 @@ impl ToolWrapper for ArWrapper {
 
 impl Default for ArWrapper {
     /// Create a new Clang Wrapper
-    #[must_use]
     fn default() -> Self {
         Self::new()
     }

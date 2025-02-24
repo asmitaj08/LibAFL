@@ -108,7 +108,7 @@ impl ToolWrapper for LibtoolWrapper {
                     }
                 }
                 _ => (),
-            };
+            }
             new_args.push(args[i].as_ref().to_string());
             i += 1;
         }
@@ -251,7 +251,6 @@ impl ToolWrapper for LibtoolWrapper {
 
 impl Default for LibtoolWrapper {
     /// Create a new Clang Wrapper
-    #[must_use]
     fn default() -> Self {
         Self::new()
     }

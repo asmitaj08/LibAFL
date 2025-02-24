@@ -1,6 +1,5 @@
 //! This module contains the `concolic` stages, which can trace a target using symbolic execution
 //! and use the results for fuzzer input and mutations.
-//!
 use alloc::borrow::{Cow, ToOwned};
 #[cfg(feature = "concolic_mutation")]
 use alloc::{string::ToString, vec::Vec};
@@ -13,14 +12,13 @@ use libafl_bolts::{
 };
 
 #[cfg(all(feature = "concolic_mutation", feature = "introspection"))]
-use crate::monitors::PerfFeature;
+use crate::monitors::stats::PerfFeature;
 use crate::{
-    corpus::{Corpus, HasCurrentCorpusId},
+    corpus::HasCurrentCorpusId,
     executors::{Executor, HasObservers},
-    inputs::UsesInput,
     observers::{concolic::ConcolicObserver, ObserversTuple},
-    stages::{RetryCountRestartHelper, Stage, TracingStage},
-    state::{HasCorpus, HasCurrentTestcase, HasExecutions, MaybeHasClientPerfMonitor, UsesState},
+    stages::{Restartable, RetryCountRestartHelper, Stage, TracingStage},
+    state::{HasCorpus, HasCurrentTestcase, HasExecutions, MaybeHasClientPerfMonitor},
     Error, HasMetadata, HasNamedMetadata,
 };
 #[cfg(feature = "concolic_mutation")]
@@ -33,33 +31,31 @@ use crate::{
 
 /// Wraps a [`TracingStage`] to add concolic observing.
 #[derive(Clone, Debug)]
-pub struct ConcolicTracingStage<'a, EM, TE, S, Z> {
+pub struct ConcolicTracingStage<'a, EM, I, TE, S, Z> {
     name: Cow<'static, str>,
-    inner: TracingStage<EM, TE, S, Z>,
+    inner: TracingStage<EM, I, TE, S, Z>,
     observer_handle: Handle<ConcolicObserver<'a>>,
 }
 
 /// The name for concolic tracer
 pub const CONCOLIC_TRACING_STAGE_NAME: &str = "concolictracing";
 
-impl<EM, TE, S, Z> Named for ConcolicTracingStage<'_, EM, TE, S, Z> {
+impl<EM, I, TE, S, Z> Named for ConcolicTracingStage<'_, EM, I, TE, S, Z> {
     fn name(&self) -> &Cow<'static, str> {
         &self.name
     }
 }
 
-impl<E, EM, TE, S, Z> Stage<E, EM, S, Z> for ConcolicTracingStage<'_, EM, TE, S, Z>
+impl<E, EM, I, TE, S, Z> Stage<E, EM, S, Z> for ConcolicTracingStage<'_, EM, I, TE, S, Z>
 where
-    TE: Executor<EM, Z, State = S> + HasObservers,
-    TE::Observers: ObserversTuple<<S::Corpus as Corpus>::Input, S>,
+    TE: Executor<EM, I, S, Z> + HasObservers,
+    TE::Observers: ObserversTuple<I, S>,
     S: HasExecutions
-        + HasCorpus
+        + HasCorpus<I>
         + HasNamedMetadata
-        + HasCurrentTestcase
+        + HasCurrentTestcase<I>
         + HasCurrentCorpusId
-        + MaybeHasClientPerfMonitor
-        + UsesInput<Input = <S::Corpus as Corpus>::Input>,
-    EM: UsesState<State = S>,
+        + MaybeHasClientPerfMonitor,
 {
     #[inline]
     fn perform(
@@ -79,7 +75,12 @@ where
         }
         Ok(())
     }
+}
 
+impl<EM, I, TE, S, Z> Restartable<S> for ConcolicTracingStage<'_, EM, I, TE, S, Z>
+where
+    S: HasMetadata + HasNamedMetadata + HasCurrentCorpusId,
+{
     fn should_restart(&mut self, state: &mut S) -> Result<bool, Error> {
         // This is a deterministic stage
         // Once it failed, then don't retry,
@@ -92,11 +93,11 @@ where
     }
 }
 
-impl<'a, EM, TE, S, Z> ConcolicTracingStage<'a, EM, TE, S, Z> {
+impl<'a, EM, I, TE, S, Z> ConcolicTracingStage<'a, EM, I, TE, S, Z> {
     /// Creates a new default tracing stage using the given [`Executor`], observing traces from a
     /// [`ConcolicObserver`] with the given name.
     pub fn new(
-        inner: TracingStage<EM, TE, S, Z>,
+        inner: TracingStage<EM, I, TE, S, Z>,
         observer_handle: Handle<ConcolicObserver<'a>>,
     ) -> Self {
         let observer_name = observer_handle.name().clone();
@@ -356,9 +357,9 @@ fn generate_mutations(iter: impl Iterator<Item = (SymExprRef, SymExpr)>) -> Vec<
 /// A mutational stage that uses Z3 to solve concolic constraints attached to the [`crate::corpus::Testcase`] by the [`ConcolicTracingStage`].
 #[cfg(feature = "concolic_mutation")]
 #[derive(Clone, Debug, Default)]
-pub struct SimpleConcolicMutationalStage<Z> {
+pub struct SimpleConcolicMutationalStage<I, Z> {
     name: Cow<'static, str>,
-    phantom: PhantomData<Z>,
+    phantom: PhantomData<(I, Z)>,
 }
 
 #[cfg(feature = "concolic_mutation")]
@@ -370,25 +371,24 @@ static mut SIMPLE_CONCOLIC_MUTATIONAL_ID: usize = 0;
 pub const SIMPLE_CONCOLIC_MUTATIONAL_NAME: &str = "concolicmutation";
 
 #[cfg(feature = "concolic_mutation")]
-impl<Z> Named for SimpleConcolicMutationalStage<Z> {
+impl<I, Z> Named for SimpleConcolicMutationalStage<I, Z> {
     fn name(&self) -> &Cow<'static, str> {
         &self.name
     }
 }
 
 #[cfg(feature = "concolic_mutation")]
-impl<E, EM, S, Z> Stage<E, EM, S, Z> for SimpleConcolicMutationalStage<Z>
+impl<E, EM, I, S, Z> Stage<E, EM, S, Z> for SimpleConcolicMutationalStage<I, Z>
 where
-    Z: Evaluator<E, EM, <S::Corpus as Corpus>::Input, S>,
-    <S::Corpus as Corpus>::Input: HasMutatorBytes + Clone,
+    Z: Evaluator<E, EM, I, S>,
+    I: HasMutatorBytes + Clone,
     S: HasExecutions
-        + HasCorpus
+        + HasCorpus<I>
         + HasMetadata
         + HasNamedMetadata
-        + HasCurrentTestcase
+        + HasCurrentTestcase<I>
         + MaybeHasClientPerfMonitor
-        + HasCurrentCorpusId
-        + UsesInput<Input = <S::Corpus as Corpus>::Input>,
+        + HasCurrentCorpusId,
 {
     #[inline]
     fn perform(
@@ -415,15 +415,20 @@ where
             for mutation in mutations {
                 let mut input_copy = state.current_input_cloned()?;
                 for (index, new_byte) in mutation {
-                    input_copy.bytes_mut()[index] = new_byte;
+                    input_copy.mutator_bytes_mut()[index] = new_byte;
                 }
-                // Time is measured directly the `evaluate_input` function
-                fuzzer.evaluate_input(state, executor, manager, input_copy)?;
+                fuzzer.evaluate_filtered(state, executor, manager, &input_copy)?;
             }
         }
         Ok(())
     }
+}
 
+#[cfg(feature = "concolic_mutation")]
+impl<I, S, Z> Restartable<S> for SimpleConcolicMutationalStage<I, Z>
+where
+    S: HasMetadata + HasNamedMetadata + HasCurrentCorpusId,
+{
     #[inline]
     fn should_restart(&mut self, state: &mut S) -> Result<bool, Error> {
         // This is a deterministic stage
@@ -439,7 +444,7 @@ where
 }
 
 #[cfg(feature = "concolic_mutation")]
-impl<Z> SimpleConcolicMutationalStage<Z> {
+impl<I, Z> SimpleConcolicMutationalStage<I, Z> {
     #[must_use]
     /// Construct this stage
     pub fn new() -> Self {

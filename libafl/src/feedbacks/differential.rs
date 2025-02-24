@@ -1,5 +1,4 @@
 //! Diff Feedback, comparing the content of two observers of the same type.
-//!
 
 use alloc::borrow::Cow;
 use core::fmt::{self, Debug, Formatter};
@@ -237,7 +236,7 @@ mod tests {
             DiffFeedback::<_, _, _>::is_interesting(
                 &mut diff_feedback,
                 &mut nop_state,
-                &mut NopEventManager::<NopState<BytesInput>>::default(),
+                &mut NopEventManager::default(),
                 &BytesInput::new(vec![0]),
                 &observers,
                 &ExitKind::Ok

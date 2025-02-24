@@ -18,7 +18,7 @@ static SEED_COUNTER: AtomicUsize = AtomicUsize::new(0);
 
 /// Return a pseudo-random seed. For `no_std` environments, a single deterministic sequence is used.
 #[must_use]
-#[expect(unreachable_code)]
+#[allow(unreachable_code)] // cfg dependent
 pub fn random_seed() -> u64 {
     #[cfg(feature = "std")]
     return random_seed_from_random_state();
@@ -136,8 +136,8 @@ pub trait Rand: Debug + Serialize + DeserializeOwned {
         fast_bound(self.next(), upper_bound_excl)
     }
 
-    /// Gets a value between [0, n]
-    fn zero_upto(&mut self, n: usize) -> usize {
+    /// Gets a value below the given one or zero
+    fn below_or_zero(&mut self, n: usize) -> usize {
         fast_bound_usize(self.next(), n)
     }
 
@@ -223,7 +223,7 @@ pub trait Rand: Debug + Serialize + DeserializeOwned {
 }
 
 macro_rules! impl_default_new {
-    ($rand: ty) => {
+    ($rand:ty) => {
         impl Default for $rand {
             /// Creates a generator seeded with [`random_seed`].
             fn default() -> Self {
@@ -249,7 +249,7 @@ impl_default_new!(RomuDuoJrRand);
 impl_default_new!(Sfc64Rand);
 
 macro_rules! impl_rng_core {
-    ($rand: ty) => {
+    ($rand:ty) => {
         #[cfg(feature = "rand_trait")]
         impl rand_core::RngCore for $rand {
             fn next_u32(&mut self) -> u32 {
@@ -262,10 +262,6 @@ macro_rules! impl_rng_core {
 
             fn fill_bytes(&mut self, dest: &mut [u8]) {
                 rand_core::impls::fill_bytes_via_next(self, dest)
-            }
-
-            fn try_fill_bytes(&mut self, dest: &mut [u8]) -> Result<(), rand_core::Error> {
-                Ok(self.fill_bytes(dest))
             }
         }
     };
@@ -365,13 +361,13 @@ impl Rand for Lehmer64Rand {
     fn set_seed(&mut self, mut seed: u64) {
         let hi = splitmix64(&mut seed);
         let lo = splitmix64(&mut seed) | 1;
-        self.s = u128::from(hi) << 64 | u128::from(lo);
+        self.s = (u128::from(hi) << 64) | u128::from(lo);
     }
 
     #[inline]
     #[expect(clippy::unreadable_literal)]
     fn next(&mut self) -> u64 {
-        self.s *= 0xda942042e4dd58b5;
+        self.s = self.s.wrapping_mul(0xda942042e4dd58b5);
         (self.s >> 64) as u64
     }
 }

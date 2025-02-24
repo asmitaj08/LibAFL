@@ -4,9 +4,7 @@ use libafl::{
     Error,
 };
 use libafl_bolts::AsSlice;
-use libafl_qemu::{
-    elf::EasyElf, ArchExtras, CallingConvention, GuestAddr, GuestReg, MmapPerms, Qemu, Regs,
-};
+use libafl_qemu::{elf::EasyElf, ArchExtras, GuestAddr, GuestReg, MmapPerms, Qemu, Regs};
 
 pub struct Harness {
     qemu: Qemu,
@@ -43,14 +41,14 @@ impl Harness {
     /// Initialize the emulator, run to the entrypoint (or jump there) and return the [`Harness`] struct
     pub fn init(qemu: Qemu) -> Result<Harness, Error> {
         let start_pc = Self::start_pc(qemu)?;
-        log::debug!("start_pc @ {start_pc:#x}");
+        log::info!("start_pc @ {start_pc:#x}");
 
         qemu.entry_break(start_pc);
 
         let ret_addr: GuestAddr = qemu
             .read_return_address()
             .map_err(|e| Error::unknown(format!("Failed to read return address: {e:?}")))?;
-        log::debug!("ret_addr = {ret_addr:#x}");
+        log::info!("ret_addr = {ret_addr:#x}");
         qemu.set_breakpoint(ret_addr);
 
         let input_addr = qemu
@@ -118,11 +116,11 @@ impl Harness {
             .map_err(|e| Error::unknown(format!("Failed to write return address: {e:?}")))?;
 
         self.qemu
-            .write_function_argument(CallingConvention::Cdecl, 0, self.input_addr)
+            .write_function_argument(0, self.input_addr)
             .map_err(|e| Error::unknown(format!("Failed to write argument 0: {e:?}")))?;
 
         self.qemu
-            .write_function_argument(CallingConvention::Cdecl, 1, len)
+            .write_function_argument(1, len)
             .map_err(|e| Error::unknown(format!("Failed to write argument 1: {e:?}")))?;
         unsafe {
             let _ = self.qemu.run();
