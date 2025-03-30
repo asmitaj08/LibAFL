@@ -12,7 +12,7 @@ namespace CsBindgen
 {
     internal static unsafe partial class NativeMethods
     {
-        const string __DllName = "liabaflTestlib";
+        const string __DllName = "libaflTestlib";
 
 
 
@@ -23,7 +23,7 @@ namespace CsBindgen
         public static extern ulong external_current_millis2();
 
         [DllImport(__DllName, EntryPoint = "main_fuzzing_func", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-        public static extern void main_fuzzing_func(byte* input_dir, delegate* unmanaged[Cdecl]<byte*, nuint, int> harness_fn);
+        public static extern void main_fuzzing_func(byte* input_dir, delegate* unmanaged[Cdecl]<byte*, nuint, byte> harness_fn);
 
 
     }

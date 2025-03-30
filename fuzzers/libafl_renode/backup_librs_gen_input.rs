@@ -5,9 +5,6 @@ use core::{convert::TryInto, ffi::c_void, slice, time::Duration};
 use serde::{de::DeserializeOwned, Serialize};
 use libafl::stages::RetryCountRestartHelper;
 use libafl_bolts::serdeany::RegistryBuilder;
-use std::sync::{Mutex, atomic::{AtomicPtr, Ordering}};
-use lazy_static::lazy_static;
-use std::ptr;
 // use log::{debug, error, log_enabled, info, Level};
 
 use std::{
@@ -59,12 +56,13 @@ pub use libafl_targets::{EDGES_MAP, EDGES_MAP_PTR, EDGES_MAP_ALLOCATED_SIZE, EDG
 // };
 
 const MAP_SIZE: usize =  64 * 1024; //2621440 ; // 8 * 1024; // 0x280000 (i.e. 2621440) for EDGES_MAP_ALLOCATED_SIZE 
-// static mut PREV_LOC: u64 = 0; 
+static mut PREV_LOC: u64 = 0; 
 // pub use libafl_targets::{EDGES_MAP, EDGES_MAP_PTR, EDGES_MAP_ALLOCATED_SIZE};
 
 #[no_mangle] // coverage map
-static mut COV_MAP: [u8; MAP_SIZE] = [0; MAP_SIZE];
+pub static mut COV_MAP: [u8; MAP_SIZE] = [0; MAP_SIZE];
 
+// Function to get the pointer to COV_MAP 
 #[no_mangle] 
 pub extern "C" fn get_cov_map_ptr() -> *mut u8 { 
 
@@ -80,99 +78,25 @@ pub extern "C" fn get_cov_map_ptr() -> *mut u8 {
 
 } 
 
-// Use lazy_static to initialize a static Mutex-wrapped array (coverage map)
-// lazy_static! {
-//     pub static ref COV_MAP: Mutex<[u8; MAP_SIZE]> = Mutex::new([0; MAP_SIZE]);
-// }
+// Function to update COV_MAP
+// #[no_mangle]
+// pub extern  "C" fn update_cov_map(pc: u64){
+//     unsafe{
+//         let hash = (pc ^ PREV_LOC) & (MAP_SIZE as u64 - 1);
+//         COV_MAP[hash as usize] += 1; 
+//         PREV_LOC = pc >> 1; 
+//         let cov_val = COV_MAP[hash as usize];
+//         let mut logfile = OpenOptions::new()
+//             .create(true)
+//             .append(true)
+//             .open("/home/asmita/fuzzing_bare-metal/SEFF_project_dirs/SEFF-project/LibAFL/fuzzers/libafl_renode/log_libafl.txt")
+//             .expect("Failed to open or create the log file");
+         
+//         // Write the message to the file
+//         writeln!(logfile, "update cov map: hash : {hash}, prev_loc : {PREV_LOC},cov : {cov_val}").expect("Failed to write to the log file");
+//     }
 
-// Function to get the pointer to COV_MAP 
-// #[no_mangle] 
-// pub extern "C" fn get_cov_map_ptr() -> *mut u8 { 
-
-//    // unsafe{
-//         // EDGES_MAP_PTR
-//         // COV_MAP.as_mut_ptr()
-//         // let ptr = COV_MAP.as_mut_ptr();
-//         // Locking access to the coverage map
-//         let mut cov_map = COV_MAP.lock().unwrap();
-//         let cov_map_ptr =  cov_map.as_mut_ptr();
-//         println!("*****Coverage Map Pointer Address - Libafl: {:?}", cov_map_ptr);
-//         // println!("******Coverage Map Pointer Address (pointer format): {:p}", ptr);
-//         cov_map_ptr
-
-//   //  }
-
-// } 
-
-const INPUT_SIZE: usize = 1024;
-#[no_mangle] 
-static mut UART_IN: [u8; INPUT_SIZE] = [0; INPUT_SIZE];
-
-#[no_mangle] 
-pub extern "C" fn get_uart_input_ptr() -> *mut u8 { 
-
-    unsafe{
-        // EDGES_MAP_PTR
-        // COV_MAP.as_mut_ptr()
-        let ptr = UART_IN.as_mut_ptr();
-        println!("*****UART IN Pointer Address - Libafl: {:?}", ptr);
-        // println!("******Coverage Map Pointer Address (pointer format): {:p}", ptr);
-        ptr
-
-    }
-
-} 
-
-#[no_mangle] 
-static mut UART_IN_SIZE: usize = 0;
-
-#[no_mangle] 
-pub extern "C" fn get_uart_input_size_ptr() -> *mut usize { 
-
-    unsafe{
-        // EDGES_MAP_PTR
-        // COV_MAP.as_mut_ptr()
-        let ptr : *mut usize = &mut UART_IN_SIZE;
-        println!("*****UART INPUT SIZE Pointer Address - Libafl: {:?}", ptr);
-        // println!("******Coverage Map Pointer Address (pointer format): {:p}", ptr);
-        ptr
-
-    }
-} 
-
-// lazy_static! {
-//     pub static ref UART_IN: Mutex<[u8; INPUT_SIZE]> = Mutex::new([0; INPUT_SIZE]);
-//     // pub static ref UART_IN_SIZE: Mutex<usize> = Mutex::new(0); // Mutex to store the actual size of data
-// }
-
-// #[no_mangle] 
-// pub extern  "C" fn get_uart_input_ptr() -> *mut u8{
-//     let mut uart_in = UART_IN.lock().unwrap();
-//     let uart_in_ptr =  uart_in.as_mut_ptr();
-//     println!("*****UART IN Pointer Address - Libafl: {:?}", uart_in_ptr);
-//     uart_in_ptr
-    
-// }
-
-// #[no_mangle] 
-// pub extern  "C" fn get_uart_input_size() -> usize{
-//     let uart_input_size = UART_IN_SIZE.lock().unwrap(); // Lock access to size
-//     // println!("*****UART INPUT SIZE  - Libafl: {:?}", *uart_input_size);
-//     *uart_input_size
-    
-// }
-
-// lazy_static! {
-//     pub static ref UART_PTR_SH: Mutex<Vec<u8>> = Mutex::new(Vec::new()); // earlier I was trying to make it work by initilaizing without size being known beforehand, but it will crash 
-// }
-
-// #[no_mangle] // older version with unknown INPUT size and the pointer always kept getting updated as per buf, but it crashes
-// pub extern  "C" fn update_uart_input_data(out_size: &mut usize) -> *const u8{
-//     let uart_buff = UART_PTR_SH.lock().unwrap();
-//     *out_size = uart_buff.len();
-//     uart_buff.as_ptr()
-    
-// }
+//     }
  
 
 
@@ -183,23 +107,24 @@ pub unsafe extern "C" fn external_current_millis2() -> u64 {
 }
 
 
+// Function to count covered edges
+// fn count_covered_edges(cov_map: &[u8; MAP_SIZE]) -> usize {
+//     cov_map.iter().filter(|&&val| val > 0).count()
+// }
 
 #[no_mangle] // Also add edge_map pointer of something as one of the args of this func that can be populated by renode for coverage
 pub extern "C" fn main_fuzzing_func(input_dir: *const c_char,
-    harness_fn: extern "C" fn()->u8,
+    harness_fn: extern "C" fn(*const u8, usize)->u8,
 ) {
     env_logger::init();
     println!("Hello, entered main_fuzzing_func in libafl_renode");
 
     println!("Setting up Harness");
-//    // Variables to store UART and I2C pointers and sizes - multipart
-//    let mut uart_ptr: *const u8 = std::ptr::null();
-//    let mut uart_size: usize = 0;
-//    let mut i2c_ptr: *const u8 = std::ptr::null();
-//    let mut i2c_size: usize = 0;
+   
+
     // The wrapped harness function, calling out to the LLVM-style harness
-    //let mut harness = |input: &BytesInput| {
-      let mut harness = |input: &MultipartInput<BytesInput, String>| {
+    let mut harness = |input: &BytesInput| {
+      //  let mut harness = |input: &MultipartInput<BytesInput, String>| {
          // Open the file in append mode or create it if it doesn't exist
         // let mut logfile = OpenOptions::new()
         //     .create(true)
@@ -208,60 +133,38 @@ pub extern "C" fn main_fuzzing_func(input_dir: *const c_char,
         //     .expect("Failed to open or create the log file");
 
         // // Write the message to the file
-        // unsafe{writeln!(logfile, "In libafl harness, cov map : {:?}", COV_MAP).expect("Failed to write to the log file")}
-
-      
-        let mut count = input.len(); //multipart
-        for (i, (name, input)) in input.parts().iter().enumerate() { //multipart
-            // println!("**** MultiPart Inputs : count : {} , index : {}, Name: {}, Data: {:?}",count, i,name, input.as_ref());
+        // unsafe{writeln!(logfile, "In libafl harness, cov map : {:?}", COV_MAP).expect("Failed to write to the log file")};
+        // let mut count = input.len(); //multipart
+    //    // for (i, (name, input)) in input.parts().iter().enumerate() { //multipart
+    //         println!("**** MultiPart Inputs : count : {} , index : {}, Name: {}, Data: {:?}",count, i,name, input.as_ref());
                      
             let target = input.target_bytes();
             let buf = target.as_slice();
-            // Now, depending on the part, pass it separately to the callback - multipart
-            if name == "uart" {
-                // uart_ptr = buf.as_ptr();  // Store UART pointer
-                // uart_size = buf.len();     // Store UART size
-                if !buf.is_empty() {
-                    // let mut uart_in = UART_IN.lock().unwrap();
-                    let len = std::cmp::min(buf.len(), INPUT_SIZE);
-                    unsafe{
-                            UART_IN[..len].copy_from_slice(&buf[..len]);
-                            UART_IN_SIZE = len;
-                        }
-                    // Update the size of valid data
-                    // let mut input_size = UART_IN_SIZE.lock().unwrap(); // Lock access to the size variable
-                    // *input_size = len;
-                    // println!("^^^^ Libafl -UART Pointer: {:p}, Size: {}, data[0] : {}", unsafe{UART_IN.as_ptr()}, len,buf[0]);
-                }
-            } else if name == "i2c" {
-                // i2c_ptr = buf.as_ptr();    // Store I2C pointer
-                // i2c_size = buf.len();      // Store I2C size
-            }
-            
-        }
-        // println!("^^^^ UART Pointer: {:p}, Size: {}", uart_ptr, uart_size);
-        // println!("^^^^^ I2C Pointer: {:p}, Size: {}", i2c_ptr, i2c_size);
-        let ret : u8 = harness_fn(); //multipart
+           
+            // let buf =  buf.to_vec();
+            // let mut buf = input.bytes().to_vec();
+            //let buf1 : &mut [u8]=buf.as_mut_slice();
+            // harness_fn(buf.as_ptr(), buf.len());
+            // ExitKind::Ok  
+        let ret : u8 = harness_fn(buf.as_ptr(), buf.len());
+        //}
         // ExitKind::Ok 
         // let ret = harness_fn(buf.as_ptr());
         // let ret1=0;
-        // //println!("#######Harness func return val {}", ret);
-        match ret {
-            0 => ExitKind::Ok,
-            2 => ExitKind::Timeout,
-           // 99 => ShutdownSignalData,  // Exit the program with error code 1, won't work , it can only return ExitKind
-            _=> ExitKind::Crash,
-        }
+        //println!("#######Harness func return val {}", ret);
+        // match ret {
+        //     0 => ExitKind::Ok,
+        //     2 => ExitKind::Timeout,
+        //    // 99 => ShutdownSignalData,  // Exit the program with error code 1, won't work , it can only return ExitKind
+        //     _=> ExitKind::Crash,
+        // }
+        ExitKind::Ok 
     };
     println!("Harness setup done");
     // println!("Done setting up dirs");
     let edges = unsafe { &mut COV_MAP };
-    // // let edges = unsafe { &mut EDGES_MAP };
+    // let edges = unsafe { &mut EDGES_MAP };
     let edges_observer = unsafe{StdMapObserver::new("edges", edges)};
-    // let mut cov_map = COV_MAP.lock().unwrap();  // Locking access to COV_MAP
-    // let edges = &mut *cov_map;  // Derefencing the MutexGuard to get access to the array
-
-    // let edges_observer = unsafe { StdMapObserver::new("edges", edges) };
 
     // let mut observers = tuple_list!(edges_observer);
 
@@ -350,24 +253,24 @@ pub extern "C" fn main_fuzzing_func(input_dir: *const c_char,
     //     iter::repeat(("part_name".to_string(), BytesInput::from(&b"D"[..]))).take(4),
     // );
 
-    let initial = MultipartInput::from(vec![ 
-        ("uart".to_string(), BytesInput::new(vec![b'a'])),
-        ("i2c".to_string(), BytesInput::new(vec![b'd'])),
-    ]);
+    // let initial = MultipartInput::from(vec![ 
+    //     ("uart".to_string(), BytesInput::new(vec![b'a'])),
+    //     ("i2c".to_string(), BytesInput::new(vec![b'd'])),
+    // ]);
 
-    fuzzer  
-        .evaluate_input(&mut state, &mut executor, &mut mgr, &initial) //multipart
-        .unwrap();
+    // fuzzer  
+    //     .evaluate_input(&mut state, &mut executor, &mut mgr, &initial) //multipart
+    //     .unwrap();
 
      // Generate 8 initial inputs - bytesInput
-    //  fuzzer
-    //  .evaluate_input(
-    //      &mut state,
-    //      &mut executor,
-    //      &mut mgr,
-    //      &BytesInput::new(vec![b'a']),
-    //  )
-    //  .unwrap();
+     fuzzer
+     .evaluate_input(
+         &mut state,
+         &mut executor,
+         &mut mgr,
+         &BytesInput::new(vec![b'a']),
+     )
+     .unwrap();
 
      // Generator of printable bytearrays of max size 32
     //  let mut generator = RandBytesGenerator::new(1);

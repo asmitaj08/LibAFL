@@ -1,0 +1,947 @@
+** Test Hello from Emulator cs 3
+** Test Hello from Emulator cs 3
+** Test Hello from Emulator cs 3
+^^^ Sysbus.cs InitStructures()
+CreationDriver.cs PrepareVariables() start
+CreationDriver.cs PrepareVariables() Done
+^^^^ CreationDriver.cs ProcessInner starting
+^^^ Sysbus.cs InitStructures()
+CreationDriver.cs PrepareVariables() start
+CreationDriver.cs PrepareVariables() Done
+^^^^ CreationDriver.cs ProcessInner starting
+^^^ Sysbus.cs InitStructures()
+CreationDriver.cs PrepareVariables() start
+CreationDriver.cs PrepareVariables() Done
+^^^^ CreationDriver.cs ProcessInner starting
+^^^^^ TranslationCPU - Init ^^^^^^^^
+^^^^^ TranslationCPU - Init ^^^^^^^^
+^^^^^ TranslationCPU - Init - TlibInit start : model : cortex-m4 ^^^^^^^^
+^^^^^ TranslationCPU - Init - TlibInit start : model : cortex-m4 Done!!!^^^^^^^^
+^^^^^ TranslationCPU - Init - TlibAtomicMemoryStateInit start ^^^^^^^^
+^^^^^ TranslationCPU - HandleRamSetup ^^^^^^^^
+^^^^^ TranslationCPU - Init Done!!^^^^^^^^
+*****MappedMeory()********** : machine : nrf, size : 1048576, segmentSize : 65536
+^^^^^^ MappedMemeory.cs Preparing 16 segments for 100000 bytes of memory, each 65536 bytes long.
+^^^^^^ MappedMemeory.cs Preparing seg : describedSegments len : 16
+^^^^^^ MappedMemeory.cs Preparing seg : describedSegments[0] val :[MappedSegment: Size=0x10000, StartingOffset=0x0], pointer : 0x0
+^^^^^^ MappedMemeory.cs Preparing seg : describedSegments[1] val :[MappedSegment: Size=0x10000, StartingOffset=0x10000], pointer : 0x0
+^^^^^^ MappedMemeory.cs Preparing seg : describedSegments[2] val :[MappedSegment: Size=0x10000, StartingOffset=0x20000], pointer : 0x0
+^^^^^^ MappedMemeory.cs Preparing seg : describedSegments[3] val :[MappedSegment: Size=0x10000, StartingOffset=0x30000], pointer : 0x0
+^^^^^^ MappedMemeory.cs Preparing seg : describedSegments[4] val :[MappedSegment: Size=0x10000, StartingOffset=0x40000], pointer : 0x0
+^^^^^^ MappedMemeory.cs Preparing seg : describedSegments[5] val :[MappedSegment: Size=0x10000, StartingOffset=0x50000], pointer : 0x0
+^^^^^^ MappedMemeory.cs Preparing seg : describedSegments[6] val :[MappedSegment: Size=0x10000, StartingOffset=0x60000], pointer : 0x0
+^^^^^^ MappedMemeory.cs Preparing seg : describedSegments[7] val :[MappedSegment: Size=0x10000, StartingOffset=0x70000], pointer : 0x0
+^^^^^^ MappedMemeory.cs Preparing seg : describedSegments[8] val :[MappedSegment: Size=0x10000, StartingOffset=0x80000], pointer : 0x0
+^^^^^^ MappedMemeory.cs Preparing seg : describedSegments[9] val :[MappedSegment: Size=0x10000, StartingOffset=0x90000], pointer : 0x0
+^^^^^^ MappedMemeory.cs Preparing seg : describedSegments[10] val :[MappedSegment: Size=0x10000, StartingOffset=0xA0000], pointer : 0x0
+^^^^^^ MappedMemeory.cs Preparing seg : describedSegments[11] val :[MappedSegment: Size=0x10000, StartingOffset=0xB0000], pointer : 0x0
+^^^^^^ MappedMemeory.cs Preparing seg : describedSegments[12] val :[MappedSegment: Size=0x10000, StartingOffset=0xC0000], pointer : 0x0
+^^^^^^ MappedMemeory.cs Preparing seg : describedSegments[13] val :[MappedSegment: Size=0x10000, StartingOffset=0xD0000], pointer : 0x0
+^^^^^^ MappedMemeory.cs Preparing seg : describedSegments[14] val :[MappedSegment: Size=0x10000, StartingOffset=0xE0000], pointer : 0x0
+^^^^^^ MappedMemeory.cs Preparing seg : describedSegments[15] val : 0x[MappedSegment: Size=0x10000, StartingOffset=0xF0000]
+*****MappedMeory()********** : machine : nrf, size : 262144, segmentSize : 65536
+^^^^^^ MappedMemeory.cs Preparing 4 segments for 40000 bytes of memory, each 65536 bytes long.
+^^^^^^ MappedMemeory.cs Preparing seg : describedSegments len : 4
+^^^^^^ MappedMemeory.cs Preparing seg : describedSegments[0] val :[MappedSegment: Size=0x10000, StartingOffset=0x0], pointer : 0x0
+^^^^^^ MappedMemeory.cs Preparing seg : describedSegments[1] val :[MappedSegment: Size=0x10000, StartingOffset=0x10000], pointer : 0x0
+^^^^^^ MappedMemeory.cs Preparing seg : describedSegments[2] val :[MappedSegment: Size=0x10000, StartingOffset=0x20000], pointer : 0x0
+^^^^^^ MappedMemeory.cs Preparing seg : describedSegments[3] val : 0x[MappedSegment: Size=0x10000, StartingOffset=0x30000]
+^^^^^ TranslationCPU - Init - TlibInit start : model : cortex-m4 ^^^^^^^^
+^^^ NRF52840.cs constructor init
+^^^ NRF52840.cs DefineRegisters
+^^^ NRF52840.cs constructor init
+^^^ NRF52840.cs DefineRegisters
+^^^^^ TranslationCPU - Init ^^^^^^^^
+^^^^^ TranslationCPU - Init - TlibInit start : model : cortex-m4 Done!!!^^^^^^^^
+^^^^^ TranslationCPU - Init - TlibAtomicMemoryStateInit start ^^^^^^^^
+^^^^^ TranslationCPU - HandleRamSetup ^^^^^^^^
+^^^^^ TranslationCPU - Init Done!!^^^^^^^^
+^^^ SystemBus.cs Register 1111 : ibus_Peripheral : Antmicro.Renode.Peripherals.IRQControllers.NVIC, BusRangeRegistration : 0x<0xE000E000, 0xE000EFFF>
+*****MappedMeory()********** : machine : nrf, size : 1048576, segmentSize : 65536
+^^^^^^ MappedMemeory.cs Preparing 16 segments for 100000 bytes of memory, each 65536 bytes long.
+^^^^^^ MappedMemeory.cs Preparing seg : describedSegments len : 16
+^^^^^^ MappedMemeory.cs Preparing seg : describedSegments[0] val :[MappedSegment: Size=0x10000, StartingOffset=0x0], pointer : 0x0
+^^^^^^ MappedMemeory.cs Preparing seg : describedSegments[1] val :[MappedSegment: Size=0x10000, StartingOffset=0x10000], pointer : 0x0
+^^^^^^ MappedMemeory.cs Preparing seg : describedSegments[2] val :[MappedSegment: Size=0x10000, StartingOffset=0x20000], pointer : 0x0
+^^^^^^ MappedMemeory.cs Preparing seg : describedSegments[3] val :[MappedSegment: Size=0x10000, StartingOffset=0x30000], pointer : 0x0
+^^^^^^ MappedMemeory.cs Preparing seg : describedSegments[4] val :[MappedSegment: Size=0x10000, StartingOffset=0x40000], pointer : 0x0
+^^^^^^ MappedMemeory.cs Preparing seg : describedSegments[5] val :[MappedSegment: Size=0x10000, StartingOffset=0x50000], pointer : 0x0
+^^^^^^ MappedMemeory.cs Preparing seg : describedSegments[6] val :[MappedSegment: Size=0x10000, StartingOffset=0x60000], pointer : 0x0
+^^^^^^ MappedMemeory.cs Preparing seg : describedSegments[7] val :[MappedSegment: Size=0x10000, StartingOffset=0x70000], pointer : 0x0
+^^^^^^ MappedMemeory.cs Preparing seg : describedSegments[8] val :[MappedSegment: Size=0x10000, StartingOffset=0x80000], pointer : 0x0
+^^^^^^ MappedMemeory.cs Preparing seg : describedSegments[9] val :[MappedSegment: Size=0x10000, StartingOffset=0x90000], pointer : 0x0
+^^^^^^ MappedMemeory.cs Preparing seg : describedSegments[10] val :[MappedSegment: Size=0x10000, StartingOffset=0xA0000], pointer : 0x0
+^^^^^^ MappedMemeory.cs Preparing seg : describedSegments[11] val :[MappedSegment: Size=0x10000, StartingOffset=0xB0000], pointer : 0x0
+^^^^^^ MappedMemeory.cs Preparing seg : describedSegments[12] val :[MappedSegment: Size=0x10000, StartingOffset=0xC0000], pointer : 0x0
+^^^^^^ MappedMemeory.cs Preparing seg : describedSegments[13] val :[MappedSegment: Size=0x10000, StartingOffset=0xD0000], pointer : 0x0
+^^^^^^ MappedMemeory.cs Preparing seg : describedSegments[14] val :[MappedSegment: Size=0x10000, StartingOffset=0xE0000], pointer : 0x0
+^^^^^^ MappedMemeory.cs Preparing seg : describedSegments[15] val : 0x[MappedSegment: Size=0x10000, StartingOffset=0xF0000]
+*****MappedMeory()********** : machine : nrf, size : 262144, segmentSize : 65536
+^^^^^^ MappedMemeory.cs Preparing 4 segments for 40000 bytes of memory, each 65536 bytes long.
+^^^^^^ MappedMemeory.cs Preparing seg : describedSegments len : 4
+^^^^^^ MappedMemeory.cs Preparing seg : describedSegments[0] val :[MappedSegment: Size=0x10000, StartingOffset=0x0], pointer : 0x0
+^^^^^^ MappedMemeory.cs Preparing seg : describedSegments[1] val :[MappedSegment: Size=0x10000, StartingOffset=0x10000], pointer : 0x0
+^^^^^^ MappedMemeory.cs Preparing seg : describedSegments[2] val :[MappedSegment: Size=0x10000, StartingOffset=0x20000], pointer : 0x0
+^^^^^^ MappedMemeory.cs Preparing seg : describedSegments[3] val : 0x[MappedSegment: Size=0x10000, StartingOffset=0x30000]
+^^^ NRF52840.cs constructor init
+^^^ NRF52840.cs DefineRegisters
+^^^^^Machine.cs InitializeInvalidatedAddressesList()
+^^^ SystemBus.cs Register 1111 : ibus_Peripheral : Antmicro.Renode.Peripherals.UART.NRF52840_UART, BusRangeRegistration : 0x<0x40002000, 0x40002FFF>
+^^^ NRF52840.cs constructor init
+^^^ NRF52840.cs DefineRegisters
+^^^ SystemBus.cs Register 1111 : ibus_Peripheral : Antmicro.Renode.Peripherals.UART.NRF52840_UART, BusRangeRegistration : 0x<0x40028000, 0x40028FFF>
+^^^ SystemBus.cs Register 1111 : ibus_Peripheral : Antmicro.Renode.Peripherals.Timers.NRF52840_RTC, BusRangeRegistration : 0x<0x4000B000, 0x4000BFFF>
+^^^ SystemBus.cs Register 1111 : ibus_Peripheral : Antmicro.Renode.Peripherals.Timers.NRF52840_RTC, BusRangeRegistration : 0x<0x40011000, 0x40011FFF>
+^^^ SystemBus.cs Register 1111 : ibus_Peripheral : Antmicro.Renode.Peripherals.Timers.NRF52840_RTC, BusRangeRegistration : 0x<0x40024000, 0x40024FFF>
+^^^ SystemBus.cs Register 1111 : ibus_Peripheral : Antmicro.Renode.Peripherals.Timers.NRF52840_Watchdog, BusRangeRegistration : 0x<0x40010000, 0x40010FFF>
+^^^ SystemBus.cs Register 1111 : ibus_Peripheral : Antmicro.Renode.Peripherals.Miscellaneous.NRF52840_PPI, BusRangeRegistration : 0x<0x4001F000, 0x4001FFFF>
+^^^ SystemBus.cs Register 1111 : ibus_Peripheral : Antmicro.Renode.Peripherals.Memory.MappedMemory, BusRangeRegistration : 0x<0x00000000, 0x000FFFFF>
+^^^^ Getting MappedSegments , in MappedMemory.cs
+^^^^ TranslationCPU.cs MapMemory() Registered memory at 0x0, size 0x10000, pointer : 0x0.
+^^^^ TranslationCPU.cs MapMemory() Registered memory at 0x10000, size 0x10000, pointer : 0x0.
+^^^^ TranslationCPU.cs MapMemory() Registered memory at 0x20000, size 0x10000, pointer : 0x0.
+^^^^ TranslationCPU.cs MapMemory() Registered memory at 0x30000, size 0x10000, pointer : 0x0.
+^^^^ TranslationCPU.cs MapMemory() Registered memory at 0x40000, size 0x10000, pointer : 0x0.
+^^^^ TranslationCPU.cs MapMemory() Registered memory at 0x50000, size 0x10000, pointer : 0x0.
+^^^^ TranslationCPU.cs MapMemory() Registered memory at 0x60000, size 0x10000, pointer : 0x0.
+^^^^ TranslationCPU.cs MapMemory() Registered memory at 0x70000, size 0x10000, pointer : 0x0.
+^^^^ TranslationCPU.cs MapMemory() Registered memory at 0x80000, size 0x10000, pointer : 0x0.
+^^^^ TranslationCPU.cs MapMemory() Registered memory at 0x90000, size 0x10000, pointer : 0x0.
+^^^^ TranslationCPU.cs MapMemory() Registered memory at 0xA0000, size 0x10000, pointer : 0x0.
+^^^^ TranslationCPU.cs MapMemory() Registered memory at 0xB0000, size 0x10000, pointer : 0x0.
+^^^^ TranslationCPU.cs MapMemory() Registered memory at 0xC0000, size 0x10000, pointer : 0x0.
+^^^^ TranslationCPU.cs MapMemory() Registered memory at 0xD0000, size 0x10000, pointer : 0x0.
+^^^^ TranslationCPU.cs MapMemory() Registered memory at 0xE0000, size 0x10000, pointer : 0x0.
+^^^^ TranslationCPU.cs MapMemory() Registered memory at 0xF0000, size 0x10000, pointer : 0x0.
+^^^ SystemBus.cs Register 1111 : ibus_Peripheral : Antmicro.Renode.Peripherals.Memory.MappedMemory, BusRangeRegistration : 0x<0x00800000, 0x0083FFFF>
+^^^^ Getting MappedSegments , in MappedMemory.cs
+^^^^ TranslationCPU.cs MapMemory() Registered memory at 0x800000, size 0x10000, pointer : 0x0.
+^^^^ TranslationCPU.cs MapMemory() Registered memory at 0x810000, size 0x10000, pointer : 0x0.
+^^^^ TranslationCPU.cs MapMemory() Registered memory at 0x820000, size 0x10000, pointer : 0x0.
+^^^^ TranslationCPU.cs MapMemory() Registered memory at 0x830000, size 0x10000, pointer : 0x0.
+^^^ SystemBus.cs Register 1111 : ibus_Peripheral : Antmicro.Renode.Peripherals.Memory.MappedMemory, BusRangeRegistration : 0x<0x20000000, 0x2003FFFF>
+^^^^ Getting MappedSegments , in MappedMemory.cs
+^^^^ TranslationCPU.cs MapMemory() Registered memory at 0x20000000, size 0x10000, pointer : 0x0.
+^^^^ TranslationCPU.cs MapMemory() Registered memory at 0x20010000, size 0x10000, pointer : 0x0.
+^^^^ TranslationCPU.cs MapMemory() Registered memory at 0x20020000, size 0x10000, pointer : 0x0.
+^^^^ TranslationCPU.cs MapMemory() Registered memory at 0x20030000, size 0x10000, pointer : 0x0.
+^^^ SystemBus.cs Register 1111 : ibus_Peripheral : Antmicro.Renode.Peripherals.Miscellaneous.NRF_CLOCK, BusRangeRegistration : 0x<0x40000000, 0x40000FFF>
+^^^ SystemBus.cs Register 1111 : ibus_Peripheral : Antmicro.Renode.Peripherals.I2C.NRF52840_I2C, BusRangeRegistration : 0x<0x40003000, 0x40003FFF>
+^^^ SystemBus.cs Register 1111 : ibus_Peripheral : Antmicro.Renode.Peripherals.SPI.NRF52840_SPI, BusRangeRegistration : 0x<0x40023000, 0x40023FFF>
+^^^ SystemBus.cs Register 1111 : ibus_Peripheral : Antmicro.Renode.Peripherals.GPIOPort.NRF52840_GPIO, BusRangeRegistration : 0x<0x50000500, 0x500007FF>
+^^^ SystemBus.cs Register 1111 : ibus_Peripheral : Antmicro.Renode.Peripherals.GPIOPort.NRF52840_GPIO, BusRangeRegistration : 0x<0x50000800, 0x50000AFF>
+^^^ SystemBus.cs Register 1111 : ibus_Peripheral : Antmicro.Renode.Peripherals.GPIOPort.NRF52840_GPIOTasksEvents, BusRangeRegistration : 0x<0x40006000, 0x40006FFF>
+^^^ SystemBus.cs Register 1111 : ibus_Peripheral : Antmicro.Renode.Peripherals.I2C.NRF52840_I2C, BusRangeRegistration : 0x<0x40004000, 0x40004FFF>
+^^^ SystemBus.cs Register 1111 : ibus_Peripheral : Antmicro.Renode.Peripherals.Timers.NRF52840_Timer, BusRangeRegistration : 0x<0x40008000, 0x40008FFF>
+^^^ SystemBus.cs Register 1111 : ibus_Peripheral : Antmicro.Renode.Peripherals.Timers.NRF52840_Timer, BusRangeRegistration : 0x<0x40009000, 0x40009FFF>
+^^^ SystemBus.cs Register 1111 : ibus_Peripheral : Antmicro.Renode.Peripherals.Timers.NRF52840_Timer, BusRangeRegistration : 0x<0x4000A000, 0x4000AFFF>
+^^^ SystemBus.cs Register 1111 : ibus_Peripheral : Antmicro.Renode.Peripherals.Timers.NRF52840_Timer, BusRangeRegistration : 0x<0x4001A000, 0x4001AFFF>
+^^^ SystemBus.cs Register 1111 : ibus_Peripheral : Antmicro.Renode.Peripherals.Timers.NRF52840_Timer, BusRangeRegistration : 0x<0x4001B000, 0x4001BFFF>
+^^^ SystemBus.cs Register 1111 : ibus_Peripheral : Antmicro.Renode.Peripherals.Sound.NRF52840_I2S, BusRangeRegistration : 0x<0x40025000, 0x40025FFF>
+^^^ SystemBus.cs Register 1111 : ibus_Peripheral : Antmicro.Renode.Peripherals.Sound.NRF52840_PDM, BusRangeRegistration : 0x<0x4001D000, 0x4001DFFF>
+^^^ SystemBus.cs Register 1111 : ibus_Peripheral : Antmicro.Renode.Peripherals.Wireless.NRF52840_Radio, BusRangeRegistration : 0x<0x40001000, 0x40001FFF>
+^^^ SystemBus.cs Register 1111 : ibus_Peripheral : Antmicro.Renode.Peripherals.Miscellaneous.NRF52840_RNG, BusRangeRegistration : 0x<0x4000D000, 0x4000DFFF>
+^^^ SystemBus.cs Register 1111 : ibus_Peripheral : Antmicro.Renode.Peripherals.Miscellaneous.NRF52840_ECB, BusRangeRegistration : 0x<0x4000E000, 0x4000EFFF>
+^^^ SystemBus.cs Register 1111 : ibus_Peripheral : Antmicro.Renode.Peripherals.Miscellaneous.NRF52840_EGU, BusRangeRegistration : 0x<0x40014000, 0x40014FFF>
+^^^ SystemBus.cs Register 1111 : ibus_Peripheral : Antmicro.Renode.Peripherals.Miscellaneous.NRF52840_EGU, BusRangeRegistration : 0x<0x40015000, 0x40015FFF>
+^^^ SystemBus.cs Register 1111 : ibus_Peripheral : Antmicro.Renode.Peripherals.Miscellaneous.NRF52840_EGU, BusRangeRegistration : 0x<0x40016000, 0x40016FFF>
+^^^ SystemBus.cs Register 1111 : ibus_Peripheral : Antmicro.Renode.Peripherals.Miscellaneous.NRF52840_EGU, BusRangeRegistration : 0x<0x40017000, 0x40017FFF>
+^^^ SystemBus.cs Register 1111 : ibus_Peripheral : Antmicro.Renode.Peripherals.Miscellaneous.NRF52840_EGU, BusRangeRegistration : 0x<0x40018000, 0x40018FFF>
+^^^ SystemBus.cs Register 1111 : ibus_Peripheral : Antmicro.Renode.Peripherals.Miscellaneous.NRF52840_EGU, BusRangeRegistration : 0x<0x40019000, 0x40019FFF>
+^^^ SystemBus.cs Register 1111 : ibus_Peripheral : Antmicro.Renode.Peripherals.IRQControllers.NVIC, BusRangeRegistration : 0x<0xE000E000, 0xE000EFFF>
+^^^^^ TranslationCPU - Init - TlibInit start : model : cortex-m4 ^^^^^^^^
+^^^^^Machine.cs InitializeInvalidatedAddressesList()
+^^^ SystemBus.cs Register 1111 : ibus_Peripheral : Antmicro.Renode.Peripherals.UART.NRF52840_UART, BusRangeRegistration : 0x<0x40002000, 0x40002FFF>
+^^^ SystemBus.cs Register 1111 : ibus_Peripheral : Antmicro.Renode.Peripherals.UART.NRF52840_UART, BusRangeRegistration : 0x<0x40028000, 0x40028FFF>
+^^^ SystemBus.cs Register 1111 : ibus_Peripheral : Antmicro.Renode.Peripherals.Timers.NRF52840_RTC, BusRangeRegistration : 0x<0x4000B000, 0x4000BFFF>
+^^^ SystemBus.cs Register 1111 : ibus_Peripheral : Antmicro.Renode.Peripherals.Timers.NRF52840_RTC, BusRangeRegistration : 0x<0x40011000, 0x40011FFF>
+^^^ SystemBus.cs Register 1111 : ibus_Peripheral : Antmicro.Renode.Peripherals.Timers.NRF52840_RTC, BusRangeRegistration : 0x<0x40024000, 0x40024FFF>
+^^^ SystemBus.cs Register 1111 : ibus_Peripheral : Antmicro.Renode.Peripherals.Timers.NRF52840_Watchdog, BusRangeRegistration : 0x<0x40010000, 0x40010FFF>
+^^^ SystemBus.cs Register 1111 : ibus_Peripheral : Antmicro.Renode.Peripherals.Miscellaneous.NRF52840_PPI, BusRangeRegistration : 0x<0x4001F000, 0x4001FFFF>
+^^^ SystemBus.cs Register 1111 : ibus_Peripheral : Antmicro.Renode.Peripherals.Memory.MappedMemory, BusRangeRegistration : 0x<0x00000000, 0x000FFFFF>
+^^^^ Getting MappedSegments , in MappedMemory.cs
+^^^^ TranslationCPU.cs MapMemory() Registered memory at 0x0, size 0x10000, pointer : 0x0.
+^^^^ TranslationCPU.cs MapMemory() Registered memory at 0x10000, size 0x10000, pointer : 0x0.
+^^^^ TranslationCPU.cs MapMemory() Registered memory at 0x20000, size 0x10000, pointer : 0x0.
+^^^^ TranslationCPU.cs MapMemory() Registered memory at 0x30000, size 0x10000, pointer : 0x0.
+^^^^ TranslationCPU.cs MapMemory() Registered memory at 0x40000, size 0x10000, pointer : 0x0.
+^^^^ TranslationCPU.cs MapMemory() Registered memory at 0x50000, size 0x10000, pointer : 0x0.
+^^^^ TranslationCPU.cs MapMemory() Registered memory at 0x60000, size 0x10000, pointer : 0x0.
+^^^^ TranslationCPU.cs MapMemory() Registered memory at 0x70000, size 0x10000, pointer : 0x0.
+^^^^ TranslationCPU.cs MapMemory() Registered memory at 0x80000, size 0x10000, pointer : 0x0.
+^^^^ TranslationCPU.cs MapMemory() Registered memory at 0x90000, size 0x10000, pointer : 0x0.
+^^^^ TranslationCPU.cs MapMemory() Registered memory at 0xA0000, size 0x10000, pointer : 0x0.
+^^^^ TranslationCPU.cs MapMemory() Registered memory at 0xB0000, size 0x10000, pointer : 0x0.
+^^^^ TranslationCPU.cs MapMemory() Registered memory at 0xC0000, size 0x10000, pointer : 0x0.
+^^^^ TranslationCPU.cs MapMemory() Registered memory at 0xD0000, size 0x10000, pointer : 0x0.
+^^^^ TranslationCPU.cs MapMemory() Registered memory at 0xE0000, size 0x10000, pointer : 0x0.
+^^^^ TranslationCPU.cs MapMemory() Registered memory at 0xF0000, size 0x10000, pointer : 0x0.
+^^^ SystemBus.cs Register 1111 : ibus_Peripheral : Antmicro.Renode.Peripherals.Memory.MappedMemory, BusRangeRegistration : 0x<0x00800000, 0x0083FFFF>
+^^^^ Getting MappedSegments , in MappedMemory.cs
+^^^^ TranslationCPU.cs MapMemory() Registered memory at 0x800000, size 0x10000, pointer : 0x0.
+^^^^ TranslationCPU.cs MapMemory() Registered memory at 0x810000, size 0x10000, pointer : 0x0.
+^^^^ TranslationCPU.cs MapMemory() Registered memory at 0x820000, size 0x10000, pointer : 0x0.
+^^^^ TranslationCPU.cs MapMemory() Registered memory at 0x830000, size 0x10000, pointer : 0x0.
+^^^ SystemBus.cs Register 1111 : ibus_Peripheral : Antmicro.Renode.Peripherals.Memory.MappedMemory, BusRangeRegistration : 0x<0x20000000, 0x2003FFFF>
+^^^^ Getting MappedSegments , in MappedMemory.cs
+^^^^ TranslationCPU.cs MapMemory() Registered memory at 0x20000000, size 0x10000, pointer : 0x0.
+^^^^ TranslationCPU.cs MapMemory() Registered memory at 0x20010000, size 0x10000, pointer : 0x0.
+^^^^ TranslationCPU.cs MapMemory() Registered memory at 0x20020000, size 0x10000, pointer : 0x0.
+^^^^ TranslationCPU.cs MapMemory() Registered memory at 0x20030000, size 0x10000, pointer : 0x0.
+^^^ SystemBus.cs Register 1111 : ibus_Peripheral : Antmicro.Renode.Peripherals.Miscellaneous.NRF_CLOCK, BusRangeRegistration : 0x<0x40000000, 0x40000FFF>
+^^^ SystemBus.cs Register 1111 : ibus_Peripheral : Antmicro.Renode.Peripherals.I2C.NRF52840_I2C, BusRangeRegistration : 0x<0x40003000, 0x40003FFF>
+^^^ SystemBus.cs Register 1111 : ibus_Peripheral : Antmicro.Renode.Peripherals.SPI.NRF52840_SPI, BusRangeRegistration : 0x<0x40023000, 0x40023FFF>
+^^^ SystemBus.cs Register 1111 : ibus_Peripheral : Antmicro.Renode.Peripherals.GPIOPort.NRF52840_GPIO, BusRangeRegistration : 0x<0x50000500, 0x500007FF>
+^^^ SystemBus.cs Register 1111 : ibus_Peripheral : Antmicro.Renode.Peripherals.GPIOPort.NRF52840_GPIO, BusRangeRegistration : 0x<0x50000800, 0x50000AFF>
+^^^ SystemBus.cs Register 1111 : ibus_Peripheral : Antmicro.Renode.Peripherals.GPIOPort.NRF52840_GPIOTasksEvents, BusRangeRegistration : 0x<0x40006000, 0x40006FFF>
+^^^ SystemBus.cs Register 1111 : ibus_Peripheral : Antmicro.Renode.Peripherals.I2C.NRF52840_I2C, BusRangeRegistration : 0x<0x40004000, 0x40004FFF>
+^^^ SystemBus.cs Register 1111 : ibus_Peripheral : Antmicro.Renode.Peripherals.Timers.NRF52840_Timer, BusRangeRegistration : 0x<0x40008000, 0x40008FFF>
+^^^ SystemBus.cs Register 1111 : ibus_Peripheral : Antmicro.Renode.Peripherals.Timers.NRF52840_Timer, BusRangeRegistration : 0x<0x40009000, 0x40009FFF>
+^^^ SystemBus.cs Register 1111 : ibus_Peripheral : Antmicro.Renode.Peripherals.Timers.NRF52840_Timer, BusRangeRegistration : 0x<0x4000A000, 0x4000AFFF>
+^^^ SystemBus.cs Register 1111 : ibus_Peripheral : Antmicro.Renode.Peripherals.Timers.NRF52840_Timer, BusRangeRegistration : 0x<0x4001A000, 0x4001AFFF>
+^^^ SystemBus.cs Register 1111 : ibus_Peripheral : Antmicro.Renode.Peripherals.Timers.NRF52840_Timer, BusRangeRegistration : 0x<0x4001B000, 0x4001BFFF>
+^^^ SystemBus.cs Register 1111 : ibus_Peripheral : Antmicro.Renode.Peripherals.Sound.NRF52840_I2S, BusRangeRegistration : 0x<0x40025000, 0x40025FFF>
+^^^ SystemBus.cs Register 1111 : ibus_Peripheral : Antmicro.Renode.Peripherals.Sound.NRF52840_PDM, BusRangeRegistration : 0x<0x4001D000, 0x4001DFFF>
+^^^ SystemBus.cs Register 1111 : ibus_Peripheral : Antmicro.Renode.Peripherals.Wireless.NRF52840_Radio, BusRangeRegistration : 0x<0x40001000, 0x40001FFF>
+^^^ SystemBus.cs Register 1111 : ibus_Peripheral : Antmicro.Renode.Peripherals.Miscellaneous.NRF52840_RNG, BusRangeRegistration : 0x<0x4000D000, 0x4000DFFF>
+^^^ SystemBus.cs Register 1111 : ibus_Peripheral : Antmicro.Renode.Peripherals.Miscellaneous.NRF52840_ECB, BusRangeRegistration : 0x<0x4000E000, 0x4000EFFF>
+^^^ SystemBus.cs Register 1111 : ibus_Peripheral : Antmicro.Renode.Peripherals.Miscellaneous.NRF52840_EGU, BusRangeRegistration : 0x<0x40014000, 0x40014FFF>
+^^^ SystemBus.cs Register 1111 : ibus_Peripheral : Antmicro.Renode.Peripherals.Miscellaneous.NRF52840_EGU, BusRangeRegistration : 0x<0x40015000, 0x40015FFF>
+^^^ SystemBus.cs Register 1111 : ibus_Peripheral : Antmicro.Renode.Peripherals.Miscellaneous.NRF52840_EGU, BusRangeRegistration : 0x<0x40016000, 0x40016FFF>
+^^^ SystemBus.cs Register 1111 : ibus_Peripheral : Antmicro.Renode.Peripherals.Miscellaneous.NRF52840_EGU, BusRangeRegistration : 0x<0x40017000, 0x40017FFF>
+^^^ SystemBus.cs Register 1111 : ibus_Peripheral : Antmicro.Renode.Peripherals.Miscellaneous.NRF52840_EGU, BusRangeRegistration : 0x<0x40018000, 0x40018FFF>
+^^^ SystemBus.cs Register 1111 : ibus_Peripheral : Antmicro.Renode.Peripherals.Miscellaneous.NRF52840_EGU, BusRangeRegistration : 0x<0x40019000, 0x40019FFF>
+^^^^^ TranslationCPU - Init - TlibInit start : model : cortex-m4 Done!!!^^^^^^^^
+^^^^^ TranslationCPU - Init - TlibAtomicMemoryStateInit start ^^^^^^^^
+^^^^^ TranslationCPU - HandleRamSetup ^^^^^^^^
+^^^^^ TranslationCPU - Init Done!!^^^^^^^^
+*****MappedMeory()********** : machine : nrf, size : 1048576, segmentSize : 65536
+^^^^^^ MappedMemeory.cs Preparing 16 segments for 100000 bytes of memory, each 65536 bytes long.
+^^^^^^ MappedMemeory.cs Preparing seg : describedSegments len : 16
+^^^^^^ MappedMemeory.cs Preparing seg : describedSegments[0] val :[MappedSegment: Size=0x10000, StartingOffset=0x0], pointer : 0x0
+^^^^^^ MappedMemeory.cs Preparing seg : describedSegments[1] val :[MappedSegment: Size=0x10000, StartingOffset=0x10000], pointer : 0x0
+^^^^^^ MappedMemeory.cs Preparing seg : describedSegments[2] val :[MappedSegment: Size=0x10000, StartingOffset=0x20000], pointer : 0x0
+^^^^^^ MappedMemeory.cs Preparing seg : describedSegments[3] val :[MappedSegment: Size=0x10000, StartingOffset=0x30000], pointer : 0x0
+^^^^^^ MappedMemeory.cs Preparing seg : describedSegments[4] val :[MappedSegment: Size=0x10000, StartingOffset=0x40000], pointer : 0x0
+^^^^^^ MappedMemeory.cs Preparing seg : describedSegments[5] val :[MappedSegment: Size=0x10000, StartingOffset=0x50000], pointer : 0x0
+^^^^^^ MappedMemeory.cs Preparing seg : describedSegments[6] val :[MappedSegment: Size=0x10000, StartingOffset=0x60000], pointer : 0x0
+^^^^^^ MappedMemeory.cs Preparing seg : describedSegments[7] val :[MappedSegment: Size=0x10000, StartingOffset=0x70000], pointer : 0x0
+^^^^^^ MappedMemeory.cs Preparing seg : describedSegments[8] val :[MappedSegment: Size=0x10000, StartingOffset=0x80000], pointer : 0x0
+^^^^^^ MappedMemeory.cs Preparing seg : describedSegments[9] val :[MappedSegment: Size=0x10000, StartingOffset=0x90000], pointer : 0x0
+^^^^^^ MappedMemeory.cs Preparing seg : describedSegments[10] val :[MappedSegment: Size=0x10000, StartingOffset=0xA0000], pointer : 0x0
+^^^^^^ MappedMemeory.cs Preparing seg : describedSegments[11] val :[MappedSegment: Size=0x10000, StartingOffset=0xB0000], pointer : 0x0
+^^^^^^ MappedMemeory.cs Preparing seg : describedSegments[12] val :[MappedSegment: Size=0x10000, StartingOffset=0xC0000], pointer : 0x0
+^^^^^^ MappedMemeory.cs Preparing seg : describedSegments[13] val :[MappedSegment: Size=0x10000, StartingOffset=0xD0000], pointer : 0x0
+^^^^^^ MappedMemeory.cs Preparing seg : describedSegments[14] val :[MappedSegment: Size=0x10000, StartingOffset=0xE0000], pointer : 0x0
+^^^^^^ MappedMemeory.cs Preparing seg : describedSegments[15] val : 0x[MappedSegment: Size=0x10000, StartingOffset=0xF0000]
+*****MappedMeory()********** : machine : nrf, size : 262144, segmentSize : 65536
+^^^^^^ MappedMemeory.cs Preparing 4 segments for 40000 bytes of memory, each 65536 bytes long.
+^^^^^^ MappedMemeory.cs Preparing seg : describedSegments len : 4
+^^^^^^ MappedMemeory.cs Preparing seg : describedSegments[0] val :[MappedSegment: Size=0x10000, StartingOffset=0x0], pointer : 0x0
+^^^^^^ MappedMemeory.cs Preparing seg : describedSegments[1] val :[MappedSegment: Size=0x10000, StartingOffset=0x10000], pointer : 0x0
+^^^^^^ MappedMemeory.cs Preparing seg : describedSegments[2] val :[MappedSegment: Size=0x10000, StartingOffset=0x20000], pointer : 0x0
+^^^^^^ MappedMemeory.cs Preparing seg : describedSegments[3] val : 0x[MappedSegment: Size=0x10000, StartingOffset=0x30000]
+^^^ NRF52840.cs constructor init
+^^^ NRF52840.cs DefineRegisters
+^^^ NRF52840.cs constructor init
+^^^ NRF52840.cs DefineRegisters
+CreationDriver.cs PrepareVariables() start
+CreationDriver.cs PrepareVariables() Done
+^^^^ CreationDriver.cs ProcessInner before machine PostCreationActions()
+^^^ SystemBus.cs Register 1111 : ibus_Peripheral : Antmicro.Renode.Peripherals.IRQControllers.NVIC, BusRangeRegistration : 0x<0xE000E000, 0xE000EFFF>
+^^^^^Machine.cs InitializeInvalidatedAddressesList()
+^^^^^^^^ MappedMemory.cs AllocateSegment()
+^^^ SystemBus.cs Register 1111 : ibus_Peripheral : Antmicro.Renode.Peripherals.UART.NRF52840_UART, BusRangeRegistration : 0x<0x40002000, 0x40002FFF>
+^^^ SystemBus.cs Register 1111 : ibus_Peripheral : Antmicro.Renode.Peripherals.UART.NRF52840_UART, BusRangeRegistration : 0x<0x40028000, 0x40028FFF>
+^^^ SystemBus.cs Register 1111 : ibus_Peripheral : Antmicro.Renode.Peripherals.Timers.NRF52840_RTC, BusRangeRegistration : 0x<0x4000B000, 0x4000BFFF>
+^^^ SystemBus.cs Register 1111 : ibus_Peripheral : Antmicro.Renode.Peripherals.Timers.NRF52840_RTC, BusRangeRegistration : 0x<0x40011000, 0x40011FFF>
+^^^ SystemBus.cs Register 1111 : ibus_Peripheral : Antmicro.Renode.Peripherals.Timers.NRF52840_RTC, BusRangeRegistration : 0x<0x40024000, 0x40024FFF>
+^^^ SystemBus.cs Register 1111 : ibus_Peripheral : Antmicro.Renode.Peripherals.Timers.NRF52840_Watchdog, BusRangeRegistration : 0x<0x40010000, 0x40010FFF>
+^^^ SystemBus.cs Register 1111 : ibus_Peripheral : Antmicro.Renode.Peripherals.Miscellaneous.NRF52840_PPI, BusRangeRegistration : 0x<0x4001F000, 0x4001FFFF>
+^^^ SystemBus.cs Register 1111 : ibus_Peripheral : Antmicro.Renode.Peripherals.Memory.MappedMemory, BusRangeRegistration : 0x<0x00000000, 0x000FFFFF>
+^^^^ Getting MappedSegments , in MappedMemory.cs
+^^^ SystemBus.cs LoadFileChunks : File loaded, path : /home/asmita/fuzzing_bare-metal/SEFF_project_dirs/SEFF-project/LibAFL/fuzzers/libafl_renode/nrf_bmp180_drv1_no_delay.out, minAddr : 0
+^^^^ TranslationCPU.cs MapMemory() Registered memory at 0x0, size 0x10000, pointer : 0x0.
+^^^^ TranslationCPU.cs MapMemory() Registered memory at 0x10000, size 0x10000, pointer : 0x0.
+^^^^ TranslationCPU.cs MapMemory() Registered memory at 0x20000, size 0x10000, pointer : 0x0.
+^^^^ TranslationCPU.cs MapMemory() Registered memory at 0x30000, size 0x10000, pointer : 0x0.
+^^^^ TranslationCPU.cs MapMemory() Registered memory at 0x40000, size 0x10000, pointer : 0x0.
+^^^^ TranslationCPU.cs MapMemory() Registered memory at 0x50000, size 0x10000, pointer : 0x0.
+^^^^ TranslationCPU.cs MapMemory() Registered memory at 0x60000, size 0x10000, pointer : 0x0.
+^^^^ TranslationCPU.cs MapMemory() Registered memory at 0x70000, size 0x10000, pointer : 0x0.
+^^^^ TranslationCPU.cs MapMemory() Registered memory at 0x80000, size 0x10000, pointer : 0x0.
+^^^^ TranslationCPU.cs MapMemory() Registered memory at 0x90000, size 0x10000, pointer : 0x0.
+^^^^ TranslationCPU.cs MapMemory() Registered memory at 0xA0000, size 0x10000, pointer : 0x0.
+^^^^ TranslationCPU.cs MapMemory() Registered memory at 0xB0000, size 0x10000, pointer : 0x0.
+^^^^ TranslationCPU.cs MapMemory() Registered memory at 0xC0000, size 0x10000, pointer : 0x0.
+^^^^ TranslationCPU.cs MapMemory() Registered memory at 0xD0000, size 0x10000, pointer : 0x0.
+^^^^ TranslationCPU.cs MapMemory() Registered memory at 0xE0000, size 0x10000, pointer : 0x0.
+^^^^ TranslationCPU.cs MapMemory() Registered memory at 0xF0000, size 0x10000, pointer : 0x0.
+^^^ SystemBus.cs Register 1111 : ibus_Peripheral : Antmicro.Renode.Peripherals.Memory.MappedMemory, BusRangeRegistration : 0x<0x00800000, 0x0083FFFF>
+^^^^ Getting MappedSegments , in MappedMemory.cs
+^^^^ TranslationCPU.cs MapMemory() Registered memory at 0x800000, size 0x10000, pointer : 0x0.
+^^^^ TranslationCPU.cs MapMemory() Registered memory at 0x810000, size 0x10000, pointer : 0x0.
+^^^^ TranslationCPU.cs MapMemory() Registered memory at 0x820000, size 0x10000, pointer : 0x0.
+^^^^ TranslationCPU.cs MapMemory() Registered memory at 0x830000, size 0x10000, pointer : 0x0.
+^^^ SystemBus.cs Register 1111 : ibus_Peripheral : Antmicro.Renode.Peripherals.Memory.MappedMemory, BusRangeRegistration : 0x<0x20000000, 0x2003FFFF>
+^^^^ Getting MappedSegments , in MappedMemory.cs
+^^^^ TranslationCPU.cs MapMemory() Registered memory at 0x20000000, size 0x10000, pointer : 0x0.
+^^^^ TranslationCPU.cs MapMemory() Registered memory at 0x20010000, size 0x10000, pointer : 0x0.
+^^^^ TranslationCPU.cs MapMemory() Registered memory at 0x20020000, size 0x10000, pointer : 0x0.
+^^^^ TranslationCPU.cs MapMemory() Registered memory at 0x20030000, size 0x10000, pointer : 0x0.
+^^^ SystemBus.cs Register 1111 : ibus_Peripheral : Antmicro.Renode.Peripherals.Miscellaneous.NRF_CLOCK, BusRangeRegistration : 0x<0x40000000, 0x40000FFF>
+^^^ SystemBus.cs Register 1111 : ibus_Peripheral : Antmicro.Renode.Peripherals.I2C.NRF52840_I2C, BusRangeRegistration : 0x<0x40003000, 0x40003FFF>
+^^^ SystemBus.cs Register 1111 : ibus_Peripheral : Antmicro.Renode.Peripherals.SPI.NRF52840_SPI, BusRangeRegistration : 0x<0x40023000, 0x40023FFF>
+^^^ SystemBus.cs Register 1111 : ibus_Peripheral : Antmicro.Renode.Peripherals.GPIOPort.NRF52840_GPIO, BusRangeRegistration : 0x<0x50000500, 0x500007FF>
+^^^ SystemBus.cs Register 1111 : ibus_Peripheral : Antmicro.Renode.Peripherals.GPIOPort.NRF52840_GPIO, BusRangeRegistration : 0x<0x50000800, 0x50000AFF>
+^^^ SystemBus.cs Register 1111 : ibus_Peripheral : Antmicro.Renode.Peripherals.GPIOPort.NRF52840_GPIOTasksEvents, BusRangeRegistration : 0x<0x40006000, 0x40006FFF>
+^^^ SystemBus.cs Register 1111 : ibus_Peripheral : Antmicro.Renode.Peripherals.I2C.NRF52840_I2C, BusRangeRegistration : 0x<0x40004000, 0x40004FFF>
+^^^ SystemBus.cs Register 1111 : ibus_Peripheral : Antmicro.Renode.Peripherals.Timers.NRF52840_Timer, BusRangeRegistration : 0x<0x40008000, 0x40008FFF>
+^^^ SystemBus.cs Register 1111 : ibus_Peripheral : Antmicro.Renode.Peripherals.Timers.NRF52840_Timer, BusRangeRegistration : 0x<0x40009000, 0x40009FFF>
+^^^ SystemBus.cs Register 1111 : ibus_Peripheral : Antmicro.Renode.Peripherals.Timers.NRF52840_Timer, BusRangeRegistration : 0x<0x4000A000, 0x4000AFFF>
+^^^ SystemBus.cs Register 1111 : ibus_Peripheral : Antmicro.Renode.Peripherals.Timers.NRF52840_Timer, BusRangeRegistration : 0x<0x4001A000, 0x4001AFFF>
+^^^ SystemBus.cs Register 1111 : ibus_Peripheral : Antmicro.Renode.Peripherals.Timers.NRF52840_Timer, BusRangeRegistration : 0x<0x4001B000, 0x4001BFFF>
+^^^ SystemBus.cs Register 1111 : ibus_Peripheral : Antmicro.Renode.Peripherals.Sound.NRF52840_I2S, BusRangeRegistration : 0x<0x40025000, 0x40025FFF>
+^^^ SystemBus.cs Register 1111 : ibus_Peripheral : Antmicro.Renode.Peripherals.Sound.NRF52840_PDM, BusRangeRegistration : 0x<0x4001D000, 0x4001DFFF>
+^^^ SystemBus.cs Register 1111 : ibus_Peripheral : Antmicro.Renode.Peripherals.Wireless.NRF52840_Radio, BusRangeRegistration : 0x<0x40001000, 0x40001FFF>
+^^^ SystemBus.cs Register 1111 : ibus_Peripheral : Antmicro.Renode.Peripherals.Miscellaneous.NRF52840_RNG, BusRangeRegistration : 0x<0x4000D000, 0x4000DFFF>
+^^^ SystemBus.cs Register 1111 : ibus_Peripheral : Antmicro.Renode.Peripherals.Miscellaneous.NRF52840_ECB, BusRangeRegistration : 0x<0x4000E000, 0x4000EFFF>
+^^^ SystemBus.cs Register 1111 : ibus_Peripheral : Antmicro.Renode.Peripherals.Miscellaneous.NRF52840_EGU, BusRangeRegistration : 0x<0x40014000, 0x40014FFF>
+^^^ SystemBus.cs Register 1111 : ibus_Peripheral : Antmicro.Renode.Peripherals.Miscellaneous.NRF52840_EGU, BusRangeRegistration : 0x<0x40015000, 0x40015FFF>
+^^^ SystemBus.cs Register 1111 : ibus_Peripheral : Antmicro.Renode.Peripherals.Miscellaneous.NRF52840_EGU, BusRangeRegistration : 0x<0x40016000, 0x40016FFF>
+^^^ SystemBus.cs Register 1111 : ibus_Peripheral : Antmicro.Renode.Peripherals.Miscellaneous.NRF52840_EGU, BusRangeRegistration : 0x<0x40017000, 0x40017FFF>
+^^^ SystemBus.cs Register 1111 : ibus_Peripheral : Antmicro.Renode.Peripherals.Miscellaneous.NRF52840_EGU, BusRangeRegistration : 0x<0x40018000, 0x40018FFF>
+^^^ SystemBus.cs Register 1111 : ibus_Peripheral : Antmicro.Renode.Peripherals.Miscellaneous.NRF52840_EGU, BusRangeRegistration : 0x<0x40019000, 0x40019FFF>
+CreationDriver.cs PrepareVariables() start
+CreationDriver.cs PrepareVariables() Done
+^^^^ CreationDriver.cs ProcessInner before machine PostCreationActions()
+^^^^^^^^ MappedMemory.cs AllocateSegment()
+^^^ SystemBus.cs LoadFileChunks : File loaded, path : /home/asmita/fuzzing_bare-metal/SEFF_project_dirs/SEFF-project/LibAFL/fuzzers/libafl_renode/nrf_bmp180_drv1_no_delay.out, minAddr : 0
+CreationDriver.cs PrepareVariables() start
+CreationDriver.cs PrepareVariables() Done
+^^^^ CreationDriver.cs ProcessInner before machine PostCreationActions()
+^^^^^^^^ MappedMemory.cs AllocateSegment()
+^^^ SystemBus.cs LoadFileChunks : File loaded, path : /home/asmita/fuzzing_bare-metal/SEFF_project_dirs/SEFF-project/LibAFL/fuzzers/libafl_renode/nrf_bmp180_drv1_no_delay.out, minAddr : 0
+*****Coverage Map Pointer Address: 0x7dd2847240d1
+^^^^^ externalsManager.cs : Start()
+^^^^^^^ TarnslationalCPU.cs OnLeavingResetState()
+^^^^^^ basecpu.cs, OnLeavingResetState()
+^^^^^ MasterTimeSource.cs start()
+^^^^^^^^ TranslationCPU.cs export TouchHostBlock : offset : 0x0 at [PC=0x2BC]
+^^^^^^^^ TranslationCPU.cs export TouchHostBlock , mapping : seg_pointer : 0x619E2B8A3000
+Sysbus.cs MappedSegmentWrapper : Touch() 
+^^^^^^^^ TranslationCPU.cs RebuildMemoryMappings Start 
+^^^TranslationCPU.cs RebuildMemoryMappings : HostMemoryBlock - Start: 0x0, Size: 0x10000, HostPointer: 0x619E2B8A3000
+^^^TranslationCPU.cs RebuildMemoryMappings HostBlocks len : 1, blockbuffer : 0x7DD2440482B0
+^^TranslationCPU.cs RebuildMemoryMappings : RenodeSetHostBlocks done
+^^^^^^^^ TranslationCPU.cs RebuildMemoryMappings Done with 1 host blocks now!!!!
+^^^^^^^^ TranslationCPU.cs export TouchHostBlock : offset : 0x20000000 at [PC=0x2CA]
+^^^^^^^^ TranslationCPU.cs export TouchHostBlock , mapping : seg_pointer : 0x0
+Sysbus.cs MappedSegmentWrapper : Touch() 
+^^^^^^^^ MappedMemory.cs AllocateSegment()
+^^^^^^^^ TranslationCPU.cs RebuildMemoryMappings Start 
+^^^TranslationCPU.cs RebuildMemoryMappings : HostMemoryBlock - Start: 0x0, Size: 0x10000, HostPointer: 0x619E2B8A3000
+^^^TranslationCPU.cs RebuildMemoryMappings : HostMemoryBlock - Start: 0x20000000, Size: 0x10000, HostPointer: 0x7DD2440D5000
+^^^TranslationCPU.cs RebuildMemoryMappings HostBlocks len : 2, blockbuffer : 0x7DD24404B5F0
+^^TranslationCPU.cs RebuildMemoryMappings : RenodeSetHostBlocks done
+^^^^^^^^ TranslationCPU.cs RebuildMemoryMappings Done with 2 host blocks now!!!!
+^^^^^^^^ TranslationCPU.cs export TouchHostBlock : offset : 0x2003FC00 at [PC=0x3870]
+^^^^^^^^ TranslationCPU.cs export TouchHostBlock , mapping : seg_pointer : 0x0
+Sysbus.cs MappedSegmentWrapper : Touch() 
+^^^^^^^^ MappedMemory.cs AllocateSegment()
+^^^^^^^^ TranslationCPU.cs RebuildMemoryMappings Start 
+^^^TranslationCPU.cs RebuildMemoryMappings : HostMemoryBlock - Start: 0x0, Size: 0x10000, HostPointer: 0x619E2B8A3000
+^^^TranslationCPU.cs RebuildMemoryMappings : HostMemoryBlock - Start: 0x20000000, Size: 0x10000, HostPointer: 0x7DD2440D5000
+^^^TranslationCPU.cs RebuildMemoryMappings : HostMemoryBlock - Start: 0x20030000, Size: 0x10000, HostPointer: 0x7DD2440E6000
+^^^TranslationCPU.cs RebuildMemoryMappings HostBlocks len : 3, blockbuffer : 0x7DD2440B0260
+^^TranslationCPU.cs RebuildMemoryMappings : RenodeSetHostBlocks done
+^^^^^^^^ TranslationCPU.cs RebuildMemoryMappings Done with 3 host blocks now!!!!
+*****Coverage Map Pointer Address: 0x7e03777240d1
+^^^^^ externalsManager.cs : Start()
+^^^^^^^ TarnslationalCPU.cs OnLeavingResetState()
+^^^^^^ basecpu.cs, OnLeavingResetState()
+^^^^^ MasterTimeSource.cs start()
+^^^^^^^^ TranslationCPU.cs export TouchHostBlock : offset : 0x0 at [PC=0x2BC]
+^^^^^^^^ TranslationCPU.cs export TouchHostBlock , mapping : seg_pointer : 0x601316AA7000
+Sysbus.cs MappedSegmentWrapper : Touch() 
+^^^^^^^^ TranslationCPU.cs RebuildMemoryMappings Start 
+^^^TranslationCPU.cs RebuildMemoryMappings : HostMemoryBlock - Start: 0x0, Size: 0x10000, HostPointer: 0x601316AA7000
+^^^TranslationCPU.cs RebuildMemoryMappings HostBlocks len : 1, blockbuffer : 0x7E033405C900
+^^TranslationCPU.cs RebuildMemoryMappings : RenodeSetHostBlocks done
+^^^^^^^^ TranslationCPU.cs RebuildMemoryMappings Done with 1 host blocks now!!!!
+^^^^^^^^ TranslationCPU.cs export TouchHostBlock : offset : 0x20000000 at [PC=0x2CA]
+^^^^^^^^ TranslationCPU.cs export TouchHostBlock , mapping : seg_pointer : 0x0
+Sysbus.cs MappedSegmentWrapper : Touch() 
+^^^^^^^^ MappedMemory.cs AllocateSegment()
+^^^^^^^^ TranslationCPU.cs RebuildMemoryMappings Start 
+^^^TranslationCPU.cs RebuildMemoryMappings : HostMemoryBlock - Start: 0x0, Size: 0x10000, HostPointer: 0x601316AA7000
+^^^TranslationCPU.cs RebuildMemoryMappings : HostMemoryBlock - Start: 0x20000000, Size: 0x10000, HostPointer: 0x7E03340C8000
+^^^TranslationCPU.cs RebuildMemoryMappings HostBlocks len : 2, blockbuffer : 0x7E0334033DA0
+^^TranslationCPU.cs RebuildMemoryMappings : RenodeSetHostBlocks done
+^^^^^^^^ TranslationCPU.cs RebuildMemoryMappings Done with 2 host blocks now!!!!
+^^^^^^^^ TranslationCPU.cs export TouchHostBlock : offset : 0x2003FC00 at [PC=0x3870]
+^^^^^^^^ TranslationCPU.cs export TouchHostBlock , mapping : seg_pointer : 0x0
+Sysbus.cs MappedSegmentWrapper : Touch() 
+^^^^^^^^ MappedMemory.cs AllocateSegment()
+^^^^^^^^ TranslationCPU.cs RebuildMemoryMappings Start 
+^^^TranslationCPU.cs RebuildMemoryMappings : HostMemoryBlock - Start: 0x0, Size: 0x10000, HostPointer: 0x601316AA7000
+^^^TranslationCPU.cs RebuildMemoryMappings : HostMemoryBlock - Start: 0x20000000, Size: 0x10000, HostPointer: 0x7E03340C8000
+^^^TranslationCPU.cs RebuildMemoryMappings : HostMemoryBlock - Start: 0x20030000, Size: 0x10000, HostPointer: 0x7E03340DD000
+^^^TranslationCPU.cs RebuildMemoryMappings HostBlocks len : 3, blockbuffer : 0x7E03340A3570
+^^TranslationCPU.cs RebuildMemoryMappings : RenodeSetHostBlocks done
+^^^^^^^^ TranslationCPU.cs RebuildMemoryMappings Done with 3 host blocks now!!!!
+*****Coverage Map Pointer Address: 0x7b2bccd240d1
+^^^^^ externalsManager.cs : Start()
+^^^^^^^ TarnslationalCPU.cs OnLeavingResetState()
+^^^^^^ basecpu.cs, OnLeavingResetState()
+^^^^^ MasterTimeSource.cs start()
+^^^^^^^^ TranslationCPU.cs export TouchHostBlock : offset : 0x0 at [PC=0x2BC]
+^^^^^^^^ TranslationCPU.cs export TouchHostBlock , mapping : seg_pointer : 0x62F24F869000
+Sysbus.cs MappedSegmentWrapper : Touch() 
+^^^^^^^^ TranslationCPU.cs RebuildMemoryMappings Start 
+^^^TranslationCPU.cs RebuildMemoryMappings : HostMemoryBlock - Start: 0x0, Size: 0x10000, HostPointer: 0x62F24F869000
+^^^TranslationCPU.cs RebuildMemoryMappings HostBlocks len : 1, blockbuffer : 0x7B2B8C033B00
+^^TranslationCPU.cs RebuildMemoryMappings : RenodeSetHostBlocks done
+^^^^^^^^ TranslationCPU.cs RebuildMemoryMappings Done with 1 host blocks now!!!!
+^^^^^^^^ TranslationCPU.cs export TouchHostBlock : offset : 0x20000000 at [PC=0x2CA]
+^^^^^^^^ TranslationCPU.cs export TouchHostBlock , mapping : seg_pointer : 0x0
+Sysbus.cs MappedSegmentWrapper : Touch() 
+^^^^^^^^ MappedMemory.cs AllocateSegment()
+^^^^^^^^ TranslationCPU.cs RebuildMemoryMappings Start 
+^^^TranslationCPU.cs RebuildMemoryMappings : HostMemoryBlock - Start: 0x0, Size: 0x10000, HostPointer: 0x62F24F869000
+^^^TranslationCPU.cs RebuildMemoryMappings : HostMemoryBlock - Start: 0x20000000, Size: 0x10000, HostPointer: 0x7B2B8C0BE000
+^^^TranslationCPU.cs RebuildMemoryMappings HostBlocks len : 2, blockbuffer : 0x7B2B8C0B4980
+^^TranslationCPU.cs RebuildMemoryMappings : RenodeSetHostBlocks done
+^^^^^^^^ TranslationCPU.cs RebuildMemoryMappings Done with 2 host blocks now!!!!
+^^^^^^^^ TranslationCPU.cs export TouchHostBlock : offset : 0x2003FC00 at [PC=0x3870]
+^^^^^^^^ TranslationCPU.cs export TouchHostBlock , mapping : seg_pointer : 0x0
+Sysbus.cs MappedSegmentWrapper : Touch() 
+^^^^^^^^ MappedMemory.cs AllocateSegment()
+^^^^^^^^ TranslationCPU.cs RebuildMemoryMappings Start 
+^^^TranslationCPU.cs RebuildMemoryMappings : HostMemoryBlock - Start: 0x0, Size: 0x10000, HostPointer: 0x62F24F869000
+^^^TranslationCPU.cs RebuildMemoryMappings : HostMemoryBlock - Start: 0x20000000, Size: 0x10000, HostPointer: 0x7B2B8C0BE000
+^^^TranslationCPU.cs RebuildMemoryMappings : HostMemoryBlock - Start: 0x20030000, Size: 0x10000, HostPointer: 0x7B2B8C0CF000
+^^^TranslationCPU.cs RebuildMemoryMappings HostBlocks len : 3, blockbuffer : 0x7B2B8C0A98C0
+^^TranslationCPU.cs RebuildMemoryMappings : RenodeSetHostBlocks done
+^^^^^^^^ TranslationCPU.cs RebuildMemoryMappings Done with 3 host blocks now!!!!
+^^^^^^^^^^^ Fuzz_Mem_Save - mappedMemeory : Total segment : 4, segment size : 65536^^^^^^^^^^^^^^
+Fuzz_Mem_Save test Segment 0 address: 0x7DD2440D5000
+Fuzz_Mem_Save Segment 0 address: 0x7DD2440D5000
+Fuzz_Mem_Save Segment 1 address: 0x0
+Fuzz_Mem_Save Segment 2 address: 0x0
+Fuzz_Mem_Save Segment 3 address: 0x7DD2440E6000
+Fuzz_Mem_Save Segment saved seg : 4 , realSeg : 2
+^^^^^^^^^^^ Fuzz_Mem_Save - mappedMemeory : Total segment : 4, segment size : 65536^^^^^^^^^^^^^^
+Fuzz_Mem_Save test Segment 0 address: 0x7E03340C8000
+Fuzz_Mem_Save Segment 0 address: 0x7E03340C8000
+Fuzz_Mem_Save Segment 1 address: 0x0
+Fuzz_Mem_Save Segment 2 address: 0x0
+Fuzz_Mem_Save Segment 3 address: 0x7E03340DD000
+Fuzz_Mem_Save Segment saved seg : 4 , realSeg : 2
+^^^^^^^^^^^ Test Prepare state - Translation CPU ^^^^^^^^^^^^^^
+^^^^^^^^^^^TlibGetStateSize : 65256
+^^^^^^^^^^^ Prepare state - Translation CPU Done!! ^^^^^^^^^^^^^^
+^^^^^^^^^^^ Test Prepare state - Translation CPU ^^^^^^^^^^^^^^
+^^^^^^^^^^^TlibGetStateSize : 65256
+^^^^^^^^^^^ Prepare state - Translation CPU Done!! ^^^^^^^^^^^^^^
+Hello, entered main_fuzzing_func in libafl_renode
+Setting up run_client
+Hello, entered main_fuzzing_func in libafl_renode
+Setting up run_client
+** Test Hello from Emulator cs 3
+** Test Hello from Emulator cs 3
+^^^ Sysbus.cs InitStructures()
+CreationDriver.cs PrepareVariables() start
+CreationDriver.cs PrepareVariables() Done
+^^^^ CreationDriver.cs ProcessInner starting
+^^^ Sysbus.cs InitStructures()
+CreationDriver.cs PrepareVariables() start
+CreationDriver.cs PrepareVariables() Done
+^^^^ CreationDriver.cs ProcessInner starting
+^^^^^ TranslationCPU - Init ^^^^^^^^
+^^^^^ TranslationCPU - Init ^^^^^^^^
+^^^^^ TranslationCPU - Init - TlibInit start : model : cortex-m4 ^^^^^^^^
+^^^^^ TranslationCPU - Init - TlibInit start : model : cortex-m4 Done!!!^^^^^^^^
+^^^^^ TranslationCPU - Init - TlibAtomicMemoryStateInit start ^^^^^^^^
+^^^^^ TranslationCPU - HandleRamSetup ^^^^^^^^
+^^^^^ TranslationCPU - Init Done!!^^^^^^^^
+*****MappedMeory()********** : machine : nrf, size : 1048576, segmentSize : 65536
+^^^^^^ MappedMemeory.cs Preparing 16 segments for 100000 bytes of memory, each 65536 bytes long.
+^^^^^^ MappedMemeory.cs Preparing seg : describedSegments len : 16
+^^^^^^ MappedMemeory.cs Preparing seg : describedSegments[0] val :[MappedSegment: Size=0x10000, StartingOffset=0x0], pointer : 0x0
+^^^^^^ MappedMemeory.cs Preparing seg : describedSegments[1] val :[MappedSegment: Size=0x10000, StartingOffset=0x10000], pointer : 0x0
+^^^^^^ MappedMemeory.cs Preparing seg : describedSegments[2] val :[MappedSegment: Size=0x10000, StartingOffset=0x20000], pointer : 0x0
+^^^^^^ MappedMemeory.cs Preparing seg : describedSegments[3] val :[MappedSegment: Size=0x10000, StartingOffset=0x30000], pointer : 0x0
+^^^^^^ MappedMemeory.cs Preparing seg : describedSegments[4] val :[MappedSegment: Size=0x10000, StartingOffset=0x40000], pointer : 0x0
+^^^^^^ MappedMemeory.cs Preparing seg : describedSegments[5] val :[MappedSegment: Size=0x10000, StartingOffset=0x50000], pointer : 0x0
+^^^^^^ MappedMemeory.cs Preparing seg : describedSegments[6] val :[MappedSegment: Size=0x10000, StartingOffset=0x60000], pointer : 0x0
+^^^^^^ MappedMemeory.cs Preparing seg : describedSegments[7] val :[MappedSegment: Size=0x10000, StartingOffset=0x70000], pointer : 0x0
+^^^^^^ MappedMemeory.cs Preparing seg : describedSegments[8] val :[MappedSegment: Size=0x10000, StartingOffset=0x80000], pointer : 0x0
+^^^^^^ MappedMemeory.cs Preparing seg : describedSegments[9] val :[MappedSegment: Size=0x10000, StartingOffset=0x90000], pointer : 0x0
+^^^^^^ MappedMemeory.cs Preparing seg : describedSegments[10] val :[MappedSegment: Size=0x10000, StartingOffset=0xA0000], pointer : 0x0
+^^^^^^ MappedMemeory.cs Preparing seg : describedSegments[11] val :[MappedSegment: Size=0x10000, StartingOffset=0xB0000], pointer : 0x0
+^^^^^^ MappedMemeory.cs Preparing seg : describedSegments[12] val :[MappedSegment: Size=0x10000, StartingOffset=0xC0000], pointer : 0x0
+^^^^^^ MappedMemeory.cs Preparing seg : describedSegments[13] val :[MappedSegment: Size=0x10000, StartingOffset=0xD0000], pointer : 0x0
+^^^^^^ MappedMemeory.cs Preparing seg : describedSegments[14] val :[MappedSegment: Size=0x10000, StartingOffset=0xE0000], pointer : 0x0
+^^^^^^ MappedMemeory.cs Preparing seg : describedSegments[15] val : 0x[MappedSegment: Size=0x10000, StartingOffset=0xF0000]
+*****MappedMeory()********** : machine : nrf, size : 262144, segmentSize : 65536
+^^^^^^ MappedMemeory.cs Preparing 4 segments for 40000 bytes of memory, each 65536 bytes long.
+^^^^^^ MappedMemeory.cs Preparing seg : describedSegments len : 4
+^^^^^^ MappedMemeory.cs Preparing seg : describedSegments[0] val :[MappedSegment: Size=0x10000, StartingOffset=0x0], pointer : 0x0
+^^^^^^ MappedMemeory.cs Preparing seg : describedSegments[1] val :[MappedSegment: Size=0x10000, StartingOffset=0x10000], pointer : 0x0
+^^^^^^ MappedMemeory.cs Preparing seg : describedSegments[2] val :[MappedSegment: Size=0x10000, StartingOffset=0x20000], pointer : 0x0
+^^^^^^ MappedMemeory.cs Preparing seg : describedSegments[3] val : 0x[MappedSegment: Size=0x10000, StartingOffset=0x30000]
+^^^ NRF52840.cs constructor init
+^^^ NRF52840.cs DefineRegisters
+^^^ NRF52840.cs constructor init
+^^^ NRF52840.cs DefineRegisters
+^^^^^ TranslationCPU - Init - TlibInit start : model : cortex-m4 ^^^^^^^^
+^^^ SystemBus.cs Register 1111 : ibus_Peripheral : Antmicro.Renode.Peripherals.IRQControllers.NVIC, BusRangeRegistration : 0x<0xE000E000, 0xE000EFFF>
+^^^^^ TranslationCPU - Init - TlibInit start : model : cortex-m4 Done!!!^^^^^^^^
+^^^^^ TranslationCPU - Init - TlibAtomicMemoryStateInit start ^^^^^^^^
+^^^^^ TranslationCPU - HandleRamSetup ^^^^^^^^
+^^^^^ TranslationCPU - Init Done!!^^^^^^^^
+^^^^^Machine.cs InitializeInvalidatedAddressesList()
+^^^ SystemBus.cs Register 1111 : ibus_Peripheral : Antmicro.Renode.Peripherals.UART.NRF52840_UART, BusRangeRegistration : 0x<0x40002000, 0x40002FFF>
+*****MappedMeory()********** : machine : nrf, size : 1048576, segmentSize : 65536
+^^^^^^ MappedMemeory.cs Preparing 16 segments for 100000 bytes of memory, each 65536 bytes long.
+^^^^^^ MappedMemeory.cs Preparing seg : describedSegments len : 16
+^^^^^^ MappedMemeory.cs Preparing seg : describedSegments[0] val :[MappedSegment: Size=0x10000, StartingOffset=0x0], pointer : 0x0
+^^^^^^ MappedMemeory.cs Preparing seg : describedSegments[1] val :[MappedSegment: Size=0x10000, StartingOffset=0x10000], pointer : 0x0
+^^^^^^ MappedMemeory.cs Preparing seg : describedSegments[2] val :[MappedSegment: Size=0x10000, StartingOffset=0x20000], pointer : 0x0
+^^^^^^ MappedMemeory.cs Preparing seg : describedSegments[3] val :[MappedSegment: Size=0x10000, StartingOffset=0x30000], pointer : 0x0
+^^^^^^ MappedMemeory.cs Preparing seg : describedSegments[4] val :[MappedSegment: Size=0x10000, StartingOffset=0x40000], pointer : 0x0
+^^^^^^ MappedMemeory.cs Preparing seg : describedSegments[5] val :[MappedSegment: Size=0x10000, StartingOffset=0x50000], pointer : 0x0
+^^^^^^ MappedMemeory.cs Preparing seg : describedSegments[6] val :[MappedSegment: Size=0x10000, StartingOffset=0x60000], pointer : 0x0
+^^^^^^ MappedMemeory.cs Preparing seg : describedSegments[7] val :[MappedSegment: Size=0x10000, StartingOffset=0x70000], pointer : 0x0
+^^^^^^ MappedMemeory.cs Preparing seg : describedSegments[8] val :[MappedSegment: Size=0x10000, StartingOffset=0x80000], pointer : 0x0
+^^^^^^ MappedMemeory.cs Preparing seg : describedSegments[9] val :[MappedSegment: Size=0x10000, StartingOffset=0x90000], pointer : 0x0
+^^^^^^ MappedMemeory.cs Preparing seg : describedSegments[10] val :[MappedSegment: Size=0x10000, StartingOffset=0xA0000], pointer : 0x0
+^^^^^^ MappedMemeory.cs Preparing seg : describedSegments[11] val :[MappedSegment: Size=0x10000, StartingOffset=0xB0000], pointer : 0x0
+^^^^^^ MappedMemeory.cs Preparing seg : describedSegments[12] val :[MappedSegment: Size=0x10000, StartingOffset=0xC0000], pointer : 0x0
+^^^^^^ MappedMemeory.cs Preparing seg : describedSegments[13] val :[MappedSegment: Size=0x10000, StartingOffset=0xD0000], pointer : 0x0
+^^^^^^ MappedMemeory.cs Preparing seg : describedSegments[14] val :[MappedSegment: Size=0x10000, StartingOffset=0xE0000], pointer : 0x0
+^^^^^^ MappedMemeory.cs Preparing seg : describedSegments[15] val : 0x[MappedSegment: Size=0x10000, StartingOffset=0xF0000]
+*****MappedMeory()********** : machine : nrf, size : 262144, segmentSize : 65536
+^^^^^^ MappedMemeory.cs Preparing 4 segments for 40000 bytes of memory, each 65536 bytes long.
+^^^^^^ MappedMemeory.cs Preparing seg : describedSegments len : 4
+^^^^^^ MappedMemeory.cs Preparing seg : describedSegments[0] val :[MappedSegment: Size=0x10000, StartingOffset=0x0], pointer : 0x0
+^^^^^^ MappedMemeory.cs Preparing seg : describedSegments[1] val :[MappedSegment: Size=0x10000, StartingOffset=0x10000], pointer : 0x0
+^^^^^^ MappedMemeory.cs Preparing seg : describedSegments[2] val :[MappedSegment: Size=0x10000, StartingOffset=0x20000], pointer : 0x0
+^^^^^^ MappedMemeory.cs Preparing seg : describedSegments[3] val : 0x[MappedSegment: Size=0x10000, StartingOffset=0x30000]
+^^^ SystemBus.cs Register 1111 : ibus_Peripheral : Antmicro.Renode.Peripherals.UART.NRF52840_UART, BusRangeRegistration : 0x<0x40028000, 0x40028FFF>
+^^^ SystemBus.cs Register 1111 : ibus_Peripheral : Antmicro.Renode.Peripherals.Timers.NRF52840_RTC, BusRangeRegistration : 0x<0x4000B000, 0x4000BFFF>
+^^^ SystemBus.cs Register 1111 : ibus_Peripheral : Antmicro.Renode.Peripherals.Timers.NRF52840_RTC, BusRangeRegistration : 0x<0x40011000, 0x40011FFF>
+^^^ SystemBus.cs Register 1111 : ibus_Peripheral : Antmicro.Renode.Peripherals.Timers.NRF52840_RTC, BusRangeRegistration : 0x<0x40024000, 0x40024FFF>
+^^^ SystemBus.cs Register 1111 : ibus_Peripheral : Antmicro.Renode.Peripherals.Timers.NRF52840_Watchdog, BusRangeRegistration : 0x<0x40010000, 0x40010FFF>
+^^^ SystemBus.cs Register 1111 : ibus_Peripheral : Antmicro.Renode.Peripherals.Miscellaneous.NRF52840_PPI, BusRangeRegistration : 0x<0x4001F000, 0x4001FFFF>
+^^^ SystemBus.cs Register 1111 : ibus_Peripheral : Antmicro.Renode.Peripherals.Memory.MappedMemory, BusRangeRegistration : 0x<0x00000000, 0x000FFFFF>
+^^^ NRF52840.cs constructor init
+^^^ NRF52840.cs DefineRegisters
+^^^^ Getting MappedSegments , in MappedMemory.cs
+^^^^ TranslationCPU.cs MapMemory() Registered memory at 0x0, size 0x10000, pointer : 0x0.
+^^^^ TranslationCPU.cs MapMemory() Registered memory at 0x10000, size 0x10000, pointer : 0x0.
+^^^^ TranslationCPU.cs MapMemory() Registered memory at 0x20000, size 0x10000, pointer : 0x0.
+^^^^ TranslationCPU.cs MapMemory() Registered memory at 0x30000, size 0x10000, pointer : 0x0.
+^^^^ TranslationCPU.cs MapMemory() Registered memory at 0x40000, size 0x10000, pointer : 0x0.
+^^^^ TranslationCPU.cs MapMemory() Registered memory at 0x50000, size 0x10000, pointer : 0x0.
+^^^^ TranslationCPU.cs MapMemory() Registered memory at 0x60000, size 0x10000, pointer : 0x0.
+^^^^ TranslationCPU.cs MapMemory() Registered memory at 0x70000, size 0x10000, pointer : 0x0.
+^^^^ TranslationCPU.cs MapMemory() Registered memory at 0x80000, size 0x10000, pointer : 0x0.
+^^^^ TranslationCPU.cs MapMemory() Registered memory at 0x90000, size 0x10000, pointer : 0x0.
+^^^^ TranslationCPU.cs MapMemory() Registered memory at 0xA0000, size 0x10000, pointer : 0x0.
+^^^^ TranslationCPU.cs MapMemory() Registered memory at 0xB0000, size 0x10000, pointer : 0x0.
+^^^^ TranslationCPU.cs MapMemory() Registered memory at 0xC0000, size 0x10000, pointer : 0x0.
+^^^^ TranslationCPU.cs MapMemory() Registered memory at 0xD0000, size 0x10000, pointer : 0x0.
+^^^^ TranslationCPU.cs MapMemory() Registered memory at 0xE0000, size 0x10000, pointer : 0x0.
+^^^^ TranslationCPU.cs MapMemory() Registered memory at 0xF0000, size 0x10000, pointer : 0x0.
+^^^ SystemBus.cs Register 1111 : ibus_Peripheral : Antmicro.Renode.Peripherals.Memory.MappedMemory, BusRangeRegistration : 0x<0x00800000, 0x0083FFFF>
+^^^^ Getting MappedSegments , in MappedMemory.cs
+^^^^ TranslationCPU.cs MapMemory() Registered memory at 0x800000, size 0x10000, pointer : 0x0.
+^^^^ TranslationCPU.cs MapMemory() Registered memory at 0x810000, size 0x10000, pointer : 0x0.
+^^^^ TranslationCPU.cs MapMemory() Registered memory at 0x820000, size 0x10000, pointer : 0x0.
+^^^^ TranslationCPU.cs MapMemory() Registered memory at 0x830000, size 0x10000, pointer : 0x0.
+^^^ SystemBus.cs Register 1111 : ibus_Peripheral : Antmicro.Renode.Peripherals.Memory.MappedMemory, BusRangeRegistration : 0x<0x20000000, 0x2003FFFF>
+^^^^ Getting MappedSegments , in MappedMemory.cs
+^^^^ TranslationCPU.cs MapMemory() Registered memory at 0x20000000, size 0x10000, pointer : 0x0.
+^^^^ TranslationCPU.cs MapMemory() Registered memory at 0x20010000, size 0x10000, pointer : 0x0.
+^^^^ TranslationCPU.cs MapMemory() Registered memory at 0x20020000, size 0x10000, pointer : 0x0.
+^^^^ TranslationCPU.cs MapMemory() Registered memory at 0x20030000, size 0x10000, pointer : 0x0.
+^^^ SystemBus.cs Register 1111 : ibus_Peripheral : Antmicro.Renode.Peripherals.Miscellaneous.NRF_CLOCK, BusRangeRegistration : 0x<0x40000000, 0x40000FFF>
+^^^ SystemBus.cs Register 1111 : ibus_Peripheral : Antmicro.Renode.Peripherals.I2C.NRF52840_I2C, BusRangeRegistration : 0x<0x40003000, 0x40003FFF>
+^^^ SystemBus.cs Register 1111 : ibus_Peripheral : Antmicro.Renode.Peripherals.SPI.NRF52840_SPI, BusRangeRegistration : 0x<0x40023000, 0x40023FFF>
+^^^ SystemBus.cs Register 1111 : ibus_Peripheral : Antmicro.Renode.Peripherals.GPIOPort.NRF52840_GPIO, BusRangeRegistration : 0x<0x50000500, 0x500007FF>
+^^^ SystemBus.cs Register 1111 : ibus_Peripheral : Antmicro.Renode.Peripherals.GPIOPort.NRF52840_GPIO, BusRangeRegistration : 0x<0x50000800, 0x50000AFF>
+^^^ SystemBus.cs Register 1111 : ibus_Peripheral : Antmicro.Renode.Peripherals.GPIOPort.NRF52840_GPIOTasksEvents, BusRangeRegistration : 0x<0x40006000, 0x40006FFF>
+^^^ SystemBus.cs Register 1111 : ibus_Peripheral : Antmicro.Renode.Peripherals.I2C.NRF52840_I2C, BusRangeRegistration : 0x<0x40004000, 0x40004FFF>
+^^^ SystemBus.cs Register 1111 : ibus_Peripheral : Antmicro.Renode.Peripherals.Timers.NRF52840_Timer, BusRangeRegistration : 0x<0x40008000, 0x40008FFF>
+^^^ SystemBus.cs Register 1111 : ibus_Peripheral : Antmicro.Renode.Peripherals.Timers.NRF52840_Timer, BusRangeRegistration : 0x<0x40009000, 0x40009FFF>
+^^^ SystemBus.cs Register 1111 : ibus_Peripheral : Antmicro.Renode.Peripherals.Timers.NRF52840_Timer, BusRangeRegistration : 0x<0x4000A000, 0x4000AFFF>
+^^^ SystemBus.cs Register 1111 : ibus_Peripheral : Antmicro.Renode.Peripherals.Timers.NRF52840_Timer, BusRangeRegistration : 0x<0x4001A000, 0x4001AFFF>
+^^^ SystemBus.cs Register 1111 : ibus_Peripheral : Antmicro.Renode.Peripherals.Timers.NRF52840_Timer, BusRangeRegistration : 0x<0x4001B000, 0x4001BFFF>
+^^^ SystemBus.cs Register 1111 : ibus_Peripheral : Antmicro.Renode.Peripherals.Sound.NRF52840_I2S, BusRangeRegistration : 0x<0x40025000, 0x40025FFF>
+^^^ SystemBus.cs Register 1111 : ibus_Peripheral : Antmicro.Renode.Peripherals.Sound.NRF52840_PDM, BusRangeRegistration : 0x<0x4001D000, 0x4001DFFF>
+^^^ SystemBus.cs Register 1111 : ibus_Peripheral : Antmicro.Renode.Peripherals.Wireless.NRF52840_Radio, BusRangeRegistration : 0x<0x40001000, 0x40001FFF>
+^^^ SystemBus.cs Register 1111 : ibus_Peripheral : Antmicro.Renode.Peripherals.Miscellaneous.NRF52840_RNG, BusRangeRegistration : 0x<0x4000D000, 0x4000DFFF>
+^^^ SystemBus.cs Register 1111 : ibus_Peripheral : Antmicro.Renode.Peripherals.Miscellaneous.NRF52840_ECB, BusRangeRegistration : 0x<0x4000E000, 0x4000EFFF>
+^^^ SystemBus.cs Register 1111 : ibus_Peripheral : Antmicro.Renode.Peripherals.Miscellaneous.NRF52840_EGU, BusRangeRegistration : 0x<0x40014000, 0x40014FFF>
+^^^ SystemBus.cs Register 1111 : ibus_Peripheral : Antmicro.Renode.Peripherals.Miscellaneous.NRF52840_EGU, BusRangeRegistration : 0x<0x40015000, 0x40015FFF>
+^^^ SystemBus.cs Register 1111 : ibus_Peripheral : Antmicro.Renode.Peripherals.Miscellaneous.NRF52840_EGU, BusRangeRegistration : 0x<0x40016000, 0x40016FFF>
+^^^ SystemBus.cs Register 1111 : ibus_Peripheral : Antmicro.Renode.Peripherals.Miscellaneous.NRF52840_EGU, BusRangeRegistration : 0x<0x40017000, 0x40017FFF>
+^^^ SystemBus.cs Register 1111 : ibus_Peripheral : Antmicro.Renode.Peripherals.Miscellaneous.NRF52840_EGU, BusRangeRegistration : 0x<0x40018000, 0x40018FFF>
+^^^ SystemBus.cs Register 1111 : ibus_Peripheral : Antmicro.Renode.Peripherals.Miscellaneous.NRF52840_EGU, BusRangeRegistration : 0x<0x40019000, 0x40019FFF>
+^^^ NRF52840.cs constructor init
+^^^ NRF52840.cs DefineRegisters
+^^^ SystemBus.cs Register 1111 : ibus_Peripheral : Antmicro.Renode.Peripherals.IRQControllers.NVIC, BusRangeRegistration : 0x<0xE000E000, 0xE000EFFF>
+^^^^^Machine.cs InitializeInvalidatedAddressesList()
+^^^ SystemBus.cs Register 1111 : ibus_Peripheral : Antmicro.Renode.Peripherals.UART.NRF52840_UART, BusRangeRegistration : 0x<0x40002000, 0x40002FFF>
+^^^ SystemBus.cs Register 1111 : ibus_Peripheral : Antmicro.Renode.Peripherals.UART.NRF52840_UART, BusRangeRegistration : 0x<0x40028000, 0x40028FFF>
+^^^ SystemBus.cs Register 1111 : ibus_Peripheral : Antmicro.Renode.Peripherals.Timers.NRF52840_RTC, BusRangeRegistration : 0x<0x4000B000, 0x4000BFFF>
+^^^ SystemBus.cs Register 1111 : ibus_Peripheral : Antmicro.Renode.Peripherals.Timers.NRF52840_RTC, BusRangeRegistration : 0x<0x40011000, 0x40011FFF>
+^^^ SystemBus.cs Register 1111 : ibus_Peripheral : Antmicro.Renode.Peripherals.Timers.NRF52840_RTC, BusRangeRegistration : 0x<0x40024000, 0x40024FFF>
+^^^ SystemBus.cs Register 1111 : ibus_Peripheral : Antmicro.Renode.Peripherals.Timers.NRF52840_Watchdog, BusRangeRegistration : 0x<0x40010000, 0x40010FFF>
+^^^ SystemBus.cs Register 1111 : ibus_Peripheral : Antmicro.Renode.Peripherals.Miscellaneous.NRF52840_PPI, BusRangeRegistration : 0x<0x4001F000, 0x4001FFFF>
+^^^ SystemBus.cs Register 1111 : ibus_Peripheral : Antmicro.Renode.Peripherals.Memory.MappedMemory, BusRangeRegistration : 0x<0x00000000, 0x000FFFFF>
+^^^^ Getting MappedSegments , in MappedMemory.cs
+^^^^ TranslationCPU.cs MapMemory() Registered memory at 0x0, size 0x10000, pointer : 0x0.
+^^^^ TranslationCPU.cs MapMemory() Registered memory at 0x10000, size 0x10000, pointer : 0x0.
+^^^^ TranslationCPU.cs MapMemory() Registered memory at 0x20000, size 0x10000, pointer : 0x0.
+^^^^ TranslationCPU.cs MapMemory() Registered memory at 0x30000, size 0x10000, pointer : 0x0.
+^^^^ TranslationCPU.cs MapMemory() Registered memory at 0x40000, size 0x10000, pointer : 0x0.
+^^^^ TranslationCPU.cs MapMemory() Registered memory at 0x50000, size 0x10000, pointer : 0x0.
+^^^^ TranslationCPU.cs MapMemory() Registered memory at 0x60000, size 0x10000, pointer : 0x0.
+^^^^ TranslationCPU.cs MapMemory() Registered memory at 0x70000, size 0x10000, pointer : 0x0.
+^^^^ TranslationCPU.cs MapMemory() Registered memory at 0x80000, size 0x10000, pointer : 0x0.
+^^^^ TranslationCPU.cs MapMemory() Registered memory at 0x90000, size 0x10000, pointer : 0x0.
+^^^^ TranslationCPU.cs MapMemory() Registered memory at 0xA0000, size 0x10000, pointer : 0x0.
+^^^^ TranslationCPU.cs MapMemory() Registered memory at 0xB0000, size 0x10000, pointer : 0x0.
+^^^^ TranslationCPU.cs MapMemory() Registered memory at 0xC0000, size 0x10000, pointer : 0x0.
+^^^^ TranslationCPU.cs MapMemory() Registered memory at 0xD0000, size 0x10000, pointer : 0x0.
+^^^^ TranslationCPU.cs MapMemory() Registered memory at 0xE0000, size 0x10000, pointer : 0x0.
+^^^^ TranslationCPU.cs MapMemory() Registered memory at 0xF0000, size 0x10000, pointer : 0x0.
+^^^ SystemBus.cs Register 1111 : ibus_Peripheral : Antmicro.Renode.Peripherals.Memory.MappedMemory, BusRangeRegistration : 0x<0x00800000, 0x0083FFFF>
+^^^^ Getting MappedSegments , in MappedMemory.cs
+^^^^ TranslationCPU.cs MapMemory() Registered memory at 0x800000, size 0x10000, pointer : 0x0.
+^^^^ TranslationCPU.cs MapMemory() Registered memory at 0x810000, size 0x10000, pointer : 0x0.
+^^^^ TranslationCPU.cs MapMemory() Registered memory at 0x820000, size 0x10000, pointer : 0x0.
+^^^^ TranslationCPU.cs MapMemory() Registered memory at 0x830000, size 0x10000, pointer : 0x0.
+^^^ SystemBus.cs Register 1111 : ibus_Peripheral : Antmicro.Renode.Peripherals.Memory.MappedMemory, BusRangeRegistration : 0x<0x20000000, 0x2003FFFF>
+^^^^ Getting MappedSegments , in MappedMemory.cs
+^^^^ TranslationCPU.cs MapMemory() Registered memory at 0x20000000, size 0x10000, pointer : 0x0.
+^^^^ TranslationCPU.cs MapMemory() Registered memory at 0x20010000, size 0x10000, pointer : 0x0.
+^^^^ TranslationCPU.cs MapMemory() Registered memory at 0x20020000, size 0x10000, pointer : 0x0.
+^^^^ TranslationCPU.cs MapMemory() Registered memory at 0x20030000, size 0x10000, pointer : 0x0.
+^^^ SystemBus.cs Register 1111 : ibus_Peripheral : Antmicro.Renode.Peripherals.Miscellaneous.NRF_CLOCK, BusRangeRegistration : 0x<0x40000000, 0x40000FFF>
+^^^ SystemBus.cs Register 1111 : ibus_Peripheral : Antmicro.Renode.Peripherals.I2C.NRF52840_I2C, BusRangeRegistration : 0x<0x40003000, 0x40003FFF>
+^^^ SystemBus.cs Register 1111 : ibus_Peripheral : Antmicro.Renode.Peripherals.SPI.NRF52840_SPI, BusRangeRegistration : 0x<0x40023000, 0x40023FFF>
+^^^ SystemBus.cs Register 1111 : ibus_Peripheral : Antmicro.Renode.Peripherals.GPIOPort.NRF52840_GPIO, BusRangeRegistration : 0x<0x50000500, 0x500007FF>
+^^^ SystemBus.cs Register 1111 : ibus_Peripheral : Antmicro.Renode.Peripherals.GPIOPort.NRF52840_GPIO, BusRangeRegistration : 0x<0x50000800, 0x50000AFF>
+^^^ SystemBus.cs Register 1111 : ibus_Peripheral : Antmicro.Renode.Peripherals.GPIOPort.NRF52840_GPIOTasksEvents, BusRangeRegistration : 0x<0x40006000, 0x40006FFF>
+^^^ SystemBus.cs Register 1111 : ibus_Peripheral : Antmicro.Renode.Peripherals.I2C.NRF52840_I2C, BusRangeRegistration : 0x<0x40004000, 0x40004FFF>
+^^^ SystemBus.cs Register 1111 : ibus_Peripheral : Antmicro.Renode.Peripherals.Timers.NRF52840_Timer, BusRangeRegistration : 0x<0x40008000, 0x40008FFF>
+^^^ SystemBus.cs Register 1111 : ibus_Peripheral : Antmicro.Renode.Peripherals.Timers.NRF52840_Timer, BusRangeRegistration : 0x<0x40009000, 0x40009FFF>
+^^^ SystemBus.cs Register 1111 : ibus_Peripheral : Antmicro.Renode.Peripherals.Timers.NRF52840_Timer, BusRangeRegistration : 0x<0x4000A000, 0x4000AFFF>
+^^^ SystemBus.cs Register 1111 : ibus_Peripheral : Antmicro.Renode.Peripherals.Timers.NRF52840_Timer, BusRangeRegistration : 0x<0x4001A000, 0x4001AFFF>
+^^^ SystemBus.cs Register 1111 : ibus_Peripheral : Antmicro.Renode.Peripherals.Timers.NRF52840_Timer, BusRangeRegistration : 0x<0x4001B000, 0x4001BFFF>
+^^^ SystemBus.cs Register 1111 : ibus_Peripheral : Antmicro.Renode.Peripherals.Sound.NRF52840_I2S, BusRangeRegistration : 0x<0x40025000, 0x40025FFF>
+^^^ SystemBus.cs Register 1111 : ibus_Peripheral : Antmicro.Renode.Peripherals.Sound.NRF52840_PDM, BusRangeRegistration : 0x<0x4001D000, 0x4001DFFF>
+^^^ SystemBus.cs Register 1111 : ibus_Peripheral : Antmicro.Renode.Peripherals.Wireless.NRF52840_Radio, BusRangeRegistration : 0x<0x40001000, 0x40001FFF>
+^^^ SystemBus.cs Register 1111 : ibus_Peripheral : Antmicro.Renode.Peripherals.Miscellaneous.NRF52840_RNG, BusRangeRegistration : 0x<0x4000D000, 0x4000DFFF>
+^^^ SystemBus.cs Register 1111 : ibus_Peripheral : Antmicro.Renode.Peripherals.Miscellaneous.NRF52840_ECB, BusRangeRegistration : 0x<0x4000E000, 0x4000EFFF>
+^^^ SystemBus.cs Register 1111 : ibus_Peripheral : Antmicro.Renode.Peripherals.Miscellaneous.NRF52840_EGU, BusRangeRegistration : 0x<0x40014000, 0x40014FFF>
+^^^ SystemBus.cs Register 1111 : ibus_Peripheral : Antmicro.Renode.Peripherals.Miscellaneous.NRF52840_EGU, BusRangeRegistration : 0x<0x40015000, 0x40015FFF>
+^^^ SystemBus.cs Register 1111 : ibus_Peripheral : Antmicro.Renode.Peripherals.Miscellaneous.NRF52840_EGU, BusRangeRegistration : 0x<0x40016000, 0x40016FFF>
+^^^ SystemBus.cs Register 1111 : ibus_Peripheral : Antmicro.Renode.Peripherals.Miscellaneous.NRF52840_EGU, BusRangeRegistration : 0x<0x40017000, 0x40017FFF>
+^^^ SystemBus.cs Register 1111 : ibus_Peripheral : Antmicro.Renode.Peripherals.Miscellaneous.NRF52840_EGU, BusRangeRegistration : 0x<0x40018000, 0x40018FFF>
+^^^ SystemBus.cs Register 1111 : ibus_Peripheral : Antmicro.Renode.Peripherals.Miscellaneous.NRF52840_EGU, BusRangeRegistration : 0x<0x40019000, 0x40019FFF>
+CreationDriver.cs PrepareVariables() start
+CreationDriver.cs PrepareVariables() Done
+^^^^ CreationDriver.cs ProcessInner before machine PostCreationActions()
+^^^^^^^^ MappedMemory.cs AllocateSegment()
+^^^ SystemBus.cs LoadFileChunks : File loaded, path : /home/asmita/fuzzing_bare-metal/SEFF_project_dirs/SEFF-project/LibAFL/fuzzers/libafl_renode/nrf_bmp180_drv1_no_delay.out, minAddr : 0
+CreationDriver.cs PrepareVariables() start
+CreationDriver.cs PrepareVariables() Done
+^^^^ CreationDriver.cs ProcessInner before machine PostCreationActions()
+^^^^^^^^ MappedMemory.cs AllocateSegment()
+^^^ SystemBus.cs LoadFileChunks : File loaded, path : /home/asmita/fuzzing_bare-metal/SEFF_project_dirs/SEFF-project/LibAFL/fuzzers/libafl_renode/nrf_bmp180_drv1_no_delay.out, minAddr : 0
+*****Coverage Map Pointer Address: 0x72670a3240d1
+^^^^^ externalsManager.cs : Start()
+^^^^^^^ TarnslationalCPU.cs OnLeavingResetState()
+^^^^^^ basecpu.cs, OnLeavingResetState()
+^^^^^ MasterTimeSource.cs start()
+^^^^^^^^ TranslationCPU.cs export TouchHostBlock : offset : 0x0 at [PC=0x2BC]
+^^^^^^^^ TranslationCPU.cs export TouchHostBlock , mapping : seg_pointer : 0x5CB399CE6000
+Sysbus.cs MappedSegmentWrapper : Touch() 
+^^^^^^^^ TranslationCPU.cs RebuildMemoryMappings Start 
+^^^TranslationCPU.cs RebuildMemoryMappings : HostMemoryBlock - Start: 0x0, Size: 0x10000, HostPointer: 0x5CB399CE6000
+^^^TranslationCPU.cs RebuildMemoryMappings HostBlocks len : 1, blockbuffer : 0x5CB399F2D3C0
+^^TranslationCPU.cs RebuildMemoryMappings : RenodeSetHostBlocks done
+^^^^^^^^ TranslationCPU.cs RebuildMemoryMappings Done with 1 host blocks now!!!!
+^^^^^^^^ TranslationCPU.cs export TouchHostBlock : offset : 0x20000000 at [PC=0x2CA]
+^^^^^^^^ TranslationCPU.cs export TouchHostBlock , mapping : seg_pointer : 0x0
+Sysbus.cs MappedSegmentWrapper : Touch() 
+^^^^^^^^ MappedMemory.cs AllocateSegment()
+^^^^^^^^ TranslationCPU.cs RebuildMemoryMappings Start 
+^^^TranslationCPU.cs RebuildMemoryMappings : HostMemoryBlock - Start: 0x0, Size: 0x10000, HostPointer: 0x5CB399CE6000
+^^^TranslationCPU.cs RebuildMemoryMappings : HostMemoryBlock - Start: 0x20000000, Size: 0x10000, HostPointer: 0x5CB399FAC000
+^^^TranslationCPU.cs RebuildMemoryMappings HostBlocks len : 2, blockbuffer : 0x5CB399F0A3A0
+^^TranslationCPU.cs RebuildMemoryMappings : RenodeSetHostBlocks done
+^^^^^^^^ TranslationCPU.cs RebuildMemoryMappings Done with 2 host blocks now!!!!
+^^^^^^^^ TranslationCPU.cs export TouchHostBlock : offset : 0x2003FC00 at [PC=0x3870]
+^^^^^^^^ TranslationCPU.cs export TouchHostBlock , mapping : seg_pointer : 0x0
+Sysbus.cs MappedSegmentWrapper : Touch() 
+^^^^^^^^ MappedMemory.cs AllocateSegment()
+^^^^^^^^ TranslationCPU.cs RebuildMemoryMappings Start 
+^^^TranslationCPU.cs RebuildMemoryMappings : HostMemoryBlock - Start: 0x0, Size: 0x10000, HostPointer: 0x5CB399CE6000
+^^^TranslationCPU.cs RebuildMemoryMappings : HostMemoryBlock - Start: 0x20000000, Size: 0x10000, HostPointer: 0x5CB399FAC000
+^^^TranslationCPU.cs RebuildMemoryMappings : HostMemoryBlock - Start: 0x20030000, Size: 0x10000, HostPointer: 0x5CB399FBD000
+^^^TranslationCPU.cs RebuildMemoryMappings HostBlocks len : 3, blockbuffer : 0x5CB399F6AB30
+^^TranslationCPU.cs RebuildMemoryMappings : RenodeSetHostBlocks done
+^^^^^^^^ TranslationCPU.cs RebuildMemoryMappings Done with 3 host blocks now!!!!
+*****Coverage Map Pointer Address: 0x7d09ff7240d1
+^^^^^ externalsManager.cs : Start()
+^^^^^^^ TarnslationalCPU.cs OnLeavingResetState()
+^^^^^^ basecpu.cs, OnLeavingResetState()
+^^^^^ MasterTimeSource.cs start()
+^^^^^^^^ TranslationCPU.cs export TouchHostBlock : offset : 0x0 at [PC=0x2BC]
+^^^^^^^^ TranslationCPU.cs export TouchHostBlock , mapping : seg_pointer : 0x59C8E35F0000
+Sysbus.cs MappedSegmentWrapper : Touch() 
+^^^^^^^^ TranslationCPU.cs RebuildMemoryMappings Start 
+^^^TranslationCPU.cs RebuildMemoryMappings : HostMemoryBlock - Start: 0x0, Size: 0x10000, HostPointer: 0x59C8E35F0000
+^^^TranslationCPU.cs RebuildMemoryMappings HostBlocks len : 1, blockbuffer : 0x59C8E3833170
+^^TranslationCPU.cs RebuildMemoryMappings : RenodeSetHostBlocks done
+^^^^^^^^ TranslationCPU.cs RebuildMemoryMappings Done with 1 host blocks now!!!!
+^^^^^^^^ TranslationCPU.cs export TouchHostBlock : offset : 0x20000000 at [PC=0x2CA]
+^^^^^^^^ TranslationCPU.cs export TouchHostBlock , mapping : seg_pointer : 0x0
+Sysbus.cs MappedSegmentWrapper : Touch() 
+^^^^^^^^ MappedMemory.cs AllocateSegment()
+^^^^^^^^ TranslationCPU.cs RebuildMemoryMappings Start 
+^^^TranslationCPU.cs RebuildMemoryMappings : HostMemoryBlock - Start: 0x0, Size: 0x10000, HostPointer: 0x59C8E35F0000
+^^^TranslationCPU.cs RebuildMemoryMappings : HostMemoryBlock - Start: 0x20000000, Size: 0x10000, HostPointer: 0x59C8E38C3000
+^^^TranslationCPU.cs RebuildMemoryMappings HostBlocks len : 2, blockbuffer : 0x59C8E38923A0
+^^TranslationCPU.cs RebuildMemoryMappings : RenodeSetHostBlocks done
+^^^^^^^^ TranslationCPU.cs RebuildMemoryMappings Done with 2 host blocks now!!!!
+^^^^^^^^ TranslationCPU.cs export TouchHostBlock : offset : 0x2003FC00 at [PC=0x3870]
+^^^^^^^^ TranslationCPU.cs export TouchHostBlock , mapping : seg_pointer : 0x0
+Sysbus.cs MappedSegmentWrapper : Touch() 
+^^^^^^^^ MappedMemory.cs AllocateSegment()
+^^^^^^^^ TranslationCPU.cs RebuildMemoryMappings Start 
+^^^TranslationCPU.cs RebuildMemoryMappings : HostMemoryBlock - Start: 0x0, Size: 0x10000, HostPointer: 0x59C8E35F0000
+^^^TranslationCPU.cs RebuildMemoryMappings : HostMemoryBlock - Start: 0x20000000, Size: 0x10000, HostPointer: 0x59C8E38C3000
+^^^TranslationCPU.cs RebuildMemoryMappings : HostMemoryBlock - Start: 0x20030000, Size: 0x10000, HostPointer: 0x59C8E38D4000
+^^^TranslationCPU.cs RebuildMemoryMappings HostBlocks len : 3, blockbuffer : 0x59C8E3881F70
+^^TranslationCPU.cs RebuildMemoryMappings : RenodeSetHostBlocks done
+^^^^^^^^ TranslationCPU.cs RebuildMemoryMappings Done with 3 host blocks now!!!!
+^^^^^^^^^^^ Fuzz_Mem_Save - mappedMemeory : Total segment : 4, segment size : 65536^^^^^^^^^^^^^^
+Fuzz_Mem_Save test Segment 0 address: 0x5CB399FAC000
+Fuzz_Mem_Save Segment 0 address: 0x5CB399FAC000
+Fuzz_Mem_Save Segment 1 address: 0x0
+Fuzz_Mem_Save Segment 2 address: 0x0
+Fuzz_Mem_Save Segment 3 address: 0x5CB399FBD000
+Fuzz_Mem_Save Segment saved seg : 4 , realSeg : 2
+^^^^^^^^^^^ Fuzz_Mem_Save - mappedMemeory : Total segment : 4, segment size : 65536^^^^^^^^^^^^^^
+Fuzz_Mem_Save test Segment 0 address: 0x59C8E38C3000
+Fuzz_Mem_Save Segment 0 address: 0x59C8E38C3000
+Fuzz_Mem_Save Segment 1 address: 0x0
+Fuzz_Mem_Save Segment 2 address: 0x0
+Fuzz_Mem_Save Segment 3 address: 0x59C8E38D4000
+Fuzz_Mem_Save Segment saved seg : 4 , realSeg : 2
+^^^^^^^^^^^ Test Prepare state - Translation CPU ^^^^^^^^^^^^^^
+^^^^^^^^^^^TlibGetStateSize : 65256
+^^^^^^^^^^^ Prepare state - Translation CPU Done!! ^^^^^^^^^^^^^^
+^^^^^^^^^^^ Test Prepare state - Translation CPU ^^^^^^^^^^^^^^
+^^^^^^^^^^^TlibGetStateSize : 65256
+^^^^^^^^^^^ Prepare state - Translation CPU Done!! ^^^^^^^^^^^^^^
+Hello, entered main_fuzzing_func in libafl_renode
+Setting up run_client
+[*] creating state
+Harness setup done
+Hello, entered main_fuzzing_func in libafl_renode
+Setting up run_client
+[*] creating state
+Harness setup done
+[*] fuzz_loop
+[UserStats   #1]  (GLOBAL) run time: 0h-0m-6s, clients: 1, corpus: 0, objectives: 0, executions: 0, exec/sec: 0.000, edges: 1.404%
+                  (CLIENT) corpus: 0, objectives: 0, executions: 0, exec/sec: 0.000, edges: 115/8192 (1%)
+[Testcase    #1]  (GLOBAL) run time: 0h-0m-6s, clients: 1, corpus: 1, objectives: 0, executions: 0, exec/sec: 0.000, edges: 1.404%
+                  (CLIENT) corpus: 1, objectives: 0, executions: 0, exec/sec: 0.000, edges: 115/8192 (1%)
+[*] fuzz_loop
+[UserStats   #2]  (GLOBAL) run time: 0h-0m-6s, clients: 2, corpus: 1, objectives: 0, executions: 0, exec/sec: 0.000, edges: 1.404%
+                  (CLIENT) corpus: 0, objectives: 0, executions: 0, exec/sec: 0.000, edges: 115/8192 (1%)
+[Testcase    #2]  (GLOBAL) run time: 0h-0m-6s, clients: 2, corpus: 2, objectives: 0, executions: 0, exec/sec: 0.000, edges: 1.404%
+                  (CLIENT) corpus: 1, objectives: 0, executions: 0, exec/sec: 0.000, edges: 115/8192 (1%)
+[UserStats   #1]  (GLOBAL) run time: 0h-0m-7s, clients: 2, corpus: 2, objectives: 0, executions: 0, exec/sec: 0.000, edges: 1.428%
+                  (CLIENT) corpus: 1, objectives: 0, executions: 0, exec/sec: 0.000, edges: 119/8192 (1%)
+[Testcase    #1]  (GLOBAL) run time: 0h-0m-7s, clients: 2, corpus: 3, objectives: 0, executions: 0, exec/sec: 0.000, edges: 1.428%
+                  (CLIENT) corpus: 2, objectives: 0, executions: 0, exec/sec: 0.000, edges: 119/8192 (1%)
+[UserStats   #2]  (GLOBAL) run time: 0h-0m-7s, clients: 2, corpus: 3, objectives: 0, executions: 0, exec/sec: 0.000, edges: 1.453%
+                  (CLIENT) corpus: 1, objectives: 0, executions: 0, exec/sec: 0.000, edges: 119/8192 (1%)
+[Testcase    #2]  (GLOBAL) run time: 0h-0m-7s, clients: 2, corpus: 4, objectives: 0, executions: 0, exec/sec: 0.000, edges: 1.453%
+                  (CLIENT) corpus: 2, objectives: 0, executions: 0, exec/sec: 0.000, edges: 119/8192 (1%)
+[UserStats   #1]  (GLOBAL) run time: 0h-0m-7s, clients: 2, corpus: 4, objectives: 0, executions: 0, exec/sec: 0.000, edges: 1.483%
+                  (CLIENT) corpus: 2, objectives: 0, executions: 0, exec/sec: 0.000, edges: 124/8192 (1%)
+[Testcase    #1]  (GLOBAL) run time: 0h-0m-7s, clients: 2, corpus: 5, objectives: 0, executions: 0, exec/sec: 0.000, edges: 1.483%
+                  (CLIENT) corpus: 3, objectives: 0, executions: 0, exec/sec: 0.000, edges: 124/8192 (1%)
+[UserStats   #2]  (GLOBAL) run time: 0h-0m-7s, clients: 2, corpus: 5, objectives: 0, executions: 0, exec/sec: 0.000, edges: 1.514%
+                  (CLIENT) corpus: 2, objectives: 0, executions: 0, exec/sec: 0.000, edges: 124/8192 (1%)
+[Testcase    #2]  (GLOBAL) run time: 0h-0m-7s, clients: 2, corpus: 6, objectives: 0, executions: 0, exec/sec: 0.000, edges: 1.514%
+                  (CLIENT) corpus: 3, objectives: 0, executions: 0, exec/sec: 0.000, edges: 124/8192 (1%)
+[UserStats   #1]  (GLOBAL) run time: 0h-0m-8s, clients: 2, corpus: 6, objectives: 0, executions: 0, exec/sec: 0.000, edges: 1.520%
+                  (CLIENT) corpus: 3, objectives: 0, executions: 0, exec/sec: 0.000, edges: 125/8192 (1%)
+[Testcase    #1]  (GLOBAL) run time: 0h-0m-8s, clients: 2, corpus: 7, objectives: 0, executions: 0, exec/sec: 0.000, edges: 1.520%
+                  (CLIENT) corpus: 4, objectives: 0, executions: 0, exec/sec: 0.000, edges: 125/8192 (1%)
+[UserStats   #2]  (GLOBAL) run time: 0h-0m-8s, clients: 2, corpus: 7, objectives: 0, executions: 0, exec/sec: 0.000, edges: 1.526%
+                  (CLIENT) corpus: 3, objectives: 0, executions: 0, exec/sec: 0.000, edges: 125/8192 (1%)
+[Testcase    #2]  (GLOBAL) run time: 0h-0m-8s, clients: 2, corpus: 8, objectives: 0, executions: 0, exec/sec: 0.000, edges: 1.526%
+                  (CLIENT) corpus: 4, objectives: 0, executions: 0, exec/sec: 0.000, edges: 125/8192 (1%)
+[UserStats   #2]  (GLOBAL) run time: 0h-0m-13s, clients: 2, corpus: 8, objectives: 0, executions: 0, exec/sec: 0.000, edges: 1.538%
+                  (CLIENT) corpus: 4, objectives: 0, executions: 0, exec/sec: 0.000, edges: 127/8192 (1%)
+[Testcase    #2]  (GLOBAL) run time: 0h-0m-13s, clients: 2, corpus: 9, objectives: 0, executions: 0, exec/sec: 0.000, edges: 1.538%
+                  (CLIENT) corpus: 5, objectives: 0, executions: 0, exec/sec: 0.000, edges: 127/8192 (1%)
+[UserStats   #2]  (GLOBAL) run time: 0h-0m-15s, clients: 2, corpus: 9, objectives: 0, executions: 0, exec/sec: 0.000, edges: 1.550%
+                  (CLIENT) corpus: 5, objectives: 0, executions: 0, exec/sec: 0.000, edges: 129/8192 (1%)
+[Testcase    #2]  (GLOBAL) run time: 0h-0m-15s, clients: 2, corpus: 10, objectives: 0, executions: 0, exec/sec: 0.000, edges: 1.550%
+                  (CLIENT) corpus: 6, objectives: 0, executions: 0, exec/sec: 0.000, edges: 129/8192 (1%)
+[UserStats   #1]  (GLOBAL) run time: 0h-0m-17s, clients: 2, corpus: 10, objectives: 0, executions: 0, exec/sec: 0.000, edges: 1.556%
+                  (CLIENT) corpus: 4, objectives: 0, executions: 0, exec/sec: 0.000, edges: 126/8192 (1%)
+[Testcase    #1]  (GLOBAL) run time: 0h-0m-17s, clients: 2, corpus: 11, objectives: 0, executions: 0, exec/sec: 0.000, edges: 1.556%
+                  (CLIENT) corpus: 5, objectives: 0, executions: 0, exec/sec: 0.000, edges: 126/8192 (1%)
+[UserStats   #2]  (GLOBAL) run time: 0h-0m-17s, clients: 2, corpus: 11, objectives: 0, executions: 0, exec/sec: 0.000, edges: 1.562%
+                  (CLIENT) corpus: 6, objectives: 0, executions: 0, exec/sec: 0.000, edges: 130/8192 (1%)
+[Testcase    #2]  (GLOBAL) run time: 0h-0m-17s, clients: 2, corpus: 12, objectives: 0, executions: 0, exec/sec: 0.000, edges: 1.562%
+                  (CLIENT) corpus: 7, objectives: 0, executions: 0, exec/sec: 0.000, edges: 130/8192 (1%)
+[UserStats   #2]  (GLOBAL) run time: 0h-0m-19s, clients: 2, corpus: 12, objectives: 0, executions: 0, exec/sec: 0.000, edges: 1.575%
+                  (CLIENT) corpus: 7, objectives: 0, executions: 0, exec/sec: 0.000, edges: 132/8192 (1%)
+[Testcase    #2]  (GLOBAL) run time: 0h-0m-19s, clients: 2, corpus: 13, objectives: 0, executions: 0, exec/sec: 0.000, edges: 1.575%
+                  (CLIENT) corpus: 8, objectives: 0, executions: 0, exec/sec: 0.000, edges: 132/8192 (1%)
+[UserStats   #2]  (GLOBAL) run time: 0h-0m-20s, clients: 2, corpus: 13, objectives: 0, executions: 0, exec/sec: 0.000, edges: 1.581%
+                  (CLIENT) corpus: 8, objectives: 0, executions: 0, exec/sec: 0.000, edges: 133/8192 (1%)
+[Testcase    #2]  (GLOBAL) run time: 0h-0m-20s, clients: 2, corpus: 14, objectives: 0, executions: 0, exec/sec: 0.000, edges: 1.581%
+                  (CLIENT) corpus: 9, objectives: 0, executions: 0, exec/sec: 0.000, edges: 133/8192 (1%)
+[UserStats   #2]  (GLOBAL) run time: 0h-0m-22s, clients: 2, corpus: 14, objectives: 0, executions: 0, exec/sec: 0.000, edges: 1.587%
+                  (CLIENT) corpus: 9, objectives: 0, executions: 0, exec/sec: 0.000, edges: 134/8192 (1%)
+[Testcase    #2]  (GLOBAL) run time: 0h-0m-22s, clients: 2, corpus: 15, objectives: 0, executions: 0, exec/sec: 0.000, edges: 1.587%
+                  (CLIENT) corpus: 10, objectives: 0, executions: 0, exec/sec: 0.000, edges: 134/8192 (1%)
+[UserStats   #1]  (GLOBAL) run time: 0h-0m-22s, clients: 2, corpus: 15, objectives: 0, executions: 0, exec/sec: 0.000, edges: 1.599%
+                  (CLIENT) corpus: 5, objectives: 0, executions: 0, exec/sec: 0.000, edges: 128/8192 (1%)
+[Testcase    #1]  (GLOBAL) run time: 0h-0m-22s, clients: 2, corpus: 16, objectives: 0, executions: 0, exec/sec: 0.000, edges: 1.599%
+                  (CLIENT) corpus: 6, objectives: 0, executions: 0, exec/sec: 0.000, edges: 128/8192 (1%)
+[UserStats   #2]  (GLOBAL) run time: 0h-0m-22s, clients: 2, corpus: 16, objectives: 0, executions: 0, exec/sec: 0.000, edges: 1.605%
+                  (CLIENT) corpus: 10, objectives: 0, executions: 0, exec/sec: 0.000, edges: 135/8192 (1%)
+[Testcase    #2]  (GLOBAL) run time: 0h-0m-22s, clients: 2, corpus: 17, objectives: 0, executions: 0, exec/sec: 0.000, edges: 1.605%
+                  (CLIENT) corpus: 11, objectives: 0, executions: 0, exec/sec: 0.000, edges: 135/8192 (1%)
+[UserStats   #1]  (GLOBAL) run time: 0h-0m-22s, clients: 2, corpus: 17, objectives: 0, executions: 0, exec/sec: 0.000, edges: 1.611%
+                  (CLIENT) corpus: 6, objectives: 0, executions: 0, exec/sec: 0.000, edges: 129/8192 (1%)
+[Testcase    #1]  (GLOBAL) run time: 0h-0m-22s, clients: 2, corpus: 18, objectives: 0, executions: 0, exec/sec: 0.000, edges: 1.611%
+                  (CLIENT) corpus: 7, objectives: 0, executions: 0, exec/sec: 0.000, edges: 129/8192 (1%)
+[UserStats   #2]  (GLOBAL) run time: 0h-0m-23s, clients: 2, corpus: 18, objectives: 0, executions: 0, exec/sec: 0.000, edges: 1.624%
+                  (CLIENT) corpus: 11, objectives: 0, executions: 0, exec/sec: 0.000, edges: 137/8192 (1%)
+[Testcase    #2]  (GLOBAL) run time: 0h-0m-23s, clients: 2, corpus: 19, objectives: 0, executions: 0, exec/sec: 0.000, edges: 1.624%
+                  (CLIENT) corpus: 12, objectives: 0, executions: 0, exec/sec: 0.000, edges: 137/8192 (1%)
+[UserStats   #2]  (GLOBAL) run time: 0h-0m-23s, clients: 2, corpus: 19, objectives: 0, executions: 0, exec/sec: 0.000, edges: 1.636%
+                  (CLIENT) corpus: 12, objectives: 0, executions: 0, exec/sec: 0.000, edges: 139/8192 (1%)
+[Testcase    #2]  (GLOBAL) run time: 0h-0m-23s, clients: 2, corpus: 20, objectives: 0, executions: 0, exec/sec: 0.000, edges: 1.636%
+                  (CLIENT) corpus: 13, objectives: 0, executions: 0, exec/sec: 0.000, edges: 139/8192 (1%)
+[UserStats   #2]  (GLOBAL) run time: 0h-0m-26s, clients: 2, corpus: 20, objectives: 0, executions: 0, exec/sec: 0.000, edges: 1.648%
+                  (CLIENT) corpus: 13, objectives: 0, executions: 0, exec/sec: 0.000, edges: 141/8192 (1%)
+[Testcase    #2]  (GLOBAL) run time: 0h-0m-26s, clients: 2, corpus: 21, objectives: 0, executions: 0, exec/sec: 0.000, edges: 1.648%
+                  (CLIENT) corpus: 14, objectives: 0, executions: 0, exec/sec: 0.000, edges: 141/8192 (1%)
+[UserStats   #2]  (GLOBAL) run time: 0h-0m-27s, clients: 2, corpus: 21, objectives: 0, executions: 0, exec/sec: 0.000, edges: 1.660%
+                  (CLIENT) corpus: 14, objectives: 0, executions: 0, exec/sec: 0.000, edges: 143/8192 (1%)
+[Testcase    #2]  (GLOBAL) run time: 0h-0m-27s, clients: 2, corpus: 22, objectives: 0, executions: 0, exec/sec: 0.000, edges: 1.660%
+                  (CLIENT) corpus: 15, objectives: 0, executions: 0, exec/sec: 0.000, edges: 143/8192 (1%)
+[UserStats   #1]  (GLOBAL) run time: 0h-0m-29s, clients: 2, corpus: 22, objectives: 0, executions: 0, exec/sec: 0.000, edges: 1.666%
+                  (CLIENT) corpus: 7, objectives: 0, executions: 0, exec/sec: 0.000, edges: 130/8192 (1%)
+[Testcase    #1]  (GLOBAL) run time: 0h-0m-29s, clients: 2, corpus: 23, objectives: 0, executions: 0, exec/sec: 0.000, edges: 1.666%
+                  (CLIENT) corpus: 8, objectives: 0, executions: 0, exec/sec: 0.000, edges: 130/8192 (1%)
+[UserStats   #2]  (GLOBAL) run time: 0h-0m-29s, clients: 2, corpus: 23, objectives: 0, executions: 0, exec/sec: 0.000, edges: 1.672%
+                  (CLIENT) corpus: 15, objectives: 0, executions: 0, exec/sec: 0.000, edges: 144/8192 (1%)
+[Testcase    #2]  (GLOBAL) run time: 0h-0m-29s, clients: 2, corpus: 24, objectives: 0, executions: 0, exec/sec: 0.000, edges: 1.672%
+                  (CLIENT) corpus: 16, objectives: 0, executions: 0, exec/sec: 0.000, edges: 144/8192 (1%)
+[UserStats   #2]  (GLOBAL) run time: 0h-0m-32s, clients: 2, corpus: 24, objectives: 0, executions: 0, exec/sec: 0.000, edges: 1.685%
+                  (CLIENT) corpus: 16, objectives: 0, executions: 0, exec/sec: 0.000, edges: 146/8192 (1%)
+[Testcase    #2]  (GLOBAL) run time: 0h-0m-32s, clients: 2, corpus: 25, objectives: 0, executions: 0, exec/sec: 0.000, edges: 1.685%
+                  (CLIENT) corpus: 17, objectives: 0, executions: 0, exec/sec: 0.000, edges: 146/8192 (1%)
+[UserStats   #2]  (GLOBAL) run time: 0h-0m-33s, clients: 2, corpus: 25, objectives: 0, executions: 0, exec/sec: 0.000, edges: 1.697%
+                  (CLIENT) corpus: 17, objectives: 0, executions: 0, exec/sec: 0.000, edges: 148/8192 (1%)
+[Testcase    #2]  (GLOBAL) run time: 0h-0m-33s, clients: 2, corpus: 26, objectives: 0, executions: 0, exec/sec: 0.000, edges: 1.697%
+                  (CLIENT) corpus: 18, objectives: 0, executions: 0, exec/sec: 0.000, edges: 148/8192 (1%)
+Fuzzing stopped by user. Good bye.
+^^^^^ MasterTimeSource.cs Stop()
+
+^^^^^^^^^^^^^^PAUSE externalManer.cs^^^^^^^^^^^^
+
+^^^^^ TranslationCPU.cs DisposeInner()
+^^^^^^^ TranslationCPU.cs CheckIfAllIsFreed()
+Fuzzing stopped by user. Good bye.
+Fuzzing stopped by user. Good bye.
+**** Bin dir : /home/asmita/fuzzing_bare-metal/SEFF_project_dirs/SEFF-project/renode/output/bin/Release 
+ *** renode_dir : /home/asmita/fuzzing_bare-metal/SEFF_project_dirs/SEFF-project/renode
+*********Emulation()********
+*********Monitor()********
+*********mach add********
+*********PlatformDescriptionMachineExtensions********
+*********LoadElf********
+*********GetSymbolAddress********
+Main func addr : 0x305c
+******Starting the emulator
+************In target hook
+Target event triggered.
+Done initial setup
+calling liabafl main_fuzzing_func------
+**** Bin dir : /home/asmita/fuzzing_bare-metal/SEFF_project_dirs/SEFF-project/renode/output/bin/Release 
+ *** renode_dir : /home/asmita/fuzzing_bare-metal/SEFF_project_dirs/SEFF-project/renode
+*********Emulation()********
+*********Monitor()********
+*********mach add********
+*********PlatformDescriptionMachineExtensions********
+*********LoadElf********
+*********GetSymbolAddress********
+Main func addr : 0x305c
+******Starting the emulator
+************In target hook
+Target event triggered.
+Done initial setup
+calling liabafl main_fuzzing_func------
+^^^^^^^^ MappedMemory.cs Free(), disposed : False
+^^^^^^^^ MappedMemory.cs Free(), disposed : False
+^^^^^ MasterTimeSource.cs Dispose()
+^^^^^ MasterTimeSource.cs Stop()
+^^^^^ MasterTimeSource.cs Stop()
+^^^^^ MasterTimeSource.cs Stop()
+
+^^^^^^^^^^^^^^PAUSE externalManer.cs^^^^^^^^^^^^
+
+
+^^^^^^^^^^^^^^PAUSE externalManer.cs^^^^^^^^^^^^
+
+^^^^^ MasterTimeSource.cs Stop()
+
+^^^^^^^^^^^^^^PAUSE externalManer.cs^^^^^^^^^^^^
+
+^^^^^ MasterTimeSource.cs Dispose()
+^^^^^ MasterTimeSource.cs Stop()
+^^^^^ TranslationCPU.cs DisposeInner()
+^^^^^ TranslationCPU.cs DisposeInner()
+^^^^^^^ TranslationCPU.cs CheckIfAllIsFreed()
+^^^^^^^ TranslationCPU.cs CheckIfAllIsFreed()
+^^^^^^^^ MappedMemory.cs Free(), disposed : False
+^^^^^^^^ MappedMemory.cs Free(), disposed : False
+^^^^^^^^ MappedMemory.cs Free(), disposed : False
+^^^^^^^^ MappedMemory.cs Free(), disposed : False
+^^^^^ MasterTimeSource.cs Dispose()
+^^^^^ MasterTimeSource.cs Dispose()
+^^^^^ MasterTimeSource.cs Stop()
+^^^^^ MasterTimeSource.cs Stop()
+^^^^^ MasterTimeSource.cs Stop()
+
+^^^^^^^^^^^^^^PAUSE externalManer.cs^^^^^^^^^^^^
+
+^^^^^ MasterTimeSource.cs Dispose()
+^^^^^ MasterTimeSource.cs Stop()
+^^^^^ MasterTimeSource.cs Stop()
+
+^^^^^^^^^^^^^^PAUSE externalManer.cs^^^^^^^^^^^^
+
+^^^^^ MasterTimeSource.cs Dispose()
+^^^^^ MasterTimeSource.cs Stop()

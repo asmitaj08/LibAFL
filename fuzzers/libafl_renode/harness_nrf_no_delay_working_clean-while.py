@@ -28,6 +28,16 @@ import threading
 target_event = threading.Event()
 exit_event = threading.Event()
 
+def signal_handler(sig, frame):
+    print(f"Received signal {sig}. Exiting gracefully...")
+    sys.exit(0)
+
+signal.signal(signal.SIGINT, signal_handler)  # Ctrl+C (Interrupt)
+signal.signal(signal.SIGTERM, signal_handler)  # Termination signal
+signal.signal(signal.SIGQUIT, signal_handler)
+
+print("Signal handler setup done")
+
 mach_name = "nrf"
 print("*********Emulation()********")
 e = Emulation()
@@ -58,10 +68,10 @@ PlatformDescriptionMachineExtensions.LoadPlatformDescriptionFromString(mach.inte
 
 print("*********LoadElf********")
 # mach.load_elf("https://dl.antmicro.com/projects/renode/BMP180_I2C.ino.arduino.mbed.nano33ble.elf-s_3127076-ba5f49cd34cd9549c2aa44f83af8e2011ecd1c22")
-# mach.load_elf("/home/asmita/fuzzing_bare-metal/SEFF_project_dirs/SEFF-project/LibAFL/fuzzers/libafl_renode/nrf_bmp180_drv1_no_delay.out")
+mach.load_elf("/home/asmita/fuzzing_bare-metal/SEFF_project_dirs/SEFF-project/LibAFL/fuzzers/libafl_renode/nrf_bmp180_drv1_no_delay.out")
 
 # binary with bug
-mach.load_elf("/home/asmita/fuzzing_bare-metal/SEFF_project_dirs/SEFF-project/LibAFL/fuzzers/libafl_renode/nrf_bmp180_drv1_no_delay_with_bug.out")
+# mach.load_elf("/home/asmita/fuzzing_bare-metal/SEFF_project_dirs/SEFF-project/LibAFL/fuzzers/libafl_renode/nrf_bmp180_drv1_no_delay_with_bug.out")
 
 print("*********GetSymbolAddress********")
 target_addr = mach.sysbus.GetSymbolAddress("main")
@@ -81,8 +91,10 @@ def hook_addr_target(cpu,addr):
 
 def hook_addr_exit(cpu,addr):
     print(f"***** Exit addr ******* : {hex(addr)}")
-    mach.Pause()
+    # mach.Pause()
+    # mach.sysbus.cpu.Pause()
     exit_event.set()  # Signal the exit event
+    # mach.Pause()
 
 Action1 = getattr(System, 'Action`2')
 hook_action_target = Action1[ICpuSupportingGdb, System.UInt64](hook_addr_target)
@@ -91,7 +103,6 @@ mach.sysbus.cpu.AddHook(target_func_calling_pc,hook_action_target)
 Action2 = getattr(System, 'Action`2')
 hook_action_exit = Action2[ICpuSupportingGdb, System.UInt64](hook_addr_exit)
 mach.sysbus.cpu.AddHook(exit_addr,hook_action_exit)
-# mach.sysbus.cpu.AddHook(fault_addr,hook_action_exit)
 
 
 TranslationCPUHooksExtensions.SetHookAtBlockBegin(mach.sysbus.cpu.internal, mach.internal, " ")
@@ -125,13 +136,14 @@ t_count = 1
 
 # pr = cProfile.Profile()
 # pr.enable()
-# try :
-i=0
-while t_count:
+try :
+    i=0
+    while t_count:
         # print("***************Loading the saved states...")
         # print(f"---- Reg before load : SP : {hex(mach.sysbus.cpu.GetRegisterUnsafe(13).RawValue)}, PC : {hex(mach.sysbus.cpu.GetRegisterUnsafe(15).RawValue)}")
         start_time = time.time()
-        mach.Pause()
+        # mach.Pause()
+        # mach.sysbus.cpu.Pause()
         # mach.sysbus.ram.Fuzz_DeallocateAllSegments()
         mach.sysbus.ram.Fuzz_Mem_Load()
         mach.sysbus.cpu.Fuzz_LoadState()
@@ -146,6 +158,7 @@ while t_count:
         exit_event.wait(timeout=0.1)
         # Reset the event for the next iteration
         exit_event.clear()
+        mach.Pause()
         end_time = time.time()
         load_execution_time = end_time - start_time
         print(f"******** Load file execution time: {load_execution_time:.10f} seconds")
@@ -153,8 +166,8 @@ while t_count:
            
 
     
-# except Exception as e:
-#     print(f"\n***** Exception occurred: {e}")
+except Exception as e:
+    print(f"\n***** Exception occurred: {e}")
 #     # sys.exit(1)
 
 # finally:
@@ -171,6 +184,7 @@ while t_count:
 #     # Exit the program
 #     sys.exit(0)
 
+# input()
 
 
 

@@ -1,13 +1,29 @@
 [package]
 name = "libafl_renode"
-version = "0.0.0"
+version = "0.1.0"
 authors = [""]
 edition = "2021"
 
 [features]
-default = ["std"]
+default = [
+  "std",
+  "llmp_compression",
+  "llmp_small_maps",
+  "llmp_broker_timeouts",
+  "serdeany_autoreg",
+  "libafl_bolts/xxh3",
+]
 tui = []
 std = []
+serdeany_autoreg = ["libafl_bolts/serdeany_autoreg"]
+llmp_compression = ["libafl_bolts/llmp_compression"]
+llmp_small_maps = [
+  "libafl_bolts/llmp_small_maps",
+] # reduces initial map size for llmp
+llmp_broker_timeouts = ["std"]
+rand_trait = ["libafl_bolts/rand_trait"]
+
+
 
 [profile.dev]
 panic = "abort"
@@ -21,17 +37,21 @@ debug = true
 
 [build-dependencies]
 csbindgen = "1.8.0" 
-# cc = { version = "1.0", features = ["parallel"] }
-# which = "4.4"
+cc = { version = "1.0", features = ["parallel"] }
+which = "4.4"
 
 [dependencies]
-libafl = { path = "../../libafl/" }
+# libafl = { path = "../../libafl/", default-features = false} // needed when don't want to fork in spaning, restarting
+libafl = { path = "../../libafl/", features = ["multipart_inputs"]}
 libafl_bolts = { path = "../../libafl_bolts/" }
 # libafl_targets = { path = "../../libafl_targets/", features = ["pointer_maps", "sancov_cmplog", "libfuzzer"] }
-libafl_targets = { path = "../../libafl_targets" }
+libafl_targets = { path = "../../libafl_targets"}
 clap = { version = "4.0", features = ["default"] }
 env_logger = {version = "0.11.2"}
 log = "0.4.20"
+serde = "1.0.210"
+lazy_static = "1.4"
+
 
 
 [lib]
