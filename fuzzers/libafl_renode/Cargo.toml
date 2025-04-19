@@ -42,7 +42,7 @@ which = "4.4"
 
 [dependencies]
 # libafl = { path = "../../libafl/", default-features = false} // needed when don't want to fork in spaning, restarting
-libafl = { path = "../../libafl/", features = ["multipart_inputs"]}
+libafl = { path = "../../libafl/", features = ["multipart_inputs","serdeany_autoreg"]}
 libafl_bolts = { path = "../../libafl_bolts/" }
 # libafl_targets = { path = "../../libafl_targets/", features = ["pointer_maps", "sancov_cmplog", "libfuzzer"] }
 libafl_targets = { path = "../../libafl_targets"}

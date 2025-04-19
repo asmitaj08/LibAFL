@@ -1,0 +1,85 @@
+^^^TranslationCPU.cs RebuildMemoryMappings : HostMemoryBlock - Start: 0x20000000, Size: 0x1000000, HostPointer: 0x7D012E5FB000
+^^^TranslationCPU.cs RebuildMemoryMappings : HostMemoryBlock - Start: 0x8000000, Size: 0x1000000, HostPointer: 0x7D012F5FD000
+^^^TranslationCPU.cs RebuildMemoryMappings HostBlocks len : 2, blockbuffer : 0x7D01280C0F50
+^^TranslationCPU.cs RebuildMemoryMappings : RenodeSetHostBlocks done
+^^^^^^^^ TranslationCPU.cs RebuildMemoryMappings Done with 2 host blocks now!!!!
+ ^^^^^ BaseCPU.cs CpuThreadBodyInner CPU, toExecute:10000 executed 7911 instructions and returned Ok at PC : 0x8001118 thread ID: 13
+^^^^^^^ BaseCPU.cs : ReportProgress :numberOfExecutedInstructions : 7911
+ ^^^^^ BaseCPU.cs CpuThreadBodyInner CPU, toExecute:2089 executed 633 instructions and returned Ok at PC : 0x8001118 thread ID: 13
+^^^^^^^ BaseCPU.cs : ReportProgress :numberOfExecutedInstructions : 633
+ ^^^^^ BaseCPU.cs CpuThreadBodyInner CPU, toExecute:1456 executed 66 instructions and returned Ok at PC : 0x800454c thread ID: 13
+^^^^^^^ BaseCPU.cs : ReportProgress :numberOfExecutedInstructions : 66
+ ^^^^^ BaseCPU.cs CpuThreadBodyInner CPU, toExecute:1390 executed 1390 instructions and returned Ok at PC : 0x800226c thread ID: 13
+^^^^^^^ BaseCPU.cs : ReportProgress :numberOfExecutedInstructions : 1390
+^^^^^ BaseCPU.cs In CpuThreadBodyInner : CPU thread body running... granted 100000 ticks : isAborted : False, isPaused : False thread ID: 13 
+ ^^^^^ BaseCPU.cs CpuThreadBodyInner CPU, toExecute:9652 executed 178 instructions and returned Ok at PC : 0x80023f6 thread ID: 13
+^^^^^^^ BaseCPU.cs : ReportProgress :numberOfExecutedInstructions : 178
+ ^^^^^ BaseCPU.cs CpuThreadBodyInner CPU, toExecute:9474 executed 88 instructions and returned Ok at PC : 0x8002504 thread ID: 13
+^^^^^^^ BaseCPU.cs : ReportProgress :numberOfExecutedInstructions : 88
+ ^^^^^ BaseCPU.cs CpuThreadBodyInner CPU, toExecute:9386 executed 325 instructions and returned Ok at PC : 0x80023f6 thread ID: 13
+^^^^^^^ BaseCPU.cs : ReportProgress :numberOfExecutedInstructions : 325
+ ^^^^^ BaseCPU.cs CpuThreadBodyInner CPU, toExecute:9061 executed 76 instructions and returned Ok at PC : 0x800244a thread ID: 13
+^^^^^^^ BaseCPU.cs : ReportProgress :numberOfExecutedInstructions : 76
+ ^^^^^ BaseCPU.cs CpuThreadBodyInner CPU, toExecute:8985 executed 6 instructions and returned Ok at PC : 0x80024c0 thread ID: 13
+^^^^^^^ BaseCPU.cs : ReportProgress :numberOfExecutedInstructions : 6
+ ^^^^^ BaseCPU.cs CpuThreadBodyInner CPU, toExecute:8979 executed 296 instructions and returned Ok at PC : 0x80023f6 thread ID: 13
+^^^^^^^ BaseCPU.cs : ReportProgress :numberOfExecutedInstructions : 296
+ ^^^^^ BaseCPU.cs CpuThreadBodyInner CPU, toExecute:8683 executed 78 instructions and returned Ok at PC : 0x8002314 thread ID: 13
+^^^^^^^ BaseCPU.cs : ReportProgress :numberOfExecutedInstructions : 78
+ ^^^^^ BaseCPU.cs CpuThreadBodyInner CPU, toExecute:8605 executed 6 instructions and returned Ok at PC : 0x80024e2 thread ID: 13
+^^^^^^^ BaseCPU.cs : ReportProgress :numberOfExecutedInstructions : 6
+ ^^^^^ BaseCPU.cs CpuThreadBodyInner CPU, toExecute:8599 executed 61 instructions and returned Ok at PC : 0x8002504 thread ID: 13
+^^^^^^^ BaseCPU.cs : ReportProgress :numberOfExecutedInstructions : 61
+ ^^^^^ BaseCPU.cs CpuThreadBodyInner CPU, toExecute:8538 executed 344 instructions and returned Ok at PC : 0x80023f6 thread ID: 13
+^^^^^^^ BaseCPU.cs : ReportProgress :numberOfExecutedInstructions : 344
+ ^^^^^ BaseCPU.cs CpuThreadBodyInner CPU, toExecute:8194 executed 76 instructions and returned Ok at PC : 0x8002314 thread ID: 13
+^^^^^^^ BaseCPU.cs : ReportProgress :numberOfExecutedInstructions : 76
+ ^^^^^ BaseCPU.cs CpuThreadBodyInner CPU, toExecute:8118 executed 6 instructions and returned Ok at PC : 0x80024e2 thread ID: 13
+^^^^^^^ BaseCPU.cs : ReportProgress :numberOfExecutedInstructions : 6
+ ^^^^^ BaseCPU.cs CpuThreadBodyInner CPU, toExecute:8112 executed 61 instructions and returned Ok at PC : 0x8002504 thread ID: 13
+^^^^^^^ BaseCPU.cs : ReportProgress :numberOfExecutedInstructions : 61
+ ^^^^^ BaseCPU.cs CpuThreadBodyInner CPU, toExecute:8051 executed 282 instructions and returned Ok at PC : 0x8002544 thread ID: 13
+^^^^^^^ BaseCPU.cs : ReportProgress :numberOfExecutedInstructions : 282
+ ^^^^^ BaseCPU.cs CpuThreadBodyInner CPU, toExecute:7769 executed 12 instructions and returned Ok at PC : 0x8003fe4 thread ID: 13
+^^^^^^^ BaseCPU.cs : ReportProgress :numberOfExecutedInstructions : 12
+ ^^^^^ BaseCPU.cs CpuThreadBodyInner CPU, toExecute:7757 executed 19 instructions and returned Ok at PC : 0x8002544 thread ID: 13
+^^^^^^^ BaseCPU.cs : ReportProgress :numberOfExecutedInstructions : 19
+ ^^^^^ BaseCPU.cs CpuThreadBodyInner CPU, toExecute:7738 executed 12 instructions and returned Ok at PC : 0x8003fec thread ID: 13
+^^^^^^^ BaseCPU.cs : ReportProgress :numberOfExecutedInstructions : 12
+ ^^^^^ BaseCPU.cs CpuThreadBodyInner CPU, toExecute:7726 executed 19 instructions and returned Ok at PC : 0x8002544 thread ID: 13
+^^^^^^^ BaseCPU.cs : ReportProgress :numberOfExecutedInstructions : 19
+ ^^^^^ BaseCPU.cs CpuThreadBodyInner CPU, toExecute:7707 executed 12 instructions and returned Ok at PC : 0x8003ff4 thread ID: 13
+^^^^^^^ BaseCPU.cs : ReportProgress :numberOfExecutedInstructions : 12
+ ^^^^^ BaseCPU.cs CpuThreadBodyInner CPU, toExecute:7695 executed 20 instructions and returned Ok at PC : 0x8002544 thread ID: 13
+^^^^^^^ BaseCPU.cs : ReportProgress :numberOfExecutedInstructions : 20
+ ^^^^^ BaseCPU.cs CpuThreadBodyInner CPU, toExecute:7675 executed 12 instructions and returned Ok at PC : 0x8004016 thread ID: 13
+^^^^^^^ BaseCPU.cs : ReportProgress :numberOfExecutedInstructions : 12
+ ^^^^^ BaseCPU.cs CpuThreadBodyInner CPU, toExecute:7663 executed 7663 instructions and returned Ok at PC : 0x8003ee8 thread ID: 13
+^^^^^^^ BaseCPU.cs : ReportProgress :numberOfExecutedInstructions : 7663
+ ^^^^^ BaseCPU.cs CpuThreadBodyInner CPU, toExecute:1 executed 1 instructions and returned Ok at PC : 0x8003eea thread ID: 13
+^^^^^^^ BaseCPU.cs : ReportProgress :numberOfExecutedInstructions : 1
+ ^^^^^ BaseCPU.cs CpuThreadBodyInner CPU, toExecute:347 executed 0 instructions and returned Ok at PC : 0x8004ed0 thread ID: 13
+^^^^^^^ BaseCPU.cs : ReportProgress :numberOfExecutedInstructions : 0
+ ^^^^^ BaseCPU.cs CpuThreadBodyInner CPU, toExecute:347 executed 347 instructions and returned Ok at PC : 0x8003ee6 thread ID: 13
+^^^^^^^ BaseCPU.cs : ReportProgress :numberOfExecutedInstructions : 347
+^^^^^ BaseCPU.cs In CpuThreadBodyInner : CPU thread body running... granted 100000 ticks : isAborted : False, isPaused : False thread ID: 13 
+ ^^^^^ BaseCPU.cs CpuThreadBodyInner CPU, toExecute:10000 executed 10000 instructions and returned Ok at PC : 0x80014f6 thread ID: 13
+^^^^^^^ BaseCPU.cs : ReportProgress :numberOfExecutedInstructions : 10000
+^^^^^ BaseCPU.cs In CpuThreadBodyInner : CPU thread body running... granted 100000 ticks : isAborted : False, isPaused : False thread ID: 13 
+ ^^^^^ BaseCPU.cs CpuThreadBodyInner CPU, toExecute:762 executed 762 instructions and returned Ok at PC : 0x80014f0 thread ID: 13
+^^^^^^^ BaseCPU.cs : ReportProgress :numberOfExecutedInstructions : 762
+ ^^^^^ BaseCPU.cs CpuThreadBodyInner CPU, toExecute:1 executed 1 instructions and returned Ok at PC : 0x80014f2 thread ID: 13
+^^^^^^^ BaseCPU.cs : ReportProgress :numberOfExecutedInstructions : 1
+ ^^^^^ BaseCPU.cs CpuThreadBodyInner CPU, toExecute:9237 executed 0 instructions and returned Ok at PC : 0x8004ed0 thread ID: 13
+^^^^^^^ BaseCPU.cs : ReportProgress :numberOfExecutedInstructions : 0
+ ^^^^^ BaseCPU.cs CpuThreadBodyInner CPU, toExecute:9237 executed 8361 instructions and returned Ok at PC : 0x80041aa thread ID: 13
+^^^^^^^ BaseCPU.cs : ReportProgress :numberOfExecutedInstructions : 8361
+ ^^^^^ BaseCPU.cs CpuThreadBodyInner CPU, toExecute:876 executed 6 instructions and returned Ok at PC : 0x80041b0 thread ID: 13
+^^^^^^^ BaseCPU.cs : ReportProgress :numberOfExecutedInstructions : 6
+ ^^^^^ BaseCPU.cs CpuThreadBodyInner CPU, toExecute:870 executed 6 instructions and returned Ok at PC : 0x80041b6 thread ID: 13
+^^^^^^^ BaseCPU.cs : ReportProgress :numberOfExecutedInstructions : 6
+ ^^^^^ BaseCPU.cs CpuThreadBodyInner CPU, toExecute:864 executed 7 instructions and returned Ok at PC : 0x8004bc8 thread ID: 13
+^^^^^^^ BaseCPU.cs : ReportProgress :numberOfExecutedInstructions : 7
+ ^^^^^ BaseCPU.cs CpuThreadBodyInner CPU, toExecute:857 executed 534 instructions and returned StoppedAtBreakpoint at PC : 0x80041a0 thread ID: 13
+^^^^^^^ BaseCPU.cs : ReportProgress :numberOfExecutedInstructions : 534
+***** Exit addr ******* : 0x80041a0

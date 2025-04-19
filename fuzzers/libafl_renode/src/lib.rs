@@ -30,28 +30,34 @@ use libafl::{
     events::{Launcher, EventConfig, SimpleEventManager, SendExiting, ShutdownSignalData},
     // executors::{inprocess::InProcessExecutor, ExitKind},
     executors::{ExitKind, InProcessExecutor},
-    feedback_or,
+    feedback_or,feedback_or_fast, feedback_and,
     feedbacks::{CrashFeedback, MaxMapFeedback, TimeFeedback, TimeoutFeedback},
     fuzzer::{Fuzzer, StdFuzzer},
     generators::{RandBytesGenerator,RandPrintablesGenerator},
     inputs::{BytesInput, HasTargetBytes, MultipartInput},
     // monitors::MultiMonitor, monitors::SimpleMonitor,
     monitors::{MultiMonitor,SimpleMonitor},
-    mutators::{havoc_mutations::havoc_mutations, scheduled::StdScheduledMutator},
+    mutators::{havoc_mutations::havoc_mutations, scheduled::{tokens_mutations, StdScheduledMutator}},
 
     // mutators::{
     //     havoc_mutations::havoc_mutations, scheduled::{tokens_mutations, StdScheduledMutator},
     //     token_mutations::{I2SRandReplace, Tokens},
     // },
     observers::{CanTrack, HitcountsMapObserver, StdMapObserver, TimeObserver},
-    schedulers::{IndexesLenTimeMinimizerScheduler, QueueScheduler},
-    stages::mutational::StdMutationalStage,
+    schedulers::{
+        powersched::PowerSchedule, StdWeightedScheduler,
+        IndexesLenTimeMinimizerScheduler, QueueScheduler
+    },
+    stages::{
+        calibrate::CalibrationStage, power::StdPowerMutationalStage, GeneralizationStage,
+        StdMutationalStage, TracingStage,
+    },
     state::{StdState, HasCorpus},
     Error,
     Evaluator,
 };
 
-pub use libafl_targets::{EDGES_MAP, EDGES_MAP_PTR, EDGES_MAP_ALLOCATED_SIZE, EDGES_MAP_DEFAULT_SIZE,CmpLogObserver};
+pub use libafl_targets::{EDGES_MAP, EDGES_MAP_PTR, EDGES_MAP_ALLOCATED_SIZE, EDGES_MAP_DEFAULT_SIZE,CmpLogObserver, MAX_EDGES_FOUND};
 
 // use libafl_targets::{
 //     CmpLogObserver, std_edges_map_observer, EDGES_MAP_PTR,
@@ -72,7 +78,7 @@ pub extern "C" fn get_cov_map_ptr() -> *mut u8 {
         // EDGES_MAP_PTR
         // COV_MAP.as_mut_ptr()
         let ptr = COV_MAP.as_mut_ptr();
-        println!("*****Coverage Map Pointer Address: {:?}", ptr);
+        println!("*****Coverage Map Pointer Address - Libafl: {:?}", ptr);
         // println!("******Coverage Map Pointer Address (pointer format): {:p}", ptr);
         ptr
 
@@ -104,36 +110,33 @@ pub extern "C" fn get_cov_map_ptr() -> *mut u8 {
 
 // } 
 
-const INPUT_SIZE: usize = 1024;
-#[no_mangle] 
-static mut UART_IN: [u8; INPUT_SIZE] = [0; INPUT_SIZE];
+const INPUT_SIZE_MAX: usize = 1024;
 
 #[no_mangle] 
-pub extern "C" fn get_uart_input_ptr() -> *mut u8 { 
+static mut INPUT_DATA: [u8; INPUT_SIZE_MAX] = [0; INPUT_SIZE_MAX];
+// static ref INPUT_DATA: Mutex<[u8; MAP_SIZE]> = Mutex::new([0; INPUT_SIZE]);
+// static mut INPUT_DATA: Vec<u8> = Vec::new();
 
+#[no_mangle] 
+pub extern "C" fn get_input_ptr() -> *mut u8 { 
     unsafe{
-        // EDGES_MAP_PTR
-        // COV_MAP.as_mut_ptr()
-        let ptr = UART_IN.as_mut_ptr();
-        println!("*****UART IN Pointer Address - Libafl: {:?}", ptr);
-        // println!("******Coverage Map Pointer Address (pointer format): {:p}", ptr);
+        let ptr = INPUT_DATA.as_mut_ptr();
+        // let in_data = INPUT_DATA.lock().unwrap();
+        // let ptr = in_data.as_mut_ptr();
+        println!("*****INPUT_DATA Pointer Address - Libafl: {:?}", ptr);
         ptr
 
     }
-
 } 
 
 #[no_mangle] 
-static mut UART_IN_SIZE: usize = 0;
+static mut INPUT_SIZE: usize = 0;
 
 #[no_mangle] 
-pub extern "C" fn get_uart_input_size_ptr() -> *mut usize { 
-
+pub extern "C" fn get_input_size_ptr() -> *mut usize { 
     unsafe{
-        // EDGES_MAP_PTR
-        // COV_MAP.as_mut_ptr()
-        let ptr : *mut usize = &mut UART_IN_SIZE;
-        println!("*****UART INPUT SIZE Pointer Address - Libafl: {:?}", ptr);
+        let ptr : *mut usize = &mut INPUT_SIZE;
+        println!("*****INPUT_SIZE Pointer Address - Libafl: {:?}", ptr);
         // println!("******Coverage Map Pointer Address (pointer format): {:p}", ptr);
         ptr
 
@@ -183,8 +186,20 @@ pub unsafe extern "C" fn external_current_millis2() -> u64 {
 }
 
 
+// fn count_non_zero_elements_covMap() -> usize {
+//     let mut count = 0;
+//     unsafe {
+//         for &value in COV_MAP.iter() {
+//             if value != 0 {
+//                 count += 1;
+//             }
+//         }
+//     }
+//     count
+// }
 
-#[no_mangle] // Also add edge_map pointer of something as one of the args of this func that can be populated by renode for coverage
+
+#[no_mangle] 
 pub extern "C" fn main_fuzzing_func(input_dir: *const c_char,
     harness_fn: extern "C" fn()->u8,
 ) {
@@ -192,56 +207,21 @@ pub extern "C" fn main_fuzzing_func(input_dir: *const c_char,
     println!("Hello, entered main_fuzzing_func in libafl_renode");
 
     println!("Setting up Harness");
-//    // Variables to store UART and I2C pointers and sizes - multipart
-//    let mut uart_ptr: *const u8 = std::ptr::null();
-//    let mut uart_size: usize = 0;
-//    let mut i2c_ptr: *const u8 = std::ptr::null();
-//    let mut i2c_size: usize = 0;
-    // The wrapped harness function, calling out to the LLVM-style harness
-    //let mut harness = |input: &BytesInput| {
-      let mut harness = |input: &MultipartInput<BytesInput, String>| {
-         // Open the file in append mode or create it if it doesn't exist
-        // let mut logfile = OpenOptions::new()
-        //     .create(true)
-        //     .append(true)
-        //     .open("/home/asmita/fuzzing_bare-metal/SEFF_project_dirs/SEFF-project/LibAFL/fuzzers/libafl_renode/log_libafl.txt")
-        //     .expect("Failed to open or create the log file");
-
-        // // Write the message to the file
-        // unsafe{writeln!(logfile, "In libafl harness, cov map : {:?}", COV_MAP).expect("Failed to write to the log file")}
-
-      
-        let mut count = input.len(); //multipart
-        for (i, (name, input)) in input.parts().iter().enumerate() { //multipart
-            // println!("**** MultiPart Inputs : count : {} , index : {}, Name: {}, Data: {:?}",count, i,name, input.as_ref());
-                     
+    let mut harness = |input: &BytesInput| {
+        
             let target = input.target_bytes();
             let buf = target.as_slice();
-            // Now, depending on the part, pass it separately to the callback - multipart
-            if name == "uart" {
-                // uart_ptr = buf.as_ptr();  // Store UART pointer
-                // uart_size = buf.len();     // Store UART size
-                if !buf.is_empty() {
-                    // let mut uart_in = UART_IN.lock().unwrap();
-                    let len = std::cmp::min(buf.len(), INPUT_SIZE);
-                    unsafe{
-                            UART_IN[..len].copy_from_slice(&buf[..len]);
-                            UART_IN_SIZE = len;
-                        }
-                    // Update the size of valid data
-                    // let mut input_size = UART_IN_SIZE.lock().unwrap(); // Lock access to the size variable
-                    // *input_size = len;
-                    // println!("^^^^ Libafl -UART Pointer: {:p}, Size: {}, data[0] : {}", unsafe{UART_IN.as_ptr()}, len,buf[0]);
+            if !buf.is_empty() {
+                let len = std::cmp::min(buf.len(), INPUT_SIZE_MAX);
+                unsafe{
+                    INPUT_DATA[..len].copy_from_slice(&buf[..len]);
+                    INPUT_SIZE = len;
                 }
-            } else if name == "i2c" {
-                // i2c_ptr = buf.as_ptr();    // Store I2C pointer
-                // i2c_size = buf.len();      // Store I2C size
             }
-            
-        }
-        // println!("^^^^ UART Pointer: {:p}, Size: {}", uart_ptr, uart_size);
-        // println!("^^^^^ I2C Pointer: {:p}, Size: {}", i2c_ptr, i2c_size);
-        let ret : u8 = harness_fn(); //multipart
+        
+        // let non_zero_count_covMap = count_non_zero_elements_covMap();
+        // println!("Number of non-zero elements in COV_MAP: {}, Coverage Map Pointer Address: {:?}", non_zero_count_covMap, unsafe{COV_MAP.as_mut_ptr()});
+        let ret : u8 = harness_fn(); 
         // ExitKind::Ok 
         // let ret = harness_fn(buf.as_ptr());
         // let ret1=0;
@@ -249,15 +229,31 @@ pub extern "C" fn main_fuzzing_func(input_dir: *const c_char,
         match ret {
             0 => ExitKind::Ok,
             2 => ExitKind::Timeout,
-           // 99 => ShutdownSignalData,  // Exit the program with error code 1, won't work , it can only return ExitKind
             _=> ExitKind::Crash,
         }
     };
     println!("Harness setup done");
     // println!("Done setting up dirs");
-    let edges = unsafe { &mut COV_MAP };
+   let edges = unsafe { &mut COV_MAP }; //orig
     // // let edges = unsafe { &mut EDGES_MAP };
-    let edges_observer = unsafe{StdMapObserver::new("edges", edges)};
+    // let edges_observer = unsafe{StdMapObserver::new("edges", edges)}; //orig
+
+    // #[allow(static_mut_refs)] // only a problem on nightly
+    // let edges_observer = unsafe {
+    //     HitcountsMapObserver::new(StdMapObserver::from_mut_ptr(
+    //         "edges",
+    //         COV_MAP.as_mut_ptr(),
+    //         MAX_EDGES_FOUND,
+    //     ))
+    //     .track_indices()
+    // };
+
+    #[allow(static_mut_refs)] // only a problem on nightly
+    let edges_observer = unsafe {
+        HitcountsMapObserver::new(unsafe{StdMapObserver::new("edges", edges)})
+        .track_indices()
+    };
+
     // let mut cov_map = COV_MAP.lock().unwrap();  // Locking access to COV_MAP
     // let edges = &mut *cov_map;  // Derefencing the MutexGuard to get access to the array
 
@@ -274,10 +270,27 @@ pub extern "C" fn main_fuzzing_func(input_dir: *const c_char,
     // let edges_observer = unsafe{StdMapObserver::new("shared_mem", shmem_buf)};
 
     // let mut feedback = MaxMapFeedback::tracking(&edges_observer, true, false);
-    let mut feedback = MaxMapFeedback::new(&edges_observer); // working
+   
+    let time_observer = TimeObserver::new("time");
+    
+    // let mut feedback = MaxMapFeedback::new(&edges_observer); // working
+    let map_feedback = MaxMapFeedback::new(&edges_observer);
+    let calibration = CalibrationStage::new(&map_feedback);
+   
+    let mut feedback = feedback_or!(
+        // New maximization map feedback linked to the edges observer and the feedback state
+        map_feedback,
+        // Time feedback, this one does not need a feedback state
+        TimeFeedback::new(&time_observer)
+    );
 
 
-    let mut objective = CrashFeedback::new();   // make it timeout objective??
+    let mut objective = feedback_or_fast!(
+        CrashFeedback::new(),   
+        TimeoutFeedback::new());
+
+    // let mut objective = CrashFeedback::new();   // make it timeout objective??
+
    
     println!("[*] creating state");
     // If not restarting, create a State from scratch
@@ -286,7 +299,8 @@ pub extern "C" fn main_fuzzing_func(input_dir: *const c_char,
         // RNG
         StdRand::with_seed(10),
         // Corpus that will be evolved, we keep it in memory for performance
-        InMemoryCorpus::new(),
+        // InMemoryCorpus::new(),
+        OnDiskCorpus::new(PathBuf::from("./queue_dir")).unwrap(),
         // Corpus in which we store solutions (crashes in this example),
         // on disk so the user can get them after stopping the fuzzer
         OnDiskCorpus::new(PathBuf::from("./crashes")).unwrap(),
@@ -326,17 +340,40 @@ pub extern "C" fn main_fuzzing_func(input_dir: *const c_char,
 
     let mut mgr = SimpleEventManager::new(mon);
     
-    let scheduler = QueueScheduler::new();
+    // let scheduler = QueueScheduler::new();
+
+   
+
+    let mutator = StdScheduledMutator::new(havoc_mutations().merge(tokens_mutations()));
+    // let mutator = StdScheduledMutator::new(havoc_mutations());
+    let power: StdPowerMutationalStage<_, _, BytesInput, _, _, _> =
+        StdPowerMutationalStage::new(mutator);
+    // let mut stages = tuple_list!(StdMutationalStage::new(mutator));
+    let mut stages = tuple_list!(calibration, power);
+
+     // A minimization+queue policy to get testcasess from the corpus
+     let scheduler = IndexesLenTimeMinimizerScheduler::new(
+        &edges_observer,
+        StdWeightedScheduler::with_schedule(
+            &mut state,
+            &edges_observer,
+            Some(PowerSchedule::fast()),
+        ),
+    );
+
      // A fuzzer with feedbacks and a corpus scheduler
      let mut fuzzer = StdFuzzer::new(scheduler, feedback, objective);
      println!("[*] fuzzer, scheduler setup done");
     // Create the executor for an in-process function with one observer for edge coverage and one for the execution time
-    let mut executor = InProcessExecutor::new(
+    // let mut executor = InProcessExecutor::new(
+        let mut executor = InProcessExecutor::with_timeout(
             &mut harness,
-            tuple_list!(edges_observer),
+            // tuple_list!(edges_observer),
+            tuple_list!(edges_observer, time_observer),
             &mut fuzzer,
             &mut state,
             &mut mgr,
+            Duration::new(10, 0), // 10 seconds timeout
     ).expect("Failed to create the Executor");
     println!("[*] executor setup done");
      // Generator of printable bytearrays of max size 32
@@ -344,22 +381,7 @@ pub extern "C" fn main_fuzzing_func(input_dir: *const c_char,
 
     println!("Calling to load initial inputs");
 
-    //multipart (later take input from file)
-    // a generator here is not generalisable
-    // let initial = MultipartInput::from(
-    //     iter::repeat(("part_name".to_string(), BytesInput::from(&b"D"[..]))).take(4),
-    // );
-
-    let initial = MultipartInput::from(vec![ 
-        ("uart".to_string(), BytesInput::new(vec![b'a'])),
-        ("i2c".to_string(), BytesInput::new(vec![b'd'])),
-    ]);
-
-    fuzzer  
-        .evaluate_input(&mut state, &mut executor, &mut mgr, &initial) //multipart
-        .unwrap();
-
-     // Generate 8 initial inputs - bytesInput
+    //  // Generate 8 initial inputs - bytesInput
     //  fuzzer
     //  .evaluate_input(
     //      &mut state,
@@ -378,7 +400,7 @@ pub extern "C" fn main_fuzzing_func(input_dir: *const c_char,
     //      .expect("Failed to generate the initial corpus");
 
     //commented this state.load_inputs for multipart
-    // state.load_initial_inputs(&mut fuzzer, &mut executor, &mut mgr, &[PathBuf::from("/home/asmita/fuzzing_bare-metal/SEFF_project_dirs/SEFF-project/LibAFL/fuzzers/libafl_renode/input_dir/")]).unwrap();
+    state.load_initial_inputs(&mut fuzzer, &mut executor, &mut mgr, &[PathBuf::from("input_dir/")]).unwrap();
     
     // match state.load_initial_inputs(&mut fuzzer, &mut executor, &mut mgr, &[PathBuf::from("/home/asmita/fuzzing_bare-metal/SEFF_project_dirs/SEFF-project/LibAFL/fuzzers/libafl_renode/input_dir/")]){
     //     Ok(()) => {
@@ -395,10 +417,6 @@ pub extern "C" fn main_fuzzing_func(input_dir: *const c_char,
     
     println!("[*] STARTING FUZZER");
     
-
-    // let mutator = StdScheduledMutator::new(havoc_mutations().merge(tokens_mutations()));
-    let mutator = StdScheduledMutator::new(havoc_mutations());
-    let mut stages = tuple_list!(StdMutationalStage::new(mutator));
     println!("[*] fuzz_loop");
        
     // fuzzer.fuzz_loop(&mut stages, &mut executor, &mut state, &mut mgr)

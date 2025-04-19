@@ -1,0 +1,206 @@
+fsmcBank1: Memory.MappedMemory @ sysbus 0x60000000
+    size: 0x10000000
+
+ram: Memory.MappedMemory @ sysbus 0x20000000
+    size: 0x10000000
+
+flash: Memory.MappedMemory @ sysbus 0x00000000
+    size: 0x20000000
+
+usart1: UART.STM32_UART_Fuzz @ sysbus <0x40013800, +0x100>
+    -> nvic@37
+
+usart2: UART.STM32_UART_Fuzz @ sysbus <0x40004400, +0x100>
+    -> nvic@38
+
+usart3: UART.STM32_UART_Fuzz @ sysbus <0x40004800, +0x100>
+    -> nvic@39
+
+usart4: UART.STM32_UART_Fuzz @ sysbus <0x40004C00, +0x100>
+    -> nvic@52
+
+usart5: UART.STM32_UART_Fuzz @ sysbus <0x40005000, +0x100>
+    -> nvic@53
+
+nvic: IRQControllers.NVIC @ sysbus 0xE000E000
+    priorityMask: 0xF0
+    systickFrequency: 72000000
+    IRQ -> cpu@0
+
+cpu: CPU.CortexM @ sysbus
+    cpuType: "cortex-m3"
+    nvic: nvic
+
+i2c1: I2C.STM32F4_I2C_Fuzz @ sysbus 0x40005400
+    EventInterrupt -> nvic@31
+    ErrorInterrupt -> nvic@32
+
+i2c2: I2C.STM32F4_I2C_Fuzz @ sysbus 0x40005800
+    EventInterrupt -> nvic@33
+    ErrorInterrupt -> nvic@34
+
+exti: IRQControllers.STM32F4_EXTI @ sysbus 0x40010400
+    numberOfOutputLines: 19
+    [0-4] -> nvic@[6-10]
+    [5-9] -> nvicInput23@[0-4]
+    [10-15] -> nvicInput40@[0-5]
+
+nvicInput23: Miscellaneous.CombinedInput @ none
+    numberOfInputs: 5
+    -> nvic@23
+
+nvicInput40: Miscellaneous.CombinedInput @ none
+    numberOfInputs: 6
+    -> nvic@40
+
+gpioPortA: GPIOPort.STM32F1GPIOPort @ sysbus <0x40010800, +0x400>
+    [0-15] -> exti@[0-15]
+
+gpioPortB: GPIOPort.STM32F1GPIOPort @ sysbus <0x40010C00, +0x400>
+    [0-15] -> exti@[0-15]
+
+gpioPortC: GPIOPort.STM32F1GPIOPort @ sysbus <0x40011000, +0x400>
+    [0-15] -> exti@[0-15]
+
+gpioPortD: GPIOPort.STM32F1GPIOPort @ sysbus <0x40011400, +0x400>
+    [0-15] -> exti@[0-15]
+
+gpioPortE: GPIOPort.STM32F1GPIOPort @ sysbus <0x40011800, +0x400>
+    [0-15] -> exti@[0-15]
+
+gpioPortF: GPIOPort.STM32F1GPIOPort @ sysbus <0x40011C00, +0x400>
+    [0-15] -> exti@[0-15]
+
+gpioPortG: GPIOPort.STM32F1GPIOPort @ sysbus <0x40012000, +0x400>
+    [0-15] -> exti@[0-15]
+
+
+bitbandPeripherals: Miscellaneous.BitBanding @ sysbus <0x42000000, +0x2000000>
+    peripheralBase: 0x40000000
+
+//bitbandSram: Miscellaneous.BitBanding @ sysbus <0x22000000, +0x2000000>
+//    peripheralBase: 0x20000000
+
+rcc: Python.PythonPeripheral @ sysbus 0x40021000
+    size: 0x400
+    initable: true
+    script: '''
+if request.isInit:
+   lastVal = 0
+   data = {'hsion': 1, 'pllon': 0, 'sw': 0, 'lsion': 0, 'hseon': 1}
+self.NoisyLog("%s on FLIPFLOP at offset 0x%x, value 0x%x, length %d, %s" % (str(request.type), request.offset, request.value, request.length, str(data)))
+
+if request.isWrite:
+    if request.offset == 0x0:
+        # HSION [doc = "Bit 0 - HSI clock enable"]
+        data['hsion'] = (request.value) & 0x1
+        # HSEON [doc = "Bit 16 - HSE clock enable"]
+        data['hseon'] = (request.value >> 16) & 0x1
+        # PLLON [doc = "Bit 24 - PLL enable"]
+        data['pllon'] = (request.value >> 24) & 0x1
+    elif request.offset == 0x4:
+        # SW_W [doc = "Bits 0:1 - System clock switch"]
+        data['sw'] = request.value & 0x3
+    elif request.offset == 0x24:
+        data['lsion'] = request.value & 0x1
+elif request.isRead:
+    lastVal = 1 - lastVal
+    if request.offset == 0x0:
+        # request.value = lastVal * 0x83
+
+        # RCC_CR [doc = "0x00 - Clock control register"]
+        # HSION_RW [doc = "Bit 0 - HSI clock enable flag"]
+        # HSIRDY_R [doc = "Bit 1 - HSI clock ready flag"] # HSIRDY == HISON for this model
+        # PLLRDY [doc = "Bit 25 - PLL clock ready flag"]
+        request.value = (data['hsion'] << 0) | (data['hsion'] << 1) | (data['pllon'] << 25)|(data['hseon'] << 16)| (data['hseon'] << 17)
+    elif request.offset == 0x24:
+        request.value = (data['lsion'] << 1)
+    else:
+        # RCC_CFGR [doc = "0x04 - Clock configuration register"]
+        # SWS_R [doc = "Bits 3:2 - System clock switch status"]
+        # request.value = lastVal * 0xFFFFFFFF
+        request.value = data['sw'] << 2
+
+self.NoisyLog("  0x%x (%s)" % (request.value, str(data)))
+'''
+
+flash_ctrl: MTD.STM32F4_FlashController @ sysbus 0x40022000
+    flash: flash
+
+timer1: Timers.STM32_Timer @ sysbus 0x40012C00
+    -> nvic@25
+    frequency: 10000000
+    initialLimit: 0xFFFF
+
+timer2: Timers.STM32_Timer @ sysbus 0x40000000
+    -> nvic@28
+    frequency: 10000000
+    initialLimit: 0xFFFFFFFF
+
+timer3: Timers.STM32_Timer @ sysbus 0x40000400
+    -> nvic@29
+    frequency: 10000000
+    initialLimit: 0xFFFF
+
+timer4: Timers.STM32_Timer @ sysbus 0x40000800
+    -> nvic@30
+    frequency: 10000000
+    initialLimit: 0xFFFF
+
+timer5: Timers.STM32_Timer @ sysbus 0x40000C00
+    -> nvic@50
+    frequency: 10000000
+    initialLimit: 0xFFFFFFFF
+
+timer6: Timers.STM32_Timer @ sysbus 0x40001000
+    -> nvic@54
+    frequency: 10000000
+    initialLimit: 0xFFFF
+
+timer7: Timers.STM32_Timer @ sysbus 0x40001400
+    -> nvic@55
+    frequency: 10000000
+    initialLimit: 0xFFFF
+
+timer8: Timers.STM32_Timer @ sysbus 0x40013400
+    -> nvic@44
+    frequency: 10000000
+    initialLimit: 0xFFFF
+
+timer9: Timers.STM32_Timer @ sysbus 0x40014C00
+    -> nvic@24
+    frequency: 10000000
+    initialLimit: 0xFFFF
+
+timer10: Timers.STM32_Timer @ sysbus 0x40015000
+    -> nvic@25
+    frequency: 10000000
+    initialLimit: 0xFFFF
+
+timer11: Timers.STM32_Timer @ sysbus 0x40015400
+    -> nvic@26
+    frequency: 10000000
+    initialLimit: 0xFFFF
+
+timer12: Timers.STM32_Timer @ sysbus 0x40001800
+    -> nvic@43
+    frequency: 10000000
+    initialLimit: 0xFFFF
+
+timer13: Timers.STM32_Timer @ sysbus 0x40001C00
+    -> nvic@44
+    frequency: 10000000
+    initialLimit: 0xFFFF
+
+timer14: Timers.STM32_Timer @ sysbus 0x40002000
+    -> nvic@45
+    frequency: 10000000
+    initialLimit: 0xFFFF
+
+sysbus:
+    init:
+        ApplySVD @https://dl.antmicro.com/projects/renode/svd/STM32F103.svd.gz
+        Tag <0x40021000, 0x40021003> "RCC_CR" 0x0A020083
+        // FLASH and USB tags are required for CubeMX-based projects to pass the initialization phase
+        Tag <0x50000010, 0x5000003f> "USB:RESET" 0x80000000
+        
