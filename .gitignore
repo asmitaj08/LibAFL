@@ -77,3 +77,6 @@ fuzzer_libpng*
 forkserver_simple
 
 *.patch
+
+fuzzers/libafl_renode/paper_targets/P2IM_Drone/libafl_target_byteIn/queue_dir/
+fuzzers/libafl_renode/paper_targets/P2IM_Drone/libafl_target_byteIn/crashes/

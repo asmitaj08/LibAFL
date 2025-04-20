@@ -169,6 +169,17 @@ mach.sysbus.cpu.AddHook(fault_addr3,hook_action_fault)
 mach.sysbus.cpu.AddHook(fault_addr4,hook_action_fault)
 mach.sysbus.cpu.AddHook(fault_addr5,hook_action_fault)
 
+
+def hook_in_exhaust_exit():
+    print(f"***** Exit addr fuzzer input exhaust******* ")
+    global ret_val
+    mach.Pause()
+    # mach.sysbus.cpu.DisableExecutionTracing() 
+    ret_val = 0
+    exit_event.set()  # Signal the exit event
+hook_action_exit_in_exhaust = System.Action(hook_in_exhaust_exit)
+mach.sysbus.i2c1.SetHookAfterFuzzInputExhaust_I2C(hook_action_exit_in_exhaust)
+
 # mach.sysbus.cpu.zeroOutCovMap()
 # # TranslationCPUHooksExtensions.SetHookAtBlockBegin(mach.sysbus.cpu.internal, mach.internal, " ")
 # mach.sysbus.cpu.Fuzz_SetHookAtBlockBegin()
@@ -191,7 +202,8 @@ mach.sysbus.cpu.AddHook(fault_addr5,hook_action_fault)
 # 140 : Block_count:613, edge_count : 801, indexHash : 782
 # 1000 : Block_count:440, edge_count : 562, indexHash : 551
 mach.sysbus.cpu.PerformanceInMips = 100 # changing this changes the coverage (We get more blocks when this val is 10 compared to 100), it can also impact fuzzer perf
-
+print("******Hook settings done")
+mach.fuzz_init_settings() #*****important
 mach.ConfigurePeripheralsToReset(["cpu","nvic","flash_ctrl","timer2","timer3","timer4","usart1","i2c1"])
 print("******Starting the emulator")
 
@@ -227,7 +239,7 @@ mach.sysbus.cpu.Fuzz_SetHookAtBlockBegin()
 # mach.sysbus.cpu.neverWaitForInterrupt = True
 print("Done initial setup")
 # mach.sysbus.cpu.Fuzz_GetBlockCount() # only when replaying
-# data = [0xff]*2
+data = [0xff]*200
 
 dir_path = "queue_dir"
 # filepath = "queue_dir/00997fc470afea6e"
@@ -252,7 +264,8 @@ while i<5: # clibafl_renode_lib = ctypes.CDLL("liblibafl_renode.so")omment this 
         # Else run directly from reset handler as in othe papers using cpu.Reset() 
         # mach.sysbus.ram.Fuzz_Mem_Load() # for snapshot # As firmware always run in while loop(), reload maybe only after error or timeout occurs?? - no we need to be in same mem state 
         # mach.sysbus.cpu.Fuzz_LoadState()
-        mach.FuzzReset()    
+        mach.FuzzReset() 
+        mach.sysbus.i2c1.ReadFromFuzzer_PY(data)
         #     
         # mach.sysbus.cpu.Reset() #when load from resetHandler
         # print("^^^^^ Loop cpu.Reset Done")

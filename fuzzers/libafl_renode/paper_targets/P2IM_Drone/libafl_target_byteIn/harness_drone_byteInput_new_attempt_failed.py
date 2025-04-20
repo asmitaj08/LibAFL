@@ -24,30 +24,11 @@ import ctypes
 import psutil
 import faulthandler
 
-# faulthandler.enable()
+faulthandler.enable()
 
 
 target_event = threading.Event()
 exit_event = threading.Event()
-
-ret_val = 0
-fault_flag = 0
-counter = 0
-
-def signal_handler(sig, frame):
-    # mach.sysbus.cpu.Fuzz_GetBlockCount() #use it when replaying to get blcok coverage
-    # time.sleep(2)
-    # mach.sysbus.cpu.Fuzz_ClearBlockSet() #use it when replaying to get blcok coverage
-    # time.sleep(1)
-    print(f"Received signal {sig}. Exiting ...")
-    # sys.exit(0)
-    os._exit(1)
-
-signal.signal(signal.SIGINT, signal_handler)  # Ctrl+C (Interrupt)
-# signal.signal(signal.SIGTERM, signal_handler)  # Termination signal
-# signal.signal(signal.SIGQUIT, signal_handler)
-
-print("Signal handler setup done")
 
 # libafl_renode_lib = ctypes.CDLL("/home/asmita/fuzzing_bare-metal/SEFF_project_dirs/SEFF-project/LibAFL/fuzzers/libafl_renode/target/release/liblibafl_renode.so")
 libafl_renode_lib = ctypes.CDLL("liblibafl_renode.so")
@@ -110,8 +91,17 @@ print(f"_Error_Handler addr : {hex(fault_addr4)}")
 fault_addr5 = mach.sysbus.GetSymbolAddress("HAL_UART_ErrorCallback")
 print(f"HAL_UART_ErrorCallback addr : {hex(fault_addr5)}")
 
-exit_addr = 0x080041a0  # this will change depending on target
+log_file_path = "log_drone.log" # this gets saved in renode dir
+trace_file_path = "trace_drone" # this one in libafl_renode dir
 
+ret_val = 2
+exit_addr = 0x080041a0  # this will change depending on target
+fault_flag = 0
+counter = 0
+
+# exit_addr = 0x080043e4
+# fault_addr = 0x2ec
+# final_exit_addr = 0x3b78
 
 def hook_addr_target(cpu,addr):
     print("************In target hook")
@@ -137,10 +127,9 @@ def hook_addr_exit(cpu,addr):
     #     exit_event.set()  # Signal the exit event
 
 def hook_addr_faults(cpu,addr):
-    global ret_val
-    # mach.Pause()
-    ret_val = 5
-    exit_event.set()
+    global fault_flag
+    mach.Pause()
+    fault_flag = 1
     print(f"***** Exit addr Fault ******* : {hex(addr)}")
 
 Action1 = getattr(System, 'Action`2')
@@ -156,11 +145,42 @@ hook_action_fault = Action3[ICpuSupportingGdb, System.UInt64](hook_addr_faults)
 mach.sysbus.cpu.AddHook(fault_addr1,hook_action_fault)
 mach.sysbus.cpu.AddHook(fault_addr2,hook_action_fault)
 mach.sysbus.cpu.AddHook(fault_addr3,hook_action_fault)
-mach.sysbus.cpu.AddHook(fault_addr4,hook_action_fault)
-mach.sysbus.cpu.AddHook(fault_addr5,hook_action_fault)
 
+mach.sysbus.cpu.AddHook(fault_addr4,hook_action_exit)
+mach.sysbus.cpu.AddHook(fault_addr5,hook_action_exit)
+
+def hook_in_exhaust_exit():
+    # print(f"***** Exit addr fuzzer input exhaust******* ")
+    global ret_val
+    mach.Pause()
+    # mach.sysbus.cpu.DisableExecutionTracing() 
+    ret_val = 0
+    exit_event.set()  # Signal the exit event
+hook_action_exit_in_exhaust = System.Action(hook_in_exhaust_exit)
+# mach.sysbus.i2c1.SetHookAfterFuzzInputExhaust_I2C(hook_action_exit_in_exhaust)
+
+mach.fuzz_init_settings() #*****important
 # TranslationCPUHooksExtensions.SetHookAtBlockBegin(mach.sysbus.cpu.internal, mach.internal, " ")
 mach.sysbus.cpu.Fuzz_SetHookAtBlockBegin()
+
+def signal_handler(sig, frame):
+    # mach.sysbus.cpu.Fuzz_GetBlockCount() #use it when replaying to get blcok coverage
+    # time.sleep(2)
+    # mach.sysbus.cpu.Fuzz_ClearBlockSet() #use it when replaying to get blcok coverage
+    # time.sleep(1)
+    global ret_val
+    mach.Pause()
+    ret_val = 5
+    exit_event.set()  # Signal the exit event
+    print(f"Received signal {sig}. Exiting  ...")
+    # sys.exit(0)
+    # os._exit(1)
+
+signal.signal(signal.SIGINT, signal_handler)  # Ctrl+C (Interrupt)
+# signal.signal(signal.SIGTERM, signal_handler)  # Termination signal
+# signal.signal(signal.SIGQUIT, signal_handler)
+
+print("Signal handler setup done")
 
 # m.execute("logFile @" + log_file_path)
 # mach.sysbus.cpu.LogFunctionNames(True)
@@ -168,9 +188,8 @@ mach.sysbus.cpu.Fuzz_SetHookAtBlockBegin()
 # Analyzer(mach.sysbus.usart1).Show()
 # mach.sysbus.cpu.PerformanceInMips = 100 # changing this changes the coverage (We get more blocks when this val is 10 compared to 100), it can also impact fuzzer perf
 # mach.ConfigurePeripheralsToReset(["cpu","nvic","flash_ctrl","timer2","timer3","timer4","usart1","i2c1"])
-mach.fuzz_init_settings()
 mach.ConfigurePeripheralsToReset(["cpu","nvic","flash_ctrl","timer2","timer3","timer4"])
-
+mach.ConfigurePeripheralsToFuzz(["i2c"])
 print("******Starting the emulator")
 i=0
 e.StartAll()
@@ -194,7 +213,7 @@ mach.sysbus.cpu.RemoveHooksAt(target_func_calling_pc)
 # mach.sysbus.cpu.Fuzz_SetHookAtBlockBegin()
 print("Done initial setup")
 # mach.sysbus.cpu.Fuzz_GetBlockCount() # only when replaying
-data = [0xff]*2
+# data = [0xff]*100
 
 def callback():
     try:
@@ -202,8 +221,8 @@ def callback():
         # mach.sysbus.ram.Fuzz_Mem_Load() # As firmware always run in while loop(), reload maybe only after error or timeout occurs??
         # mach.sysbus.cpu.Fuzz_LoadState()
         i+=1
-        mach.FuzzReset() 
-        # mach.sysbus.cpu.Reset() #when load from resetHandler
+        # mach.FuzzReset() 
+        mach.sysbus.cpu.Reset() #when load from resetHandler
         # mach.sysbus.nvic.Reset()
         # mach.sysbus.flash_ctrl.Reset()
         # mach.sysbus.timer2.Reset()
@@ -223,10 +242,9 @@ def callback():
         # mach.sysbus.cpu.Reset()
         # Wait until the exit_event is set
         # Reset the event for the next iteration
-        if exit_event.wait(timeout=2):
+        if exit_event.wait(timeout=1):
             # print("Exit event triggered.")
-            exit_event.clear()
-            # mach.Pause()
+            mach.Pause()
             # mach.sysbus.cpu.Fuzz_GetBlockCount()
             # mach.sysbus.cpu.CountNonZeroElements_COVMAP()
             # mach.sysbus.cpu.Fuzz_GetEdgesCount()
@@ -235,7 +253,7 @@ def callback():
             # mach.sysbus.cpu.Fuzz_GetBlockEndCount(i)
             # mach.sysbus.cpu.zeroOutCovMap() # testing if libafl clear it, else we will have to do it?
             # mach.sysbus.cpu.Fuzz_ClearSets()
-            # exit_event.clear()
+            exit_event.clear()
         else:
             # if fault_flag==0 :
             #     ret_val = 2 # timeout
@@ -253,7 +271,7 @@ def callback():
             # mach.sysbus.ram.Fuzz_Mem_Load()
             # mach.sysbus.cpu.Fuzz_LoadState()
         
-        mach.Pause() 
+        # mach.Pause() // doing it inside exit hook
         # if i>=100:
         #     ret_val=22
         # print(f"In python res :, normal : {ret_val}")

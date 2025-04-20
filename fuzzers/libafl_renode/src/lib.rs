@@ -373,7 +373,7 @@ pub extern "C" fn main_fuzzing_func(input_dir: *const c_char,
             &mut fuzzer,
             &mut state,
             &mut mgr,
-            Duration::new(10, 0), // 10 seconds timeout
+            Duration::new(20, 0), // 10 seconds timeout
     ).expect("Failed to create the Executor");
     println!("[*] executor setup done");
      // Generator of printable bytearrays of max size 32
