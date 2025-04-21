@@ -133,7 +133,7 @@ def hook_addr_exit(cpu,addr):
     # print(f"***** Exit addr ******* : {hex(addr)}")
     global ret_val
     # counter+=1
-    mach.Pause()
+    # mach.Pause()
     # mach.sysbus.cpu.DisableExecutionTracing() 
     # mach.sysbus.cpu.Fuzz_GetBlockCount() # it slows down the fuzzer
     ret_val = 0
@@ -146,7 +146,7 @@ def hook_addr_exit(cpu,addr):
 
 def hook_addr_faults(cpu,addr):
     global ret_val
-    mach.Pause()
+    # mach.Pause()
     ret_val = 5
     exit_event.set()
     print(f"***** Exit addr Fault ******* : {hex(addr)}")
@@ -233,8 +233,8 @@ def callback():
         # Reset the event for the next iteration
         if exit_event.wait(timeout=2):
             # print("Exit event triggered.")
-            # exit_event.clear()
-            mach.Pause()
+            exit_event.clear()
+            # mach.Pause()
             # mach.sysbus.cpu.Fuzz_GetBlockCount()
             # mach.sysbus.cpu.CountNonZeroElements_COVMAP()
             # mach.sysbus.cpu.Fuzz_GetEdgesCount()
@@ -243,7 +243,7 @@ def callback():
             # mach.sysbus.cpu.Fuzz_GetBlockEndCount(i)
             # mach.sysbus.cpu.zeroOutCovMap() # testing if libafl clear it, else we will have to do it?
             # mach.sysbus.cpu.Fuzz_ClearSets()
-            exit_event.clear()
+            # exit_event.clear()
         else:
             # if fault_flag==0 :
             #     ret_val = 2 # timeout
@@ -252,7 +252,7 @@ def callback():
             #     fault_flag = 0
             ret_val = 2
             # mach.sysbus.cpu.DisableExecutionTracing()
-            mach.Pause()
+            # mach.Pause()
             # mach.sysbus.cpu.zeroOutCovMap()
             # mach.sysbus.cpu.Fuzz_ClearSets()
             # mach.sysbus.ram.Fuzz_Mem_Load() # As firmware always run in while loop(), reload maybe only after error or timeout occurs??
@@ -261,7 +261,7 @@ def callback():
             # mach.sysbus.ram.Fuzz_Mem_Load()
             # mach.sysbus.cpu.Fuzz_LoadState()
         
-        # mach.Pause() 
+        mach.Pause() 
         # if i>=100:
         #     ret_val=22
         # print(f"In python res :, normal : {ret_val}")

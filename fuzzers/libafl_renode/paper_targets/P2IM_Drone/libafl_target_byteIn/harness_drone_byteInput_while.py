@@ -170,15 +170,15 @@ mach.sysbus.cpu.AddHook(fault_addr4,hook_action_fault)
 mach.sysbus.cpu.AddHook(fault_addr5,hook_action_fault)
 
 
-def hook_in_exhaust_exit():
-    print(f"***** Exit addr fuzzer input exhaust******* ")
-    global ret_val
-    mach.Pause()
-    # mach.sysbus.cpu.DisableExecutionTracing() 
-    ret_val = 0
-    exit_event.set()  # Signal the exit event
-hook_action_exit_in_exhaust = System.Action(hook_in_exhaust_exit)
-mach.sysbus.i2c1.SetHookAfterFuzzInputExhaust_I2C(hook_action_exit_in_exhaust)
+# def hook_in_exhaust_exit():
+#     print(f"***** Exit addr fuzzer input exhaust******* ")
+#     global ret_val
+#     mach.Pause()
+#     # mach.sysbus.cpu.DisableExecutionTracing() 
+#     ret_val = 0
+#     exit_event.set()  # Signal the exit event
+# hook_action_exit_in_exhaust = System.Action(hook_in_exhaust_exit)
+# mach.sysbus.i2c1.SetHookAfterFuzzInputExhaust_I2C(hook_action_exit_in_exhaust)
 
 # mach.sysbus.cpu.zeroOutCovMap()
 # # TranslationCPUHooksExtensions.SetHookAtBlockBegin(mach.sysbus.cpu.internal, mach.internal, " ")
