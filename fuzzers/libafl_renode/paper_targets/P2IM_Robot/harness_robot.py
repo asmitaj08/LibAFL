@@ -35,10 +35,6 @@ fault_flag = 0
 counter = 0
 
 def signal_handler_exit(sig, frame):
-    # mach.sysbus.cpu.Fuzz_GetBlockCount() #use it when replaying to get blcok coverage
-    # time.sleep(2)
-    # mach.sysbus.cpu.Fuzz_ClearBlockSet() #use it when replaying to get blcok coverage
-    # time.sleep(1)
     print(f"Received signal {sig}. Exiting ...")
     # sys.exit(0)
     os._exit(1)
@@ -57,22 +53,9 @@ signal.signal(signal.SIGBUS, signal_handler_crash)
 
 print("Signal handler setup done")
 
-# libafl_renode_lib = ctypes.CDLL("/home/asmita/fuzzing_bare-metal/SEFF_project_dirs/SEFF-project/LibAFL/fuzzers/libafl_renode/target/release/liblibafl_renode.so")
 libafl_renode_lib = ctypes.CDLL("liblibafl_renode.so")
 input_dir = "input_dir"
-# callback_function = ctypes.CFUNCTYPE(ctypes.c_uint8, ctypes.POINTER(ctypes.c_uint8), ctypes.c_size_t)
 
-# multipart 
-# Define a callback type that returns a uint8 and takes two uint8 pointers and two size_t values
-# callback_function = ctypes.CFUNCTYPE(
-#     ctypes.c_uint8,                             # Return type: uint8
-#     ctypes.POINTER(ctypes.c_uint8),             # First data pointer: uint8*
-#     ctypes.c_size_t,                            # Size of first array: size_t
-#     ctypes.POINTER(ctypes.c_uint8),             # Second data pointer: uint8*
-#     ctypes.c_size_t                             # Size of second array: size_t
-# )
-
-#Now passing input directly internally between libafl and renode 
 callback_function = ctypes.CFUNCTYPE(ctypes.c_uint8)
 
 libafl_renode_lib.main_fuzzing_func.argtypes = [ctypes.c_char_p, callback_function]
@@ -92,7 +75,7 @@ mach.load_repl("platforms/cpus/stm32f103_fuzz.repl")
 # PlatformDescriptionMachineExtensions.LoadPlatformDescriptionFromString(mach.internal,load_str)
 
 print("*********LoadElf********")
-mach.load_elf("P2IM_Drone.elf")
+mach.load_elf("P2IM_Robot.elf")
 
 print("*********GetSymbolAddress********")
 main_addr = mach.sysbus.GetSymbolAddress("main")
@@ -115,15 +98,13 @@ print(f"HardFault_Handler addr : {hex(fault_addr3)}")
 fault_addr4 = mach.sysbus.GetSymbolAddress("_Error_Handler")
 print(f"_Error_Handler addr : {hex(fault_addr4)}")
 
-fault_addr5 = mach.sysbus.GetSymbolAddress("HAL_UART_ErrorCallback")
-print(f"HAL_UART_ErrorCallback addr : {hex(fault_addr5)}")
 
-exit_addr = 0x080041a0  # this will change depending on target
-
+exit_addr = 0x0800514a  # this will change depending on target -(while-true loop)
+fault_addr5=0x0
 
 def hook_addr_target(cpu,addr):
     print("************In target hook")
-    mach.Pause() 
+    # mach.Pause() 
     # mach.sysbus.ram.Fuzz_Mem_Save()   # memory
     # mach.sysbus.cpu.Fuzz_PrepareState() # cpu state
     target_event.set()
@@ -132,21 +113,13 @@ def hook_addr_target(cpu,addr):
 def hook_addr_exit(cpu,addr):
     # print(f"***** Exit addr ******* : {hex(addr)}")
     global ret_val
-    # counter+=1
-    # mach.Pause()
-    # mach.sysbus.cpu.DisableExecutionTracing() 
-    # mach.sysbus.cpu.Fuzz_GetBlockCount() # it slows down the fuzzer
     ret_val = 0
+    mach.Pause()
     exit_event.set()
-    # if counter>=10 :
-    #     mach.Pause()
-    #     ret_val = 0
-    #     counter=0
-    #     exit_event.set()  # Signal the exit event
 
 def hook_addr_faults(cpu,addr):
     global ret_val
-    # mach.Pause()
+    mach.Pause()
     ret_val = 5
     exit_event.set()
     print(f"***** Exit addr Fault ******* : {hex(addr)}")
@@ -168,7 +141,7 @@ mach.sysbus.cpu.AddHook(fault_addr4,hook_action_fault)
 mach.sysbus.cpu.AddHook(fault_addr5,hook_action_fault)
 
 # TranslationCPUHooksExtensions.SetHookAtBlockBegin(mach.sysbus.cpu.internal, mach.internal, " ")
-mach.sysbus.cpu.Fuzz_SetHookAtBlockBegin()
+# mach.sysbus.cpu.Fuzz_SetHookAtBlockBegin()
 
 # m.execute("logFile @" + log_file_path)
 # mach.sysbus.cpu.LogFunctionNames(True)
@@ -177,7 +150,7 @@ mach.sysbus.cpu.Fuzz_SetHookAtBlockBegin()
 # mach.sysbus.cpu.PerformanceInMips = 100 # changing this changes the coverage (We get more blocks when this val is 10 compared to 100), it can also impact fuzzer perf
 # mach.ConfigurePeripheralsToReset(["cpu","nvic","flash_ctrl","timer2","timer3","timer4","usart1","i2c1"])
 mach.fuzz_init_settings()
-mach.ConfigurePeripheralsToReset(["cpu","nvic","flash_ctrl","timer2","timer3","timer4"])
+mach.ConfigurePeripheralsToReset(["cpu","nvic","flash_ctrl","timer1","timer3"])
 
 print("******Starting the emulator")
 i=0
@@ -199,40 +172,18 @@ mach.sysbus.cpu.RemoveHooksAt(target_func_calling_pc)
 # mach.sysbus.cpu.zeroOutCovMap()
 # mach.sysbus.cpu.Fuzz_ClearSets()
 # TranslationCPUHooksExtensions.SetHookAtBlockBegin(mach.sysbus.cpu.internal, mach.internal, " ")
-# mach.sysbus.cpu.Fuzz_SetHookAtBlockBegin()
+mach.sysbus.cpu.Fuzz_SetHookAtBlockBegin()
 print("Done initial setup")
 # mach.sysbus.cpu.Fuzz_GetBlockCount() # only when replaying
 data = [0xff]*2
 
 def callback():
-    try:
-        global ret_val,i, fault_flag
-        # mach.sysbus.ram.Fuzz_Mem_Load() # As firmware always run in while loop(), reload maybe only after error or timeout occurs??
-        # mach.sysbus.cpu.Fuzz_LoadState()
-        # i+=1
+        global ret_val
         mach.FuzzReset() 
-        # mach.sysbus.cpu.Reset() #when load from resetHandler
-        # mach.sysbus.nvic.Reset()
-        # mach.sysbus.flash_ctrl.Reset()
-        # mach.sysbus.timer2.Reset()
-        # mach.sysbus.timer3.Reset()
-        # mach.sysbus.timer4.Reset()
-
-        # Convert the raw pointer into a usable Python byte array
-        # data_array = ctypes.cast(data, ctypes.POINTER(ctypes.c_ubyte * length)).contents
-        # Convert to a Python list or bytes 
-        # byte_data = bytes(data_array)
-        # i+=1
-        # print(f"^^^^^ data1[0] : {data1[0]}, length1 : {length1},data2[0] : {data2[0]}, length2 : {length2}")
-        # byte_data_i2c = bytearray(data1[i] for i in range(length1))
-        # mach.sysbus.i2c1.ReadFromFuzzer_i2c(byte_data_i2c)   #rather pass it vai share mem between renode & LibAFL
-        # mach.sysbus.cpu.CreateExecutionTracing("", f"{trace_file_path}_resumed_{i}", TraceFormat.Disassembly) # make sure trace_file is new file, else it will give error if it already exists
         mach.Resume()
-        # mach.sysbus.cpu.Reset()
-        # Wait until the exit_event is set
-        # Reset the event for the next iteration
-        if exit_event.wait(timeout=2):
+        if exit_event.wait(timeout=1):
             # print("Exit event triggered.")
+            mach.Pause()
             exit_event.clear()
             # mach.Pause()
             # mach.sysbus.cpu.Fuzz_GetBlockCount()
@@ -245,58 +196,13 @@ def callback():
             # mach.sysbus.cpu.Fuzz_ClearSets()
             # exit_event.clear()
         else:
-            # if fault_flag==0 :
-            #     ret_val = 2 # timeout
-            # else :
-            #     ret_val = 5 #fault crashes
-            #     fault_flag = 0
             ret_val = 2
-            # mach.sysbus.cpu.DisableExecutionTracing()
-            # mach.Pause()
-            # mach.sysbus.cpu.zeroOutCovMap()
-            # mach.sysbus.cpu.Fuzz_ClearSets()
-            # mach.sysbus.ram.Fuzz_Mem_Load() # As firmware always run in while loop(), reload maybe only after error or timeout occurs??
-            # mach.sysbus.cpu.Fuzz_LoadState()
+            mach.Pause()
             print(f"^^^^^^^^^ Error: Timeout/crash waiting for Exit event. ret val : {ret_val}")
-            # mach.sysbus.ram.Fuzz_Mem_Load()
-            # mach.sysbus.cpu.Fuzz_LoadState()
         
-        mach.Pause() 
-        # if i>=100:
-        #     ret_val=22
-        # print(f"In python res :, normal : {ret_val}")
-        # time.sleep(1)
+        # mach.Pause() 
         return ret_val
-        # return ctypes.c_uint8(ret_val)
-        # end_time = time.time()
-        # load_execution_time = end_time - start_time
-        # print(f"******** Load file execution time: {load_execution_time:.10f} seconds")
-        # print("Done one loop")
-        # while exit_flag == 0 : # testing with this, as the event based approach is giving error with libafl, remove this when that gets fixed.
-        #     # print(f"Waiting at current pc : {(mach.sysbus.cpu.PC)}")
-        #     pass
-    
-        # if exit_flag == 1:
-        #     exit_flag = 0
 
-    except Exception as e:
-        print(f"\nException occurred in callback: {e}")
-        # sys.exit(1)
-        os._exit(1)
-             
-
-
-def list_child_processes():
-    parent = psutil.Process(os.getpid())
-    return [p.pid for p in parent.children(recursive=True)]
-
-# Check child processes before
-print("Processes before:", list_child_processes())
-def list_threads():
-    return [t.name for t in threading.enumerate()]
-
-# Check active threads before
-print("Threads before calling LibAFL:", list_threads())
 
 assert input_dir is not None, "Error: Input directory is None"
 

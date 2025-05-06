@@ -119,6 +119,7 @@ fault_addr5 = mach.sysbus.GetSymbolAddress("HAL_UART_ErrorCallback")
 print(f"HAL_UART_ErrorCallback addr : {hex(fault_addr5)}")
 
 exit_addr = 0x080041a0  # this will change depending on target
+fault_addr6=0x0
 
 
 def hook_addr_target(cpu,addr):
@@ -166,6 +167,7 @@ mach.sysbus.cpu.AddHook(fault_addr2,hook_action_fault)
 mach.sysbus.cpu.AddHook(fault_addr3,hook_action_fault)
 mach.sysbus.cpu.AddHook(fault_addr4,hook_action_fault)
 mach.sysbus.cpu.AddHook(fault_addr5,hook_action_fault)
+mach.sysbus.cpu.AddHook(fault_addr6,hook_action_fault)
 
 # TranslationCPUHooksExtensions.SetHookAtBlockBegin(mach.sysbus.cpu.internal, mach.internal, " ")
 mach.sysbus.cpu.Fuzz_SetHookAtBlockBegin()
@@ -183,7 +185,7 @@ print("******Starting the emulator")
 i=0
 e.StartAll()
 
-if target_event.wait(timeout=2):
+if target_event.wait(timeout=1):
     print("Target event triggered.")
     target_event.clear()
 else:

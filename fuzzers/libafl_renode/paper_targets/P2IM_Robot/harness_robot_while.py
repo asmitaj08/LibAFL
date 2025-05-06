@@ -125,7 +125,7 @@ print(f"_Error_Handler addr : {hex(fault_addr4)}")
 # log_file_path = "log_drone.log" # this gets saved in renode dir
 # trace_file_path = "trace_drone" # this one in libafl_renode dir
 
-state_file= "statefile_new.dat"
+# state_file= "statefile_new.dat"
 
 
 ret_val = 0
@@ -211,9 +211,10 @@ mach.sysbus.cpu.AddHook(fault_addr4,hook_action_fault)
 mach.sysbus.cpu.PerformanceInMips = 100 # changing this changes the coverage (We get more blocks when this val is 10 compared to 100), it can also impact fuzzer perf
 print("******Hook settings done")
 mach.fuzz_init_settings() #*****important
-mach.ConfigurePeripheralsToReset(["cpu","nvic","flash_ctrl","timer2","timer3","timer4","usart1","i2c1"])
-mach.ConfigurePeripheralsToFuzz(["i2c1"])
+mach.ConfigurePeripheralsToReset(["cpu","nvic","flash_ctrl","timer1","timer3"])
+# mach.ConfigurePeripheralsToFuzz(["i2c1"])
 # mach.sysbus.cpu.EnableTimeSkip("I2C_WaitOnRXNEFlagUntilTimeout") - it breaks the reset thing - do  not use as of now
+mach.sysbus.LogAllPeripheralsAccess(True)
 print("******Starting the emulator")
 
 i=0
