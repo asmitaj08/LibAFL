@@ -110,43 +110,39 @@ pub extern "C" fn get_cov_map_ptr() -> *mut u8 {
 
 // } 
 
-//used when shared input data internally to renode
+const INPUT_SIZE_MAX: usize = 1024;
 
-// const INPUT_SIZE_MAX: usize = 1024;
+#[no_mangle] 
+static mut INPUT_DATA: [u8; INPUT_SIZE_MAX] = [0; INPUT_SIZE_MAX];
+// static ref INPUT_DATA: Mutex<[u8; MAP_SIZE]> = Mutex::new([0; INPUT_SIZE]);
+// static mut INPUT_DATA: Vec<u8> = Vec::new();
 
-// #[no_mangle] 
-// static mut INPUT_DATA: [u8; INPUT_SIZE_MAX] = [0; INPUT_SIZE_MAX];
-// // static ref INPUT_DATA: Mutex<[u8; MAP_SIZE]> = Mutex::new([0; INPUT_SIZE]);
-// // static mut INPUT_DATA: Vec<u8> = Vec::new();
+#[no_mangle] 
+pub extern "C" fn get_input_ptr() -> *mut u8 { 
+    unsafe{
+        let ptr = INPUT_DATA.as_mut_ptr();
+        // let in_data = INPUT_DATA.lock().unwrap();
+        // let ptr = in_data.as_mut_ptr();
+        println!("*****INPUT_DATA Pointer Address - Libafl: {:?}", ptr);
+        ptr
 
-// #[no_mangle] 
-// pub extern "C" fn get_input_ptr() -> *mut u8 { 
-//     unsafe{
-//         let ptr = INPUT_DATA.as_mut_ptr();
-//         // let in_data = INPUT_DATA.lock().unwrap();
-//         // let ptr = in_data.as_mut_ptr();
-//         println!("*****INPUT_DATA Pointer Address - Libafl: {:?}", ptr);
-//         ptr
+    }
+} 
 
-//     }
-// } 
+#[no_mangle] 
+static mut INPUT_SIZE: usize = 0;
 
-// #[no_mangle] 
-// static mut INPUT_SIZE: usize = 0;
+#[no_mangle] 
+pub extern "C" fn get_input_size_ptr() -> *mut usize { 
+    unsafe{
+        let ptr : *mut usize = &mut INPUT_SIZE;
+        println!("*****INPUT_SIZE Pointer Address - Libafl: {:?}", ptr);
+        // println!("******Coverage Map Pointer Address (pointer format): {:p}", ptr);
+        ptr
 
-// #[no_mangle] 
-// pub extern "C" fn get_input_size_ptr() -> *mut usize { 
-//     unsafe{
-//         let ptr : *mut usize = &mut INPUT_SIZE;
-//         println!("*****INPUT_SIZE Pointer Address - Libafl: {:?}", ptr);
-//         // println!("******Coverage Map Pointer Address (pointer format): {:p}", ptr);
-//         ptr
+    }
+} 
 
-//     }
-// } 
-
-
-//not used --
 // lazy_static! {
 //     pub static ref UART_IN: Mutex<[u8; INPUT_SIZE]> = Mutex::new([0; INPUT_SIZE]);
 //     // pub static ref UART_IN_SIZE: Mutex<usize> = Mutex::new(0); // Mutex to store the actual size of data
@@ -205,7 +201,7 @@ pub unsafe extern "C" fn external_current_millis2() -> u64 {
 
 #[no_mangle] 
 pub extern "C" fn main_fuzzing_func(input_dir: *const c_char,
-    harness_fn: extern "C" fn(*const u8, usize) -> u8,
+    harness_fn: extern "C" fn()->u8,
 ) {
     env_logger::init();
     println!("Hello, entered main_fuzzing_func in libafl_renode");
@@ -215,18 +211,17 @@ pub extern "C" fn main_fuzzing_func(input_dir: *const c_char,
         
             let target = input.target_bytes();
             let buf = target.as_slice();
-            let len = buf.len();
-            // if !buf.is_empty() {
-            //     let len = std::cmp::min(buf.len(), INPUT_SIZE_MAX);
-            //     unsafe{
-            //         INPUT_DATA[..len].copy_from_slice(&buf[..len]);
-            //         INPUT_SIZE = len;
-            //     }
-            // }
+            if !buf.is_empty() {
+                let len = std::cmp::min(buf.len(), INPUT_SIZE_MAX);
+                unsafe{
+                    INPUT_DATA[..len].copy_from_slice(&buf[..len]);
+                    INPUT_SIZE = len;
+                }
+            }
         
         // let non_zero_count_covMap = count_non_zero_elements_covMap();
         // println!("Number of non-zero elements in COV_MAP: {}, Coverage Map Pointer Address: {:?}", non_zero_count_covMap, unsafe{COV_MAP.as_mut_ptr()});
-        let ret : u8 = harness_fn(buf.as_ptr(), len); 
+        let ret : u8 = harness_fn(); 
         // ExitKind::Ok 
         // let ret = harness_fn(buf.as_ptr());
         // let ret1=0;
